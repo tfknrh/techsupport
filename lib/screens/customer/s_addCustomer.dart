@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
+import 'package:googleapis/docs/v1.dart' as api;
 import 'package:provider/provider.dart';
 import 'package:techsupport/controllers/c_customer.dart';
 import 'package:techsupport/models/m_customer.dart';
@@ -9,6 +10,12 @@ import 'package:techsupport/utils/u_color.dart';
 import 'package:techsupport/widgets/w_snackBar.dart';
 import 'package:techsupport/widgets/w_text.dart';
 import 'package:techsupport/widgets/w_textField.dart';
+
+import 'package:techsupport/secrets.dart';
+import 'package:techsupport/maps.dart';
+import 'package:mapbox_search/mapbox_search.dart' as mapbox;
+import 'package:techsupport/utils/u_colorHex.dart';
+import 'package:color/color.dart' as _color;
 
 class AddCustomerScreen extends StatefulWidget {
   final bool isEdit;
@@ -23,6 +30,7 @@ class AddCustomerScreen extends StatefulWidget {
 class _AddCustomerScreenState extends State<AddCustomerScreen> {
   Color _tempShadeColor = Colors.blue[200];
   Color _shadeColor = Colors.blue[800];
+  List<String> gps = [];
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController _customerName = TextEditingController();
   TextEditingController _customerDesc = TextEditingController();
@@ -34,6 +42,17 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   void initState() {
     super.initState();
     _setData();
+    // List<String> gps = widget.customer.customerGps.split("|");
+  }
+
+  _editMaps(BuildContext context) async {
+    final result = await Navigator.push(context,
+        MaterialPageRoute(builder: (context) => MyMaps(cust: widget.customer)));
+
+    setState(() {
+      _customerGPS.text = result[0];
+      _customerLocation.text = result[1];
+    });
   }
 
   void _setData() {
@@ -77,6 +96,34 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
             ));
       },
     );
+  }
+
+  String color1 = "244, 67, 54";
+  mapbox.StaticImage staticImage =
+      mapbox.StaticImage(apiKey: Secrets.MAPBOX_API_KEY);
+  String getStaticImageWithPolyline() {
+    return staticImage.getStaticUrlWithPolyline(
+        point1: mapbox.Location(
+            lat: double.parse(gps[1]), lng: double.parse(gps[0])),
+        point2: mapbox.Location(
+            lat: double.parse(gps[1]), lng: double.parse(gps[0])),
+        marker1: mapbox.MapBoxMarker(
+            markerColor: _color.Color.rgb(244, 67, 54),
+            markerLetter: mapbox.MakiIcons.aerialway.value,
+            markerSize: mapbox.MarkerSize.LARGE),
+        marker2: mapbox.MapBoxMarker(
+            markerColor: _color.Color.rgb(244, 67, 54),
+            markerLetter: 'q',
+            markerSize: mapbox.MarkerSize.SMALL),
+        height: 300,
+        width: 600,
+        zoomLevel: 16,
+        style: mapbox.MapBoxStyle.Dark,
+        path: mapbox.MapBoxPath(
+            pathColor: _color.Color.rgb(255, 0, 0),
+            pathOpacity: 0.5,
+            pathWidth: 5),
+        render2x: true);
   }
 
   BuildContext myScaContext;
@@ -166,7 +213,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                       height: 20,
                     ),
                     CTextField(
-                        label: "Customer Name",
+                        label: "Tambahkan Customer",
+                        labelText: "Nama Customer",
                         radius: 5,
                         controller: _customerName,
                         validator: (e) =>
@@ -177,7 +225,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                       height: 20,
                     ),
                     CTextField(
-                        label: "Customer Description",
+                        label: "Tambahkan Deskripsi",
+                        labelText: "Deskripsi",
                         inputType: TextInputType.multiline,
                         maxLines: 5,
                         radius: 5,
@@ -185,30 +234,49 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                         validator: (e) =>
                             e.isEmpty ? 'Tidak boleh kosong' : null,
                         padding: EdgeInsets.symmetric(
-                            vertical: 5, horizontal: _size.width * .02)),
+                            vertical: 15, horizontal: _size.width * .02)),
                     SizedBox(
                       height: 20,
                     ),
                     CTextField(
-                        label: "Customer Location",
+                        label: "Tambahkan alamat",
+                        labelText: "Alamat",
+                        inputType: TextInputType.multiline,
+                        maxLines: 3,
                         radius: 5,
                         controller: _customerLocation,
                         padding: EdgeInsets.symmetric(
-                            vertical: 5, horizontal: _size.width * .02)),
+                            vertical: 15, horizontal: _size.width * .02)),
+                    Row(children: [
+                      Text(
+                        "Lokasi maps :",
+                        style: CText.primarycustomText(
+                            1.7, context, 'CircularStdBook'),
+                      ),
+                      GestureDetector(
+                        child: Icon(Icons.gps_fixed),
+                        onTap: () {
+                          _editMaps(context);
+                        },
+                      ),
+                    ]),
                     SizedBox(
                       height: 20,
                     ),
+
+                    // CTextField(
+                    //     label: "Customer GPS",
+                    //     radius: 5,
+                    //     controller: _customerGPS,
+                    //     padding: EdgeInsets.symmetric(
+                    //         vertical: 5, horizontal: _size.width * .02)),
+                    // SizedBox(
+                    //   height: 20,
+                    //  ),
+
                     CTextField(
-                        label: "Customer GPS",
-                        radius: 5,
-                        controller: _customerGPS,
-                        padding: EdgeInsets.symmetric(
-                            vertical: 5, horizontal: _size.width * .02)),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    CTextField(
-                        label: "Customer PIC",
+                        label: "Tambahkan PIC",
+                        labelText: "PIC",
                         radius: 5,
                         controller: _customerPIC,
                         padding: EdgeInsets.symmetric(
@@ -217,11 +285,13 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                       height: 20,
                     ),
                     CTextField(
-                        label: "Customer Akses Remote",
+                        label: "Tambahkan Akses Remote",
+                        labelText: "Akses Remote",
+                        inputType: TextInputType.multiline,
                         radius: 5,
                         controller: _customerAkses,
                         padding: EdgeInsets.symmetric(
-                            vertical: 5, horizontal: _size.width * .02)),
+                            vertical: 15, horizontal: _size.width * .02)),
                     SizedBox(
                       height: 20,
                     ),

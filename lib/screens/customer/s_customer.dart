@@ -8,6 +8,12 @@ import 'package:techsupport/widgets/w_text.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:animate_do/animate_do.dart';
 
+import 'package:techsupport/models/m_customer.dart';
+
+import 'package:techsupport/widgets/search_page.dart';
+
+import 'package:techsupport/maps.dart';
+
 class CustomersScreen extends StatefulWidget {
   CustomersScreen({Key key}) : super(key: key);
 
@@ -79,6 +85,29 @@ class _CustomersScreenState extends State<CustomersScreen> {
             "Customer",
             style: CText.primarycustomText(2.5, context, "CircularStdBold"),
           ),
+          actions: [
+            IconButton(
+                onPressed: () {
+                  showSearch(
+                      context: context,
+                      delegate: SearchPage<Customer>(
+                          onQueryUpdate: (s) => print(s),
+                          items: value.customer,
+                          searchLabel: 'Cari Customer...',
+                          // barTheme: Themes.light,
+                          suggestion: Center(
+                            child: Text('Filter Customer'),
+                          ),
+                          failure: Center(
+                            child: Text('Tidak ditemukan customer :('),
+                          ),
+                          filter: (cust) => [cust.customerName],
+                          builder: (val) => CustomerItem(
+                              customer: val,
+                              index: value.customer.indexOf(val))));
+                },
+                icon: Icon(Icons.search)),
+          ],
         ),
         body: RefreshIndicator(
             onRefresh: () async {
@@ -94,157 +123,163 @@ class _CustomersScreenState extends State<CustomersScreen> {
                 physics: BouncingScrollPhysics(),
                 itemCount: value.customer.length,
                 itemBuilder: (BuildContext listContext, int index) {
-                  return FadeIn(
-                    duration: Duration(seconds: 1),
-                    animate: true,
-                    delay: Duration(milliseconds: index * 1),
-                    child: InkWell(
-                      onTap: () async {
-                        Navigator.push(
-                            context,
-                            PageTransition(
-                                type: PageTransitionType.bottomToTop,
-                                child: AddCustomerScreen(
-                                  isEdit: true,
-                                  customer: value.customer[index],
-                                )));
-                      },
-                      child: AutoScrollTag(
-                        key: ValueKey(index),
-                        controller: scrollController,
-                        index: index,
-                        highlightColor: Colors.black.withOpacity(0.1),
+                  return CustomerItem(
+                      customer: value.customer[index], index: index);
+                })),
+      );
+    });
+  }
+}
+
+class CustomerItem extends StatefulWidget {
+  final Function onTap;
+  final Function onLongPress;
+  final Customer customer;
+  final int index;
+
+  const CustomerItem(
+      {Key key, this.onTap, this.onLongPress, this.customer, this.index})
+      : super(key: key);
+
+  @override
+  _CustomerItemState createState() => _CustomerItemState();
+}
+
+class _CustomerItemState extends State<CustomerItem> {
+  AutoScrollController scrollController = AutoScrollController();
+  @override
+  Widget build(BuildContext context) {
+    String languageCode = Localizations.localeOf(context).toLanguageTag();
+    final _size = MediaQuery.of(context).size;
+    return FadeIn(
+      duration: Duration(seconds: 1),
+      animate: true,
+      delay: Duration(milliseconds: widget.index * 1),
+      child: InkWell(
+        onTap: () async {
+          Navigator.push(
+              context,
+              PageTransition(
+                  type: PageTransitionType.bottomToTop,
+                  child: AddCustomerScreen(
+                    isEdit: true,
+                    customer: widget.customer,
+                  )));
+        },
+        child: AutoScrollTag(
+          key: ValueKey(widget.index),
+          controller: scrollController,
+          index: widget.index,
+          highlightColor: Colors.black.withOpacity(0.1),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: _size.width * 0.03),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(5),
+                    topRight: Radius.circular(5),
+                    bottomLeft: Radius.circular(5),
+                    bottomRight: Radius.circular(5)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    spreadRadius: 0,
+                    blurRadius: 11,
+                    offset: Offset(1, 5), // changes position of shadow
+                  ),
+                ],
+              ),
+              child: Card(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                elevation: 0,
+                color: MColors.thirdBackgroundColor(context),
+                child: IntrinsicHeight(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Container(
+                        width: _size.width * 0.02,
+                        decoration: BoxDecoration(
+                          color: MColors
+                              .buttonColor(), // value.customer[index].color,
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(12),
+                              topRight: Radius.circular(0),
+                              bottomLeft: Radius.circular(12),
+                              bottomRight: Radius.circular(0)),
+                        ),
+                      ),
+                      Expanded(
                         child: Padding(
                           padding: EdgeInsets.symmetric(
-                              horizontal: _size.width * 0.03),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(5),
-                                  topRight: Radius.circular(5),
-                                  bottomLeft: Radius.circular(5),
-                                  bottomRight: Radius.circular(5)),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.03),
-                                  spreadRadius: 0,
-                                  blurRadius: 11,
-                                  offset: Offset(
-                                      1, 5), // changes position of shadow
-                                ),
-                              ],
-                            ),
-                            child: Card(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
-                              elevation: 0,
-                              color: MColors.thirdBackgroundColor(context),
-                              child: IntrinsicHeight(
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
+                              vertical: 20, horizontal: _size.width * 0.05),
+                          child: Row(
+                            children: <Widget>[
+                              Expanded(
+                                child: Column(
                                   children: <Widget>[
-                                    Container(
-                                      width: _size.width * 0.02,
-                                      decoration: BoxDecoration(
-                                        color: MColors
-                                            .buttonColor(), // value.customer[index].color,
-                                        borderRadius: BorderRadius.only(
-                                            topLeft: Radius.circular(12),
-                                            topRight: Radius.circular(0),
-                                            bottomLeft: Radius.circular(12),
-                                            bottomRight: Radius.circular(0)),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Padding(
-                                        padding: EdgeInsets.symmetric(
-                                            vertical: 20,
-                                            horizontal: _size.width * 0.05),
-                                        child: Row(
-                                          children: <Widget>[
-                                            Expanded(
-                                              child: Column(
-                                                children: <Widget>[
-                                                  Row(
-                                                    children: <Widget>[
-                                                      Expanded(
-                                                        child: Text(
-                                                            value
-                                                                .customer[index]
-                                                                .customerName,
-                                                            style: CText
-                                                                .primarycustomText(
-                                                                    1.8,
-                                                                    context,
-                                                                    'CircularStdMedium')),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  Row(
-                                                    children: <Widget>[
-                                                      Expanded(
-                                                        child: Text(
-                                                            value
-                                                                .customer[index]
-                                                                .customerLocation,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            maxLines: 1,
-                                                            style: CText
-                                                                .secondarycustomText(
-                                                                    1.5,
-                                                                    context,
-                                                                    'CircularStdMedium')),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  Row(
-                                                    children: <Widget>[
-                                                      Expanded(
-                                                        child: Text(
-                                                            value
-                                                                .customer[index]
-                                                                .customerDesc,
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            maxLines: 1,
-                                                            style: CText
-                                                                .secondarycustomText(
-                                                                    1.5,
-                                                                    context,
-                                                                    'CircularStdMedium')),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            Icon(
-                                              Icons.keyboard_arrow_right,
-                                              color: Theme.of(context)
-                                                  .iconTheme
-                                                  .color,
-                                            )
-                                          ],
+                                    Row(
+                                      children: <Widget>[
+                                        Expanded(
+                                          child: Text(
+                                              widget.customer.customerName,
+                                              style: CText.primarycustomText(
+                                                  1.8,
+                                                  context,
+                                                  'CircularStdMedium')),
                                         ),
-                                      ),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: <Widget>[
+                                        Expanded(
+                                          child: Text(
+                                              widget.customer.customerLocation,
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                              style: CText.secondarycustomText(
+                                                  1.5,
+                                                  context,
+                                                  'CircularStdMedium')),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: <Widget>[
+                                        Expanded(
+                                          child: Text(
+                                              widget.customer.customerDesc,
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                              style: CText.secondarycustomText(
+                                                  1.5,
+                                                  context,
+                                                  'CircularStdMedium')),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
                               ),
-                            ),
+                              Icon(
+                                Icons.keyboard_arrow_right,
+                                color: Theme.of(context).iconTheme.color,
+                              )
+                            ],
                           ),
                         ),
                       ),
-                    ),
-                  );
-                })),
-      );
-    });
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

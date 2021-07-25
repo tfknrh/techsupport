@@ -7,6 +7,8 @@ import 'package:techsupport/controllers/c_customer.dart';
 import 'package:techsupport/models/m_aktivitas.dart';
 import 'package:techsupport/models/m_category.dart';
 import 'package:techsupport/models/m_customer.dart';
+
+import 'package:techsupport/models/m_images.dart';
 import 'package:techsupport/utils/u_color.dart';
 import 'package:techsupport/utils/u_time.dart';
 import 'package:techsupport/widgets/w_customSwitch.dart';
@@ -14,12 +16,27 @@ import 'package:techsupport/widgets/w_customTimePicker.dart';
 import 'package:techsupport/widgets/w_snackBar.dart';
 import 'package:techsupport/widgets/w_text.dart';
 import 'package:techsupport/widgets/w_textField.dart';
+
+import 'package:techsupport/screens/imagedetailScreen.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 
 import 'package:techsupport/widgets/w_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:techsupport/api/a_db.dart';
 import 'package:techsupport/SQL.dart';
+
+import 'dart:async';
+import 'dart:io';
+
+import 'package:multi_image_picker/multi_image_picker.dart';
+
+import 'package:flutter_absolute_path/flutter_absolute_path.dart';
+
+import 'package:extended_image/extended_image.dart';
+import 'package:path/path.dart' as path;
+import 'package:ext_storage/ext_storage.dart';
+
+import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 // ignore: must_be_immutable
 class AddAktivitas extends StatefulWidget {
@@ -108,6 +125,41 @@ class _AddAktivitasState extends State<AddAktivitas> {
       _isStatus = aktivitas.isStatus == 2 ? true : false;
       //_valueCustomer = aktivitas.customerId;
     }
+    // For sharing images coming from outside the app while the app is in the memory
+    _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
+        .listen((List<SharedMediaFile> value) {
+      setState(() {
+        print("Shared:" + (_sharedFiles?.map((f) => f.path)?.join(",") ?? ""));
+        _sharedFiles = value;
+      });
+    }, onError: (err) {
+      print("getIntentDataStream error: $err");
+    });
+
+    // For sharing images coming from outside the app while the app is closed
+    ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
+      setState(() {
+        _sharedFiles = value;
+      });
+    });
+
+    // For sharing or opening urls/text coming from outside the app while the app is in the memory
+    _intentDataStreamSubscription =
+        ReceiveSharingIntent.getTextStream().listen((String value) {
+      setState(() {
+        _sharedText = value;
+      });
+    }, onError: (err) {
+      print("getLinkStream error: $err");
+    });
+
+    // For sharing or opening urls/text coming from outside the app while the app is closed
+    ReceiveSharingIntent.getInitialText().then((String value) {
+      setState(() {
+        _sharedText = value;
+      });
+    });
+    getImageList();
     super.initState();
     WidgetsFlutterBinding.ensureInitialized();
     // _ijinNotif = Provider.of<AktivitasProvider>(context, listen: false)
@@ -193,6 +245,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
                             _isStatus == true ? 2 : 1);
 
                     if (x.identifier == "success") {
+                      _saveImage();
                       Navigator.pop(context);
                       await Provider.of<AktivitasProvider>(context,
                               listen: false)
@@ -412,7 +465,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
                       CTextField(
                           // inputType: TextInputType.multilin,
                           //maxLines: 5,
-                          label: "Nama Aktivitas",
+                          label: "Tambahkan Aktivitas",
                           labelText: "Nama Aktivitas",
                           controller: _aktivitasName,
                           radius: 5,
@@ -424,15 +477,32 @@ class _AddAktivitasState extends State<AddAktivitas> {
                       CTextField(
                           inputType: TextInputType.multiline,
                           maxLines: 5,
-                          label: "Deskripsi",
+                          label: "Tambahkan Deskripsi",
                           labelText: "Deskripsi",
                           controller: _description,
                           radius: 5,
                           padding: EdgeInsets.symmetric(
-                              vertical: 5, horizontal: _size.width * .02)),
-                      SizedBox(
-                        height: 20,
-                      ),
+                              vertical: 15, horizontal: _size.width * .02)),
+                      Padding(
+                          padding: EdgeInsets.symmetric(vertical: 10.0),
+                          child: Row(children: [
+                            Text(
+                              "Tambahkan gambar :",
+                              style: CText.primarycustomText(
+                                  1.7, context, 'CircularStdBook'),
+                            ),
+                            IconButton(
+                                onPressed: () {
+                                  loadAssets();
+                                  if (_sharedFiles.length > 0) {
+                                    loadShared();
+                                  }
+                                },
+                                icon: Icon(Icons.add_a_photo))
+                          ])),
+                      getGridView(),
+                      pickGridView(),
+                      shareGridView(),
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 10.0),
                         child: Row(
@@ -575,7 +645,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
                             1.8, context, "CircularStdMedium"),
                       ),
                       SizedBox(
-                        height: 20,
+                        height: 10,
                       ),
                       e != null
                           ?
@@ -633,7 +703,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
                           //   ),
                           // if (e == null)
                           SizedBox(
-                              height: 40,
+                              height: 45,
                               child: ListView.builder(
                                 // shrinkWrap: true,
                                 scrollDirection: Axis.horizontal,
@@ -690,7 +760,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
                                     .category
                                     .length,
                               ),
-                            )
+                            ),
                     ],
                   ),
                 )),
@@ -698,5 +768,291 @@ class _AddAktivitasState extends State<AddAktivitas> {
         }),
       );
     });
+  }
+
+  Future<File> moveFile(File sourceFile, String newPath) async {
+    try {
+      // prefer using rename as it is probably faster
+      return await sourceFile.rename(newPath);
+    } on FileSystemException catch (e) {
+      print(e);
+      // if rename fails, copy the source file and then delete it
+      final newFile = await sourceFile.copy(newPath);
+      await sourceFile.delete();
+      return newFile;
+    }
+  }
+
+  List<ImagesAttrb> imageList = [];
+  List<File> fileImageArray = [];
+  List<String> f = [];
+  List<Asset> resultList = [];
+  List<Asset> images = [];
+  String error = 'No Error Detected';
+  Future<void> loadAssets() async {
+    try {
+      resultList = await MultiImagePicker.pickImages(
+        maxImages: 10,
+        enableCamera: true,
+        selectedAssets: images,
+        cupertinoOptions: CupertinoOptions(takePhotoIcon: "chat"),
+        materialOptions: MaterialOptions(
+          actionBarColor: "#ff4169e1",
+          actionBarTitle: "Pilih Foto",
+          allViewTitle: "Semua Foto",
+          useDetailsView: true,
+          selectCircleStrokeColor: "#ff1e90ff",
+        ),
+      );
+    } on Exception catch (e) {
+      error = e.toString();
+    }
+    var dir = await ExtStorage.getExternalStorageDirectory();
+    if (!Directory("$dir/techsupport/images").existsSync()) {
+      Directory("$dir/techsupport/images").createSync(recursive: true);
+    }
+    if (!mounted) return;
+    f.clear();
+    for (int i = 0; i < resultList.length; i++) {
+      var path2 =
+          await FlutterAbsolutePath.getAbsolutePath(resultList[i].identifier);
+      var _ext = path.extension(path2);
+      var file = await moveFile(
+          File(path2),
+          "$dir/techsupport/images/IMG_" +
+              aktivitas.aktivitasId.toString() +
+              DateFormat("yyyyMMddHHmmss").format(DateTime.now()).toString() +
+              DateTime.now().millisecond.toString() +
+              _ext);
+
+      print(file.path);
+      f.add(file.path);
+    }
+    setState(() {
+      images = resultList;
+    });
+    // return fileImageArray;
+  }
+
+  StreamSubscription _intentDataStreamSubscription;
+  List<SharedMediaFile> _sharedFiles;
+
+  String _sharedText;
+  List<SharedMediaFile> _shared;
+
+  Future<void> loadShared() async {
+    var dir = await ExtStorage.getExternalStorageDirectory();
+    if (!Directory("$dir/techsupport/images").existsSync()) {
+      Directory("$dir/techsupport/images").createSync(recursive: true);
+    }
+    if (!mounted) return;
+    showAboutDialog(context: context);
+    for (int i = 0; i < _sharedFiles.length; i++) {
+      var _ext = path.extension(_sharedFiles[i].path);
+      // var file = await File(_sharedFiles[i].path).rename(
+      //     "$dir/techsupport/images/IMG_" +
+      //         aktivitas.aktivitasId.toString() +
+      //         DateFormat("yyyyMMddHHmmss").format(DateTime.now()).toString() +
+      //         DateTime.now().millisecond.toString() +
+      //         _ext);
+      var file = await moveFile(
+          File(_sharedFiles[i].path),
+          "$dir/techsupport/images/IMG_" +
+              aktivitas.aktivitasId.toString() +
+              DateFormat("yyyyMMddHHmmss").format(DateTime.now()).toString() +
+              DateTime.now().millisecond.toString() +
+              _ext);
+
+      print(file.path);
+      f.add(file.path);
+    }
+    // setState(() {
+    //   _shared = _sharedFiles;
+    // });
+    // return fileImageArray;
+  }
+
+//image PreView
+  Widget shareGridView() {
+    return _sharedFiles.length == 0
+        ? Container()
+        : GridView.count(
+            crossAxisCount: 6,
+            crossAxisSpacing: 1,
+            mainAxisSpacing: 1,
+            shrinkWrap: true,
+            physics: ScrollPhysics(),
+            children: List.generate(_sharedFiles.length, (index) {
+              // Asset asset = images[index];
+              return Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(2)),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(2),
+                    child: ExtendedImage.file(
+                      File(_sharedFiles[index].path),
+                      fit: BoxFit.fitHeight,
+                    ),
+                  ));
+            }));
+  }
+
+  Widget pickGridView() {
+    return images.length == 0
+        ? Container()
+        : GridView.count(
+            crossAxisCount: 6,
+            crossAxisSpacing: 1,
+            mainAxisSpacing: 1,
+            shrinkWrap: true,
+            physics: ScrollPhysics(),
+            children:
+
+                //  widget.aktrd == null?
+                List.generate(images.length, (index) {
+              Asset asset = images[index];
+              return Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(2)),
+                  child: ClipRRect(
+                      borderRadius: BorderRadius.circular(2),
+                      child: AssetThumb(
+                        asset: asset,
+                        width: 700,
+                        height: 700,
+                      )));
+            })
+
+            // : imageList.map((photo) {
+            //     return Utility.imageFromBase64String(photo.imgImage);
+            //   }).toList(),
+            );
+  }
+
+  int count = 0;
+  getGridView() {
+    return imageList.length == 0
+        ? Container()
+        : GridView.builder(
+            shrinkWrap: true,
+            physics: ScrollPhysics(),
+            itemCount: count,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3, crossAxisSpacing: 1, mainAxisSpacing: 1),
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onLongPress: () => _delete(context, imageList[index]),
+                onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ImageDetail(
+                        image: imageList[index].imgImage,
+                        name: imageList[index].imgName,
+                      ),
+                    )),
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5)),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(5),
+                    child:
+                        // ExtendedImage.memory(
+                        //   Utility.dataFromBase64String(imageList[index].imgImage),
+                        //   fit: BoxFit.fitHeight,
+                        // ),
+                        ExtendedImage.file(
+                      File(imageList[index].imgImage),
+                      fit: BoxFit.fitHeight,
+                    ),
+                    //Utility.imageFromBase64String(imageList[index].imgImage),
+                  ),
+                  //  Image.file(File(imageList[index].imgImage),
+                  //   fit: BoxFit.cover,
+                  //  ),
+                  //  ),
+                ),
+              );
+            },
+          );
+  }
+
+  void _delete(BuildContext context, ImagesAttrb image) async {
+    AlertDialog alertDialog = AlertDialog(
+      title: Text("Hapus Image"),
+      content: Text("Yakin akan akan menghapus image ini?"),
+      actions: [
+        ElevatedButton(
+          child: Text("Iya"),
+          onPressed: () async {
+            int result = await DataBaseMain.db.deleteImage(image.imgId);
+            if (result != 0) {
+              _showSnackBar(context, 'Hapus image berhasil');
+              getImageList();
+            }
+            Navigator.pop(context, true);
+          },
+        ),
+        ElevatedButton(
+          child: Text("Tidak"),
+          onPressed: () {
+            Navigator.pop(context, false);
+          },
+        ),
+      ],
+    );
+    showDialog(context: context, builder: (_) => alertDialog);
+  }
+
+  void _showSnackBar(BuildContext context, String message) {
+    final snackBar = SnackBar(content: Text(message));
+    Scaffold.of(context).showSnackBar(snackBar);
+  }
+
+  int _maxAktId;
+  _saveImage() async {
+    try {
+      for (int i = 0; i < f.length; i++) {
+        // int result;
+
+        _maxAktId = await DataBaseMain.db.maxAktId();
+        // final bytes = File(f[i]).readAsBytesSync();
+        // String imgString = Utility.base64String(bytes);
+        String imgString = f[i];
+        ImagesAttrb image = ImagesAttrb(widget.aktivitas == null
+            ? {
+                "imgImage": imgString,
+                "imgName": _aktivitasName.text,
+                "aktivitasId": _maxAktId
+              }
+            : {
+                "imgImage": imgString,
+                "imgName": widget.aktivitas.aktivitasName,
+                "aktivitasId": widget.aktivitas.aktivitasId
+              });
+
+        await DataBaseMain.db.insertImage(image);
+
+        _sharedFiles.clear();
+        _intentDataStreamSubscription.cancel();
+      }
+    } on Exception catch (e) {
+      _showSnackBar(context, e.toString());
+    }
+  }
+
+  void getImageList() async {
+    // try {
+
+    Future<List<ImagesAttrb>> imageListFuture =
+        DataBaseMain.db.getImage(widget.aktivitas.aktivitasId);
+    imageListFuture.then((contactList) {
+      setState(() {
+        this.imageList = contactList;
+        this.count = contactList.length;
+      });
+    });
+    // } on Exception catch (e) {
+    //   _showSnackBar(context, e.toString());
+    // }
   }
 }

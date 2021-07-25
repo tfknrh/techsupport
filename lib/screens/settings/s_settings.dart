@@ -99,7 +99,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     await DataBaseMain.db.updateSys("sysGmail", account.email);
     await DataBaseMain.db.updateSys("sysDBId", result.id);
-    await DataBaseMain.db.updateSys("sysBackupSize", result.size);
+    await DataBaseMain.db
+        .updateSys("sysBackupSize", localFile.lengthSync().toString());
     await DataBaseMain.db
         .updateSys("sysModified", result.modifiedTime.toString());
     await DataBaseMain.db.updateSys("sysCreated",
@@ -403,7 +404,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   splashColor: Colors.transparent,
                   highlightColor: Colors.transparent,
                   onTap: () {
-                    uploadtoGdrive();
                     showDialog(
                         context: context,
                         builder: (_) {
@@ -416,12 +416,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10)),
                                   title: Text("Setting"),
-                                  content: Text("Backup ke google berhasil"),
+                                  content: Container(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 20),
+                                    child: Column(children: [
+                                      Text("Account :" +
+                                          _listSetting.first.sysGmail),
+                                      Text("Backup Size :" +
+                                          _listSetting.first.sysBackupSize),
+                                      Text("Last Backup :" +
+                                          _listSetting.first.sysModified),
+                                      Text("Created Backup :" +
+                                          _listSetting.first.sysCreated),
+                                    ]),
+                                  ),
                                   actions: [
                                     ElevatedButton(
-                                      child: Text('Ok'),
-                                      onPressed: Navigator.of(context).pop,
-                                    )
+                                        child: Text('OK'),
+                                        onPressed: () {
+                                          uploadtoGdrive();
+                                          Navigator.of(context).pop();
+                                        })
                                   ]));
                         });
                   },

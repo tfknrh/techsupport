@@ -5,6 +5,8 @@ import 'package:techsupport/models/m_category.dart';
 import 'package:techsupport/models/m_customer.dart';
 import 'package:techsupport/models/m_setting.dart';
 
+import 'package:techsupport/models/m_images.dart';
+
 import 'package:techsupport/utils/u_time.dart';
 import 'package:techsupport/SQL.dart';
 import 'package:sqflite/sqflite.dart';
@@ -69,6 +71,34 @@ class DataBaseMain {
        customerPic TEXT,
       customerAkses TEXT)""");
 
+    await db.execute("""CREATE TABLE images(
+              imgId INTEGER PRIMARY KEY AUTOINCREMENT,
+              imgImage TEXT,
+              imgName TEXT,
+              aktivitasId INTEGER)""");
+
+    await db.execute("""CREATE TABLE setting (
+      sysCountAkt INTEGER,
+      sysCountCust INTEGER,
+      sysCountImg INTEGER,
+      sysBackupSize TEXT,
+      sysBackupSch TEXT,
+      sysGmail TEXT,
+      sysDBId TEXT,
+      sysCreated TEXT,  
+      sysModified TEXT  
+       )""");
+
+    await db.insert("setting", {
+      "sysCountAkt": "0",
+      "sysCountCust": "0",
+      "sysCountImg": "0",
+      "sysBackupSize": "0",
+      "sysBackupSch": "0",
+      "sysGmail": "No Account",
+      "sysCreated": "01-01-2021 00:00:00",
+      "sysModified": "01-01-2021 00:00:00"
+    });
     await db.execute(
         "INSERT INTO Category(categoryName,color,candelete) values('Installasi','ffDD3100',0)");
     await db.execute(
@@ -375,5 +405,79 @@ class DataBaseMain {
         await db.rawQuery('SELECT COUNT (*) from Setting');
     int result = Sqflite.firstIntValue(x);
     return result;
+  }
+
+  // Fetch Operation: Get all note objects from database
+  Future<List<Map<String, dynamic>>> getImageMapList() async {
+    var _database = await database;
+    //Database db = await database;
+    var result = await _database.query("images");
+    return result;
+  }
+
+  // Insert Operation: Insert a Note object to database
+  Future<int> insertImage(ImagesAttrb image) async {
+    // Database db = await database;
+
+    var _database = await database;
+    var result = await _database.insert("images", image.toMap());
+    return result;
+  }
+
+  // Delete Operation: Delete a Note object from database
+  Future<int> deleteImage(int id) async {
+    //var db = await database;
+
+    var _database = await database;
+    int result =
+        await _database.rawDelete('DELETE FROM images WHERE imgId = $id');
+    return result;
+  }
+
+  // Get number of Note objects in database
+  Future<int> getCountImages() async {
+    List<Map<String, dynamic>> x =
+        await _database.rawQuery('SELECT COUNT (*) from images');
+    int result = Sqflite.firstIntValue(x);
+    return result;
+  }
+
+  Future<int> maxAktId() async {
+    var _database = await database;
+    List<Map<String, dynamic>> x =
+        await _database.rawQuery('SELECT max(aktivitasId) from aktivitas');
+    int result = Sqflite.firstIntValue(x);
+    return result;
+  }
+
+  // Get the 'Map List' [ List<Map> ] and convert it to 'Image List' [ List<Image> ]
+  Future<List<ImagesAttrb>> getImageList() async {
+    var imageMapList = await getImageMapList(); // Get 'Map List' from database
+    int count =
+        imageMapList.length; // Count the number of map entries in db table
+
+    List<ImagesAttrb> imageList = [];
+    // For loop to create a 'Image List' from a 'Map List'
+    for (int i = 0; i < count; i++) {
+      imageList.add(ImagesAttrb(imageMapList[i]));
+    }
+    return imageList;
+  }
+
+  Future<List<ImagesAttrb>> getImage(dynamic id) async {
+    var _database = await database;
+    var imageMapList = await _database.query("images",
+        where: "aktivitasId = ?",
+        whereArgs: [id],
+        orderBy: "imgId DESC"); // Get 'Map List' from database
+    int count =
+        imageMapList.length; // Count the number of map entries in db table
+
+    List<ImagesAttrb> imageList = [];
+    // For loop to create a 'Image List' from a 'Map List'
+    for (int i = 0; i < count; i++) {
+      imageList.add(ImagesAttrb(imageMapList[i]));
+    }
+    return imageList;
   }
 }

@@ -18,7 +18,7 @@ import 'package:techsupport/logcat.dart';
 import 'package:techsupport/screens/category/s_category.dart';
 
 import 'package:theme_mode_handler/theme_mode_handler.dart';
-import 'package:techsupport/api/a_db.dart';
+import 'package:techsupport/maproute.dart';
 import 'package:techsupport/main.dart' as main;
 import 'dart:async';
 import 'package:intl/intl.dart';
@@ -117,7 +117,7 @@ class _AktivitassScreenState extends State<AktivitassScreen> {
                       delegate: SearchPage<Aktivitas>(
                           onQueryUpdate: (s) => print(s),
                           items: value.aktivitas,
-                          searchLabel: 'Cari Aktivitas',
+                          searchLabel: 'Cari Aktivitas...',
                           // barTheme: Themes.light,
                           suggestion: Center(
                             child: Text('Filter aktivitas'),
@@ -148,7 +148,7 @@ class _AktivitassScreenState extends State<AktivitassScreen> {
                     value: 2,
                   ),
                   PopupMenuItem(
-                    child: Text("search"),
+                    child: Text("Map"),
                     value: 3,
                   )
                 ];
@@ -162,6 +162,9 @@ class _AktivitassScreenState extends State<AktivitassScreen> {
                 } else if (value == 2) {
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => LogPage()));
+                } else if (value == 3) {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => MapPage()));
                 }
               },
             )

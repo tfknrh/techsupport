@@ -13,6 +13,9 @@ import 'package:techsupport/utils/u_color.dart';
 import 'package:techsupport/utils/u_responsive.dart';
 
 import 'package:permissions_plugin/permissions_plugin.dart';
+import 'package:flutter/services.dart';
+import 'dart:io';
+import 'package:move_to_background/move_to_background.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key key}) : super(key: key);
@@ -114,11 +117,16 @@ class _HomeScreenState extends State<HomeScreen> {
     CustomersScreen(),
     SettingsScreen(),
   ];
+  var _androidAppRetain = MethodChannel("android_app_retain");
+
   @override
   Widget build(BuildContext context) {
     checkPermissions(context);
     final _responsive = Responsive(context);
-    return Consumer<AktivitasProvider>(builder: (context, value, _) {
+    return WillPopScope(onWillPop: () async {
+      MoveToBackground.moveTaskToBack();
+      return false;
+    }, child: Consumer<AktivitasProvider>(builder: (context, value, _) {
       return Scaffold(
           backgroundColor: MColors.backgroundColor(context),
           body: _children[value.selectedIndex],
@@ -162,6 +170,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ));
-    });
+    }));
   }
 }

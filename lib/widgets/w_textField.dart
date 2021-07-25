@@ -103,18 +103,23 @@ class _InputTextState extends State<CTextField> {
               color: MColors.textFieldBorderColor(context),
               width: widget.borderWidth),
         ),
-        focusedBorder: widget.isUnderline != null
-            ? OutlineInputBorder(
-                borderSide: BorderSide(
-                    color: MColors.textFieldEnabledBorderColor(),
-                    width: widget.borderWidth),
-              )
-            : OutlineInputBorder(
-                borderRadius: BorderRadius.circular(
-                    widget.radius == null ? 20 : widget.radius),
-                borderSide: BorderSide(
-                    color: Colors.transparent, width: widget.borderWidth),
-              ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+              color: MColors.textFieldBorderColor(context),
+              width: widget.borderWidth),
+        ),
+        // widget.isUnderline != null
+        //     ? OutlineInputBorder(
+        //         borderSide: BorderSide(
+        //             color: MColors.textFieldEnabledBorderColor(),
+        //             width: widget.borderWidth),
+        //       )
+        //     : OutlineInputBorder(
+        //         borderRadius: BorderRadius.circular(
+        //             widget.radius == null ? 20 : widget.radius),
+        //         borderSide: BorderSide(
+        //             color: Colors.transparent, width: widget.borderWidth),
+        //       ),
         // enabledBorder: OutlineInputBorder(
         //   borderRadius: BorderRadius.circular(widget.radius ==null ?20:widget.radius),borderSide: BorderSide(color: Colors.transparent),
         // ),
