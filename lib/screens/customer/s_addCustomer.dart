@@ -12,7 +12,7 @@ import 'package:techsupport/widgets/w_text.dart';
 import 'package:techsupport/widgets/w_textField.dart';
 
 import 'package:techsupport/secrets.dart';
-import 'package:techsupport/maps.dart';
+import 'package:techsupport/screens/s_maps.dart';
 import 'package:mapbox_search/mapbox_search.dart' as mapbox;
 import 'package:techsupport/utils/u_colorHex.dart';
 import 'package:color/color.dart' as _color;

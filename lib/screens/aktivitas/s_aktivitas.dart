@@ -5,7 +5,7 @@ import 'package:techsupport/controllers/c_aktivitas.dart';
 import 'package:techsupport/models/m_aktivitas.dart';
 import 'package:techsupport/screens/aktivitas/s_addAktivitas.dart';
 import 'package:techsupport/utils/u_color.dart';
-import 'package:techsupport/widgets/search_page.dart';
+import 'package:techsupport/widgets/w_search_page.dart';
 
 import 'package:techsupport/widgets/w_text.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -123,8 +123,15 @@ class _AktivitassScreenState extends State<AktivitassScreen> {
                             child: Text('Filter aktivitas'),
                           ),
                           failure: Center(
-                            child: Text('Tidak ditemukan aktivitas :('),
-                          ),
+                              child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                Text('Tidak ditemukan aktivitas :('),
+                                SizedBox(height: 20),
+                                Image.asset(
+                                  'assets/images/not_found.png',
+                                ),
+                              ])),
                           filter: (akt) => [
                                 akt.aktivitasName,
                                 akt.categoryName,
@@ -224,206 +231,218 @@ class _AktivitasItemState extends State<AktivitasItem> {
   Widget build(BuildContext context) {
     String languageCode = Localizations.localeOf(context).toLanguageTag();
     final _size = MediaQuery.of(context).size;
-    return FadeIn(
-        duration: Duration(seconds: 1),
-        animate: true,
-        delay: Duration(milliseconds: widget.index * 1),
-        child: InkWell(
-          onTap: () async {
-            // if (widget.akt.aktivitasType == 1)
-            Navigator.push(
-                context,
-                PageTransition(
-                    type: PageTransitionType.bottomToTop,
-                    child: AddAktivitas(
-                      isEdit: true,
-                      aktivitas: widget.akt,
-                    )));
-          },
-          child: AutoScrollTag(
-            key: Key(widget.index.toString()),
-            controller: scrollController,
-            index: widget.index,
-            highlightColor: Colors.black.withOpacity(0.1),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: _size.width * 0.03),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(5),
-                      topRight: Radius.circular(5),
-                      bottomLeft: Radius.circular(5),
-                      bottomRight: Radius.circular(5)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      spreadRadius: 0,
-                      blurRadius: 11,
-                      offset: Offset(1, 5), // changes position of shadow
-                    ),
-                  ],
-                ),
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  elevation: 0,
-                  color:
-                      // widget.akt.aktivitasType == 1
-                      //   ?
-                      MColors.thirdBackgroundColor(context),
-                  //  : MColors.navigationBarColor(context),
-                  child: IntrinsicHeight(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: <Widget>[
-                        Container(
-                          width: _size.width * 0.02,
-                          decoration: BoxDecoration(
-                            color: widget.akt.color,
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(12),
-                                topRight: Radius.circular(0),
-                                bottomLeft: Radius.circular(12),
-                                bottomRight: Radius.circular(0)),
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 20, horizontal: _size.width * 0.05),
-                            child: Row(
-                              children: <Widget>[
-                                Expanded(
-                                  child: Column(
-                                    children: <Widget>[
-                                      Row(
-                                        children: <Widget>[
-                                          Expanded(
-                                            child: Text(widget.akt.customerName,
-                                                style: CText.primarycustomText(
-                                                    1.4,
-                                                    context,
-                                                    'CircularStdMedium')),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: <Widget>[
-                                          Text(
-                                            '${DateFormat("EEEE, dd MMMM yyyy", languageCode).format(widget.akt.dateTime)} | ${TimeValidator.getTimeOfDayS(widget.akt.timeStart)} - ${TimeValidator.getTimeOfDayS(widget.akt.timeFinish)}',
-                                            style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w700,
-                                                color: widget.akt.color),
-                                          ),
-                                          SizedBox(
-                                            width: 4,
-                                          ),
-                                          Icon(
-                                            widget.akt.aktivitasType == 1
-                                                ? Icons.monitor
-                                                : Icons.exit_to_app,
-                                            color: widget.akt.color,
-                                            size: 17,
-                                          ),
-                                          SizedBox(
-                                            width: 4,
-                                          ),
-                                          Icon(
-                                            widget.akt.notifikasi == 1
-                                                ? Icons.alarm_on
-                                                : Icons.alarm_off,
-                                            color: widget.akt.color,
-                                            size: 17,
-                                          ),
-                                          SizedBox(
-                                            width: 4,
-                                          ),
-                                          Icon(
-                                            widget.akt.isStatus == 2
-                                                ? Icons.done_all
-                                                : Icons.done,
-                                            color: widget.akt.color,
-                                            size: 17,
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: <Widget>[
-                                          Expanded(
-                                            child: Text(
-                                                widget.akt.aktivitasName,
-                                                overflow: TextOverflow.ellipsis,
-                                                maxLines: 1,
-                                                style: CText.primarycustomText(
-                                                    1.8,
-                                                    context,
-                                                    'CircularStdMedium')),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: <Widget>[
-                                          Expanded(
-                                            child: Text(widget.akt.description,
-                                                overflow: TextOverflow.ellipsis,
-                                                maxLines: 1,
-                                                style:
-                                                    CText.secondarycustomText(
-                                                        1.5,
-                                                        context,
-                                                        'CircularStdMedium')),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 5,
-                                      ),
-                                      Row(
-                                        children: <Widget>[
-                                          Container(
-                                            decoration: BoxDecoration(
-                                                color: widget.akt.color,
-                                                borderRadius:
-                                                    BorderRadius.circular(50)),
-                                            child: Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: _size.width * .02,
-                                                  vertical: 5),
-                                              child: Text(
-                                                widget.akt.categoryName,
-                                                style: CText.menucustomText(1.4,
-                                                    context, "CircularStdBook"),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Icon(
-                                  Icons.keyboard_arrow_right,
-                                  color: Theme.of(context).iconTheme.color,
-                                )
-                              ],
+    return
+        // FadeIn(
+        //     duration: Duration(seconds: 1),
+        //     animate: true,
+        //     delay: Duration(milliseconds: widget.index * 1),
+        //     child:
+        InkWell(
+            onTap: () async {
+              // if (widget.akt.aktivitasType == 1)
+              Navigator.push(
+                  context,
+                  PageTransition(
+                      type: PageTransitionType.bottomToTop,
+                      child: AddAktivitas(
+                        isEdit: true,
+                        aktivitas: widget.akt,
+                      )));
+            },
+            child: AutoScrollTag(
+              key: Key(widget.index.toString()),
+              controller: scrollController,
+              index: widget.index,
+              highlightColor: Colors.black.withOpacity(0.1),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: _size.width * 0.03),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(5),
+                        topRight: Radius.circular(5),
+                        bottomLeft: Radius.circular(5),
+                        bottomRight: Radius.circular(5)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.03),
+                        spreadRadius: 0,
+                        blurRadius: 11,
+                        offset: Offset(1, 5), // changes position of shadow
+                      ),
+                    ],
+                  ),
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                    elevation: 0,
+                    color:
+                        // widget.akt.aktivitasType == 1
+                        //   ?
+                        MColors.thirdBackgroundColor(context),
+                    //  : MColors.navigationBarColor(context),
+                    child: IntrinsicHeight(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          Container(
+                            width: _size.width * 0.02,
+                            decoration: BoxDecoration(
+                              color: widget.akt.color,
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(12),
+                                  topRight: Radius.circular(0),
+                                  bottomLeft: Radius.circular(12),
+                                  bottomRight: Radius.circular(0)),
                             ),
                           ),
-                        ),
-                      ],
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 20, horizontal: _size.width * 0.05),
+                              child: Row(
+                                children: <Widget>[
+                                  Expanded(
+                                    child: Column(
+                                      children: <Widget>[
+                                        Row(
+                                          children: <Widget>[
+                                            Expanded(
+                                              child: Text(
+                                                  widget.akt.customerName,
+                                                  style:
+                                                      CText.primarycustomText(
+                                                          1.4,
+                                                          context,
+                                                          'CircularStdMedium')),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: <Widget>[
+                                            Text(
+                                              '${DateFormat("EEEE, dd MMMM yyyy", languageCode).format(widget.akt.dateTime)} | ${TimeValidator.getTimeOfDayS(widget.akt.timeStart)} - ${TimeValidator.getTimeOfDayS(widget.akt.timeFinish)}',
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: widget.akt.color),
+                                            ),
+                                            SizedBox(
+                                              width: 4,
+                                            ),
+                                            Icon(
+                                              widget.akt.aktivitasType == 1
+                                                  ? Icons.monitor
+                                                  : Icons.exit_to_app,
+                                              color: widget.akt.color,
+                                              size: 17,
+                                            ),
+                                            SizedBox(
+                                              width: 4,
+                                            ),
+                                            Icon(
+                                              widget.akt.notifikasi == 1
+                                                  ? Icons.alarm_on
+                                                  : Icons.alarm_off,
+                                              color: widget.akt.color,
+                                              size: 17,
+                                            ),
+                                            SizedBox(
+                                              width: 4,
+                                            ),
+                                            Icon(
+                                              widget.akt.isStatus == 2
+                                                  ? Icons.done_all
+                                                  : Icons.done,
+                                              color: widget.akt.color,
+                                              size: 17,
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: <Widget>[
+                                            Expanded(
+                                              child: Text(
+                                                  widget.akt.aktivitasName,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  maxLines: 1,
+                                                  style:
+                                                      CText.primarycustomText(
+                                                          1.8,
+                                                          context,
+                                                          'CircularStdMedium')),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: <Widget>[
+                                            Expanded(
+                                              child: Text(
+                                                  widget.akt.description,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  maxLines: 1,
+                                                  style:
+                                                      CText.secondarycustomText(
+                                                          1.5,
+                                                          context,
+                                                          'CircularStdMedium')),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(
+                                          height: 5,
+                                        ),
+                                        Row(
+                                          children: <Widget>[
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                  color: widget.akt.color,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          50)),
+                                              child: Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal:
+                                                        _size.width * .02,
+                                                    vertical: 5),
+                                                child: Text(
+                                                  widget.akt.categoryName,
+                                                  style: CText.menucustomText(
+                                                      1.4,
+                                                      context,
+                                                      "CircularStdBook"),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.keyboard_arrow_right,
+                                    color: Theme.of(context).iconTheme.color,
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ),
-          // ),
-        ));
+              //  ),
+              // ),
+            ));
   }
 }

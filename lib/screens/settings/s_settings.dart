@@ -8,6 +8,8 @@ import 'package:techsupport/controllers/c_category.dart';
 import 'package:techsupport/controllers/c_aktivitas.dart';
 //import 'package:techsupport/controllers/c_aktivitas.dart';
 import 'package:techsupport/utils/u_color.dart';
+
+import 'package:techsupport/utils/u_filesize.dart';
 import 'package:techsupport/widgets/w_customSwitch.dart';
 import 'package:techsupport/widgets/w_text.dart';
 import 'package:techsupport/models/m_setting.dart';
@@ -219,6 +221,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final _size = MediaQuery.of(context).size;
+    String languageCode = Localizations.localeOf(context).toLanguageTag();
     return Consumer<AktivitasProvider>(builder: (context, value, child) {
       return Scaffold(
         backgroundColor: MColors.backgroundColor(context),
@@ -404,41 +407,72 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   splashColor: Colors.transparent,
                   highlightColor: Colors.transparent,
                   onTap: () {
-                    showDialog(
-                        context: context,
-                        builder: (_) {
-                          return BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                              child: AlertDialog(
-                                  contentPadding: const EdgeInsets.all(6.0),
-                                  backgroundColor:
-                                      MColors.dialogsColor(context),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10)),
-                                  title: Text("Setting"),
-                                  content: Container(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 20),
-                                    child: Column(children: [
-                                      Text("Account :" +
-                                          _listSetting.first.sysGmail),
-                                      Text("Backup Size :" +
-                                          _listSetting.first.sysBackupSize),
-                                      Text("Last Backup :" +
-                                          _listSetting.first.sysModified),
-                                      Text("Created Backup :" +
-                                          _listSetting.first.sysCreated),
-                                    ]),
-                                  ),
-                                  actions: [
-                                    ElevatedButton(
-                                        child: Text('OK'),
-                                        onPressed: () {
-                                          uploadtoGdrive();
-                                          Navigator.of(context).pop();
-                                        })
-                                  ]));
-                        });
+                    // showDialog(
+                    //     context: context,
+                    //     builder: (_) {
+                    //       return BackdropFilter(
+                    //           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                    //           child: AlertDialog(
+                    //               contentPadding: const EdgeInsets.symmetric(
+                    //                   vertical: 6.0, horizontal: 20),
+                    //               backgroundColor:
+                    //                   MColors.dialogsColor(context),
+                    //               shape: RoundedRectangleBorder(
+                    //                   borderRadius: BorderRadius.circular(10)),
+                    //               title: Text("Backup ke GDrive"),
+                    //               content: SingleChildScrollView(
+                    //                 //   child: Padding(
+                    //                 // padding: EdgeInsets.symmetric(
+                    //                 //     horizontal: _size.width * .05),
+                    //                 child: Column(
+                    //                     mainAxisSize: MainAxisSize.min,
+                    //                     children: [
+                    //                       ListTile(
+                    //                         leading: Text("Account"),
+                    //                         trailing: Text(
+                    //                             _listSetting.first.sysGmail),
+                    //                       ),
+                    //                       Divider(
+                    //                         color: MColors.secondaryTextColor(
+                    //                             context),
+                    //                       ),
+                    //                       ListTile(
+                    //                         leading: Text("Backup Size"),
+                    //                         trailing: Text(filesize(_listSetting
+                    //                             .first.sysBackupSize)),
+                    //                       ),
+                    //                       Divider(
+                    //                         color: MColors.secondaryTextColor(
+                    //                             context),
+                    //                       ),
+                    //                       ListTile(
+                    //                         leading: Text("Last Backup"),
+                    //                         trailing: Text(
+                    //                           DateFormat("EEEE, dd MMMM yyyy",
+                    //                                   languageCode)
+                    //                               .format(DateFormat(
+                    //                                       "dd-MM-yyyy HH:mm:ss")
+                    //                                   .parse(_listSetting
+                    //                                       .first.sysCreated))
+                    //                               .toString(),
+                    //                         ),
+                    //                       ),
+                    //                     ]),
+                    //               ),
+                    //               actions: [
+                    //                 ElevatedButton(
+                    //                     child: Text('Batal'),
+                    //                     onPressed: () {
+                    //                       Navigator.of(context).pop();
+                    //                     }),
+                    //                 ElevatedButton(
+                    //                     child: Text('Backup'),
+                    //                     onPressed: () {
+                    //                       uploadtoGdrive();
+                    //                       Navigator.of(context).pop();
+                    //                     })
+                    //               ]));
+                    //     });
                   },
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 10.0),
@@ -468,6 +502,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ],
                     ),
                   ),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    ListTile(
+                      leading: Text("Account"),
+                      trailing: Text(_listSetting.first.sysGmail),
+                    ),
+                    Divider(
+                      color: MColors.secondaryTextColor(context),
+                    ),
+                    ListTile(
+                      leading: Text("Backup Size"),
+                      trailing:
+                          Text(filesize(_listSetting.first.sysBackupSize)),
+                    ),
+                    Divider(
+                      color: MColors.secondaryTextColor(context),
+                    ),
+                    ListTile(
+                      leading: Text("Last Backup"),
+                      trailing: Text(
+                        DateFormat("EEEE, dd MMMM yyyy", languageCode)
+                            .format(DateFormat("dd-MM-yyyy HH:mm:ss")
+                                .parse(_listSetting.first.sysCreated))
+                            .toString(),
+                      ),
+                    ),
+                    Divider(
+                      color: MColors.secondaryTextColor(context),
+                    ),
+                    ListTile(
+                        trailing: ElevatedButton(
+                            child: Text('Backup'),
+                            onPressed: () {
+                              uploadtoGdrive();
+                            }))
+                  ]),
                 ),
                 Divider(
                   color: MColors.secondaryTextColor(context),

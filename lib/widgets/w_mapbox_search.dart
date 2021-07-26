@@ -242,7 +242,7 @@ class _MapBoxPlaceSearchWidgetState extends State<MapBoxPlaceSearchWidget>
 
   BoxDecoration _containerDecoration() {
     return BoxDecoration(
-      color: Colors.white,
+      color: Color(0xffF9F9F9),
       borderRadius: BorderRadius.all(Radius.circular(6.0)),
       boxShadow: [
         BoxShadow(color: Colors.black, blurRadius: 0, spreadRadius: 0)

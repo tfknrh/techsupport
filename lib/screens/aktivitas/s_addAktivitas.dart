@@ -17,7 +17,7 @@ import 'package:techsupport/widgets/w_snackBar.dart';
 import 'package:techsupport/widgets/w_text.dart';
 import 'package:techsupport/widgets/w_textField.dart';
 
-import 'package:techsupport/screens/imagedetailScreen.dart';
+import 'package:techsupport/screens/s_imagedetail.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 
 import 'package:techsupport/widgets/w_calendar.dart';

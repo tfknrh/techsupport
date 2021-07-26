@@ -10,6 +10,7 @@ import 'package:techsupport/utils/themes.dart';
 import 'package:theme_mode_handler/theme_mode_handler.dart';
 import 'package:theme_mode_handler/theme_mode_manager_interface.dart';
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:techsupport/widgets/w_splashscreen.dart';
 //import 'package:timezone/timezone.dart' as tz;
 
 void main() {
@@ -38,6 +39,24 @@ class MyManager implements IThemeModeManager {
 final GlobalKey<NavigatorState> navigatorKey =
     GlobalKey(debugLabel: "Main Navigator"); //
 
+class AfterSplash extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Welcome In SplashScreen Package'),
+        automaticallyImplyLeading: false,
+      ),
+      body: Center(
+        child: Text(
+          'Succeeded!',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30.0),
+        ),
+      ),
+    );
+  }
+}
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -52,24 +71,36 @@ class MyApp extends StatelessWidget {
             manager: MyManager(),
             builder: (ThemeMode themeMode) {
               return MaterialApp(
-                navigatorKey: navigatorKey,
-                title: 'TechSupoort',
-                debugShowCheckedModeBanner: false,
-                themeMode: themeMode,
-                localizationsDelegates: [
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                ],
-                supportedLocales: [
-                  // const Locale('es'),
-                  const Locale('id', 'ID'),
-                  //const Locale('es'),
-                ],
-                locale: Locale('id', 'ID'),
-                darkTheme: Themes.dark,
-                theme: Themes.light,
-                home: HomeScreen(),
-              );
+                  navigatorKey: navigatorKey,
+                  title: 'TechSupoort',
+                  debugShowCheckedModeBanner: false,
+                  themeMode: themeMode,
+                  localizationsDelegates: [
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                  ],
+                  supportedLocales: [
+                    // const Locale('es'),
+                    const Locale('id', 'ID'),
+                    //const Locale('es'),
+                  ],
+                  locale: Locale('id', 'ID'),
+                  darkTheme: Themes.dark,
+                  theme: Themes.light,
+                  home: SplashScreen.timer(
+                    seconds: 3,
+                    navigateAfterSeconds: HomeScreen(),
+                    title: Text(
+                      'Techsupport',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 20.0),
+                    ),
+                    image: Image.asset(
+                      'assets/splash.png',
+                    ),
+                    backgroundColor: Colors.white,
+                    loaderColor: Colors.blue,
+                  ));
             }));
   }
 }
