@@ -59,6 +59,12 @@ class SettingProvider with ChangeNotifier {
     itemSetting.clear();
     itemSetting = [
       ItemSetting(
+        title: "Backup",
+        group: "Backup ke GDrive",
+        subtitle: "",
+        tipe: 2,
+      ),
+      ItemSetting(
         group: "Tampilan",
         title: "Tema",
         subtitle: "",
@@ -72,8 +78,16 @@ class SettingProvider with ChangeNotifier {
       ),
       ItemSetting(
         group: "Backup ke GDrive",
-        title: "Akun",
-        subtitle: setting.first.sysGmail,
+        title: "Schedule",
+        subtitle: DateFormat("HH:mm").format(setting.first.sysBackupSch),
+        tipe: 1,
+      ),
+      ItemSetting(
+        group: "Backup ke GDrive",
+        title: "Terakhir Backup",
+        subtitle: DateFormat("dd MMMM yyyy HH:mm:ss")
+            .format(setting.first.sysCreated)
+            .toString(),
         tipe: 1,
       ),
       ItemSetting(
@@ -83,23 +97,8 @@ class SettingProvider with ChangeNotifier {
           tipe: 1),
       ItemSetting(
         group: "Backup ke GDrive",
-        title: "Terakhir Backup",
-        subtitle: DateFormat("dd MMMM yyyy HH:mm:ss").format(
-            // DateFormat("yyyy-MM-dd HH:mm:ss")
-            //   .parse(setting.first.sysCreated.toString())
-            setting.first.sysCreated).toString(),
-        tipe: 1,
-      ),
-      ItemSetting(
-        title: "Backup",
-        group: "Backup ke GDrive",
-        subtitle: "",
-        tipe: 2,
-      ),
-      ItemSetting(
-        group: "Backup ke GDrive",
-        title: "Schedule",
-        subtitle: TimeValidator.getDateTime(setting.first.sysBackupSch),
+        title: "Akun",
+        subtitle: setting.first.sysGmail,
         tipe: 1,
       ),
     ];
@@ -220,34 +219,63 @@ class SettingProvider with ChangeNotifier {
         DateTime.now(),
         // DateFormat("dd-MM-yyyy HH:mm:ss").format(DateTime.now()).toString(),
         result.modifiedTime);
-    notifBackup();
+
     initData();
     if (localFile.lengthSync() > int.parse(setting.first.sysBackupSize)) {
       await driveApi.files.delete(setting.first.sysDBId);
     }
+    notifBackup();
+  }
+
+  Future<void> uploadtoGdriveSch() async {
+    // deletefromGdrive();
+    final googleSignIn =
+        signIn.GoogleSignIn.standard(scopes: [drive.DriveApi.driveScope]);
+    final signIn.GoogleSignInAccount account = await googleSignIn.signIn();
+    print("User account $account");
+
+    final authHeaders = await account.authHeaders;
+    final authenticateClient = GoogleAuthClient(authHeaders);
+    final driveApi = drive.DriveApi(authenticateClient);
+
+    var dir = await ExtStorage.getExternalStorageDirectory();
+    final filename = "techsupport.db";
+    var driveFile = new drive.File();
+    driveFile.name = filename;
+    final localFile = io.File("$dir/techsupport/techsupport.db");
+
+    final result = await driveApi.files.create(driveFile,
+        uploadMedia: drive.Media(localFile.openRead(), localFile.lengthSync()));
+    updateSettingSch(
+        localFile.lengthSync().toString(),
+        DateTime(
+            DateTime.now().year,
+            DateTime.now().month,
+            DateTime.now().day + 1,
+            setting.first.sysBackupSch.hour,
+            setting.first.sysBackupSch.minute),
+        account.email,
+        result.id,
+        DateTime.now(),
+        // DateFormat("dd-MM-yyyy HH:mm:ss").format(DateTime.now()).toString(),
+        result.modifiedTime);
+
+    initData();
+    if (localFile.lengthSync() > int.parse(setting.first.sysBackupSize)) {
+      await driveApi.files.delete(setting.first.sysDBId);
+    }
+    notifBackup();
   }
 
   Future<Response> updateSetting(
-      // int sysCountAkt,
-      //  int sysCountCust,
-      //  int sysCountImg,
       String sysBackupSize,
-      // TimeOfDay sysBackupSch,
+      //  DateTime sysBackupSch,
       String sysGmail,
       String sysDBId,
       DateTime sysCreated,
       DateTime sysModified) async {
     Response r = Response();
-    // Setting e = Setting();
-    // e.sysCountAkt = setting.first.sysCountAkt;
-    // e.sysCountCust = setting.first.sysCountCust;
-    // e.sysCountImg = setting.first.sysCountImg;
-    // e.sysBackupSize = sysBackupSize;
-    // e.sysBackupSch = setting.first.sysBackupSch;
-    // e.sysGmail = sysGmail;
-    // e.sysDBId = sysDBId;
-    // e.sysCreated = sysCreated;
-    // e.sysModified = sysModified;
+
     await DataBaseMain.db.updateSettingcol("sysBackupSize", sysBackupSize);
     await DataBaseMain.db.updateSettingcol("sysGmail", sysGmail);
     await DataBaseMain.db.updateSettingcol("sysDBId", sysDBId);
@@ -256,23 +284,30 @@ class SettingProvider with ChangeNotifier {
     await DataBaseMain.db.updateSettingcol(
         "sysModified", TimeValidator.getDatenTime(sysModified));
 
-    // if (x > 0) {
-    //e.id = x;
-    // setting
-    //     .singleWhere((es) => es.settingId == e.settingId)
-    //     .customerId = customerId;
+    notifyListeners();
+    return r;
+  }
+
+  Future<Response> updateSettingSch(
+      String sysBackupSize,
+      DateTime sysBackupSch,
+      String sysGmail,
+      String sysDBId,
+      DateTime sysCreated,
+      DateTime sysModified) async {
+    Response r = Response();
+
+    await DataBaseMain.db.updateSettingcol("sysBackupSize", sysBackupSize);
+    await DataBaseMain.db.updateSettingcol("sysGmail", sysGmail);
+    await DataBaseMain.db.updateSettingcol("sysDBId", sysDBId);
+    await DataBaseMain.db
+        .updateSettingcol("sysCreated", TimeValidator.getDatenTime(sysCreated));
+    await DataBaseMain.db.updateSettingcol(
+        "sysModified", TimeValidator.getDatenTime(sysModified));
+    await DataBaseMain.db.updateSettingcol(
+        "sysBackupSch", TimeValidator.getDatenTime(sysBackupSch));
 
     notifyListeners();
-    // notificationManager.removeReminder(e.settingId);
-
-    // if (e.notifikasi == 1) {
-    //   createReminder(e);
-    // }
-    //   r = Response(
-    //       identifier: "success", message: "Setting berhasil diperbarui");
-    // } else {
-    //   r = Response(identifier: "error", message: "Terjadi kesalahan");
-    // }
     return r;
   }
 
@@ -280,29 +315,12 @@ class SettingProvider with ChangeNotifier {
     DateTime sysBackupSch,
   ) async {
     Response r = Response();
-    Setting e = Setting();
-    // e.sysCountAkt = setting.first.sysCountAkt;
-    // e.sysCountCust = setting.first.sysCountCust;
-    // e.sysCountImg = setting.first.sysCountImg;
-    // e.sysBackupSize = setting.first.sysBackupSize;
-    // //  e.sysBackupSch = setting.first.sysBackupSch;
-    // e.sysGmail = setting.first.sysGmail;
-    // e.sysDBId = setting.first.sysDBId;
-    // e.sysCreated = setting.first.sysCreated;
-    // e.sysModified = setting.first.sysModified;
-    // e.sysBackupSch = sysBackupSch;
 
     await DataBaseMain.db.updateSettingcol(
         "sysBackupSch", TimeValidator.getDatenTime(sysBackupSch));
 
-    // if (x > 0) {
     notifyListeners();
 
-    //   r = Response(
-    //       identifier: "success", message: "Setting berhasil diperbarui");
-    // } else {
-    //   r = Response(identifier: "error", message: "Terjadi kesalahan");
-    // }
     return r;
   }
 

@@ -18,7 +18,6 @@ import 'package:techsupport/widgets/w_text.dart';
 import 'package:techsupport/widgets/w_textField.dart';
 
 import 'package:techsupport/screens/s_imagedetail.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 
 import 'package:techsupport/widgets/w_calendar.dart';
 import 'package:intl/intl.dart';
@@ -28,7 +27,7 @@ import 'package:techsupport/SQL.dart';
 import 'dart:async';
 import 'dart:io';
 
-import 'package:multi_image_picker/multi_image_picker.dart';
+import 'package:techsupport/widgets/images_picker/picker.dart';
 
 import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 

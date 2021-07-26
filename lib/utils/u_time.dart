@@ -95,6 +95,10 @@ class TimeValidator {
     return '${DateFormat('yyyy-MM-dd HH:mm:ss').format(x)}';
   }
 
+  static String getDatenTimeSch(DateTime x) {
+    return '${DateFormat('yyyy-MM-dd HH:mm').format(x)}';
+  }
+
   static String getTime(TimeOfDay time) {
     return '${needZero(time.hour)}:${needZero(time.minute)}:00';
   }
@@ -104,7 +108,7 @@ class TimeValidator {
   // }
 
   static String getTimeOfDayS(TimeOfDay x) {
-    return '${needZero(x.hour)}:${needZero(x.minute)}:00';
+    return '${needZero(x.hour)}:${needZero(x.minute)}';
   }
 
   static int weekDifference(DateTime a, DateTime b) {

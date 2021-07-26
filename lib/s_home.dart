@@ -116,18 +116,19 @@ class _HomeScreenState extends State<HomeScreen> {
     TimerLoop(
         duration: Duration(seconds: 5),
         onTick: () {
-          if (Provider.of<SettingProvider>(context, listen: false)
-                  .setting
-                  .first
-                  .sysBackupSch ==
-              DateTime(
+          if (TimeValidator.getDatenTimeSch(
+                  Provider.of<SettingProvider>(context, listen: false)
+                      .setting
+                      .first
+                      .sysBackupSch) ==
+              TimeValidator.getDatenTimeSch(DateTime(
                   DateTime.now().year,
                   DateTime.now().month,
                   DateTime.now().day,
                   DateTime.now().hour,
-                  DateTime.now().minute)) {
+                  DateTime.now().minute))) {
             Provider.of<SettingProvider>(context, listen: false)
-                .uploadtoGdrive();
+                .uploadtoGdriveSch();
           }
         });
   }

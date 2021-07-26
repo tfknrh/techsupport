@@ -265,7 +265,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             value.timeSelected = _value;
                             value.updateScheduler(TimeValidator.dateandTime(
                                 DateTime.now(), _value));
-                            value.initData();
+                            _initData();
                           }
                         });
                       }
