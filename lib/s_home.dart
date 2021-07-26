@@ -5,16 +5,19 @@ import 'package:provider/provider.dart';
 import 'package:techsupport/controllers/c_category.dart';
 import 'package:techsupport/controllers/c_customer.dart';
 import 'package:techsupport/controllers/c_aktivitas.dart';
+import 'package:techsupport/controllers/c_setting.dart';
 import 'package:techsupport/screens/customer/s_customer.dart';
-import 'package:techsupport/screens/category/s_category.dart';
+import 'package:techsupport/widgets/w_timer.dart';
 import 'package:techsupport/screens/aktivitas/s_aktivitas.dart';
 import 'package:techsupport/screens/settings/s_settings.dart';
 import 'package:techsupport/utils/u_color.dart';
+
+import 'package:techsupport/utils/u_time.dart';
 import 'package:techsupport/utils/u_responsive.dart';
 
 import 'package:permissions_plugin/permissions_plugin.dart';
 import 'package:flutter/services.dart';
-import 'dart:io';
+import 'dart:async';
 import 'package:move_to_background/move_to_background.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -106,9 +109,27 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     WidgetsFlutterBinding.ensureInitialized();
-    Provider.of<CustomerProvider>(context, listen: false).obtenerCustomers();
-    Provider.of<CategoryProvider>(context, listen: false).obtenerCategorys();
+    Provider.of<CustomerProvider>(context, listen: false).getListCustomers();
+    Provider.of<CategoryProvider>(context, listen: false).getListCategorys();
     Provider.of<AktivitasProvider>(context, listen: false).initData();
+    Provider.of<SettingProvider>(context, listen: false).initData();
+    TimerLoop(
+        duration: Duration(seconds: 5),
+        onTick: () {
+          if (Provider.of<SettingProvider>(context, listen: false)
+                  .setting
+                  .first
+                  .sysBackupSch ==
+              DateTime(
+                  DateTime.now().year,
+                  DateTime.now().month,
+                  DateTime.now().day,
+                  DateTime.now().hour,
+                  DateTime.now().minute)) {
+            Provider.of<SettingProvider>(context, listen: false)
+                .uploadtoGdrive();
+          }
+        });
   }
 
   final List<Widget> _children = [

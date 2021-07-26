@@ -23,14 +23,14 @@ class AktivitasProvider with ChangeNotifier {
   DateTime daySelected = DateTime.now();
 
 //  SharedPreferences sharedPreferences;
-  void obtenerAktivitass() async {
-    final x = await DataBaseMain.obtenerAktivitass();
+  void getListAktivitass() async {
+    final x = await DataBaseMain.getListAktivitass();
     aktivitas = x;
     notifyListeners();
   }
 
-  void obtenerCustomers() async {
-    final x = await DataBaseMain.obtenerCustomers();
+  void getListCustomers() async {
+    final x = await DataBaseMain.getListCustomers();
     customer = x;
     notifyListeners();
   }
@@ -214,7 +214,7 @@ class AktivitasProvider with ChangeNotifier {
   }
 
   createReminder(Aktivitas _aktivitas) async {
-    final c = await DataBaseMain.obtenerCustomerbyID(_aktivitas.customerId);
+    final c = await DataBaseMain.getListCustomerbyID(_aktivitas.customerId);
 
     notificationManager.showNotificationSpecificTime(
         _aktivitas.aktivitasId,

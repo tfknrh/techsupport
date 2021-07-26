@@ -6,8 +6,8 @@ import 'package:techsupport/models/m_customer.dart';
 class CustomerProvider with ChangeNotifier {
   List<Customer> customer = [];
 
-  void obtenerCustomers() async {
-    final x = await DataBaseMain.obtenerCustomers();
+  void getListCustomers() async {
+    final x = await DataBaseMain.getListCustomers();
     customer = x;
     notifyListeners();
   }

@@ -7,7 +7,8 @@ class Themes {
     buttonColor: Color(0xffAE8D6A),
     primaryColorLight: Color.fromRGBO(225, 228, 236, 100), //BoxColor
     accentColor: Color.fromRGBO(114, 114, 114, 100), //SecondPrimaryText
-    splashColor: Color.fromRGBO(69, 79, 99, 1),
+    splashColor:
+        Color.fromRGBO(225, 228, 236, 100), //Color.fromRGBO(69, 79, 99, 1),
     selectedRowColor: Color.fromRGBO(201, 201, 202, 1),
     primaryColor: Color(0xffF9F9F9), // Color.fromRGBO(254, 169, 15, 1),
     indicatorColor: Color(0xffFE6080),

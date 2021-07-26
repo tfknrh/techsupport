@@ -130,14 +130,14 @@ class DataBaseMain {
     return [];
   }
 
-  static Future<List<Aktivitas>> obtenerAktivitass() async {
+  static Future<List<Aktivitas>> getListAktivitass() async {
     final db = await DataBaseMain.db.database;
     final res = await db.query('Aktivitas');
     List<Aktivitas> list =
         res.isNotEmpty ? res.map((c) => Aktivitas.fromBD(c)).toList() : [];
     for (var i = 0; i < list.length; i++) {
-      final _category = await obtenerCategorybyID(list[i].categoryId);
-      final _customer = await obtenerCustomerbyID(list[i].customerId);
+      final _category = await getListCategorybyID(list[i].categoryId);
+      final _customer = await getListCustomerbyID(list[i].customerId);
       list[i].color = _category.color;
       list[i].categoryName = _category.categoryName;
       list[i].customerName = _customer.customerName;
@@ -145,15 +145,15 @@ class DataBaseMain {
     return list;
   }
 
-  static Future<Aktivitas> obtenerAktivitasbyID(int id) async {
+  static Future<Aktivitas> getListAktivitasbyID(int id) async {
     final db = await DataBaseMain.db.database;
     final res =
         await db.rawQuery(SQL.queryAktivitas + ' where aktivitasId = ?', [id]);
     List<Aktivitas> list =
         res.isNotEmpty ? res.map((c) => Aktivitas.fromBD(c)).toList() : [];
     for (var i = 0; i < list.length; i++) {
-      final _category = await obtenerCategorybyID(list[i].categoryId);
-      final _customer = await obtenerCustomerbyID(list[i].customerId);
+      final _category = await getListCategorybyID(list[i].categoryId);
+      final _customer = await getListCustomerbyID(list[i].customerId);
       list[i].color = _category.color;
       list[i].categoryName = _category.categoryName;
       list[i].customerName = _customer.customerName;
@@ -183,7 +183,7 @@ class DataBaseMain {
 
   // #endregion
   // #region Categorys
-  static Future<List<Category>> obtenerCategorys() async {
+  static Future<List<Category>> getListCategorys() async {
     final db = await DataBaseMain.db.database;
     final res = await db.query('Category');
     List<Category> list =
@@ -191,7 +191,7 @@ class DataBaseMain {
     return list;
   }
 
-  static Future<Category> obtenerCategorybyID(int id) async {
+  static Future<Category> getListCategorybyID(int id) async {
     final db = await DataBaseMain.db.database;
     final res =
         await db.rawQuery('select * from Category where categoryId = ?', [id]);
@@ -221,8 +221,47 @@ class DataBaseMain {
   }
 
   // #endregion
+  // #region Setting
+  Future<List<Setting>> getListSettings() async {
+    final db = await DataBaseMain.db.database;
+    final res = await db.query('Setting');
+    List<Setting> list =
+        res.isNotEmpty ? res.map((c) => Setting.fromJson(c)).toList() : [];
+    return list;
+  }
+
+  static Future<int> insertSetting(Setting _setting) async {
+    final db = await DataBaseMain.db.database;
+    var raw = await db.insert('Setting', _setting.toBD());
+    return raw;
+  }
+
+  static Future<int> updateSetting(Setting _setting) async {
+    final db = await DataBaseMain.db.database;
+    var raw = await db.update(
+      'Setting',
+      _setting.toBD(),
+    );
+    return raw;
+  }
+
+  static Future<int> deleteSetting(Setting _setting) async {
+    final db = await DataBaseMain.db.database;
+    var raw = await db.delete('Setting');
+    return raw;
+  }
+
+  Future<int> getCountSetting() async {
+    final db = await database;
+    List<Map<String, dynamic>> x =
+        await db.rawQuery('SELECT COUNT (*) from Setting');
+    int result = Sqflite.firstIntValue(x);
+    return result;
+  }
+
+  // #endregion
 // #region Customer
-  static Future<List<Customer>> obtenerCustomers() async {
+  static Future<List<Customer>> getListCustomers() async {
     final db = await DataBaseMain.db.database;
     final res = await db.query('Customer');
     List<Customer> list =
@@ -230,7 +269,7 @@ class DataBaseMain {
     return list;
   }
 
-  static Future<Customer> obtenerCustomerbyID(int id) async {
+  static Future<Customer> getListCustomerbyID(int id) async {
     final db = await DataBaseMain.db.database;
     final res =
         await db.rawQuery('select * from Customer where customerId = ?', [id]);
@@ -277,8 +316,8 @@ class DataBaseMain {
          VALUES (?,?,?,?,?,?,?,?,?,?,?)""", [
       aktivitas.aktivitasName,
       aktivitas.description,
-      TimeValidator.getHora(aktivitas.timeStart),
-      TimeValidator.getHora(aktivitas.timeFinish),
+      TimeValidator.getTime(aktivitas.timeStart),
+      TimeValidator.getTime(aktivitas.timeFinish),
       aktivitas.dateTime,
       aktivitas.notifikasi,
       aktivitas.isAlarm,
@@ -297,8 +336,8 @@ class DataBaseMain {
     List<Aktivitas> list =
         res.isNotEmpty ? res.map((c) => Aktivitas.fromBD(c)).toList() : [];
     for (var i = 0; i < list.length; i++) {
-      final _category = await obtenerCategorybyID(list[i].categoryId);
-      final _customer = await obtenerCustomerbyID(list[i].customerId);
+      final _category = await getListCategorybyID(list[i].categoryId);
+      final _customer = await getListCustomerbyID(list[i].customerId);
       list[i].color = _category.color;
       list[i].categoryName = _category.categoryName;
       list[i].customerName = _customer.customerName;
@@ -307,22 +346,6 @@ class DataBaseMain {
     return list;
   }
 
-  // Future<List<Aktivitas>> getAktivitasesByWeekDay(String dateTime) async {
-  //   final db = await database;
-  //   var res = await db
-  //       .rawQuery("SELECT * FROM Aktivitas WHERE dateTime = '$dateTime'");
-  //   List<Aktivitas> list =
-  //       res.isNotEmpty ? res.map((c) => Aktivitas.fromBD(c)).toList() : [];
-  //   for (var i = 0; i < list.length; i++) {
-  //     final _category = await obtenerCategorybyID(list[i].categoryId);
-  //     final _customer = await obtenerCustomerbyID(list[i].customerId);
-  //     list[i].color = _category.color;
-  //     list[i].categoryName = _category.categoryName;
-  //     list[i].customerName = _customer.customerName;
-  //   }
-  //   return list;
-  // }
-
   Future<List<Aktivitas>> getAktivitasesByCategoryID(int categoryId) async {
     final db = await database;
     var res = await db
@@ -330,8 +353,8 @@ class DataBaseMain {
     List<Aktivitas> list =
         res.isNotEmpty ? res.map((c) => Aktivitas.fromBD(c)).toList() : [];
     for (var i = 0; i < list.length; i++) {
-      final _category = await obtenerCategorybyID(list[i].categoryId);
-      final _customer = await obtenerCustomerbyID(list[i].customerId);
+      final _category = await getListCategorybyID(list[i].categoryId);
+      final _customer = await getListCustomerbyID(list[i].customerId);
       list[i].color = _category.color;
       list[i].categoryName = _category.categoryName;
       list[i].customerName = _customer.customerName;
@@ -366,46 +389,37 @@ class DataBaseMain {
     return list;
   }
 
-  Future<List<Setting>> getListSys() async {
-    final db = await database;
-    List<Setting> list = [];
-    List<Map<String, dynamic>> dblist =
-        await db.rawQuery('SELECT * FROM Setting');
+  // Future<List<Setting>> getListSys() async {
+  //   final db = await database;
+  //   List<Setting> list = [];
+  //   List<Map<String, dynamic>> dblist =
+  //       await db.rawQuery('SELECT * FROM Setting');
 
-    for (Map<String, dynamic> item in dblist) {
-      list.add(Setting.fromJson(item));
-    }
-    return list;
-  }
+  //   for (Map<String, dynamic> item in dblist) {
+  //     list.add(Setting.fromJson(item));
+  //   }
+  //   return list;
+  // }
 
-  Future<int> updateSys(String colName, String colvalue) async {
+  Future<int> updateSettingcol(String colName, String colvalue) async {
     final db = await database;
     return await db
         .rawUpdate("update Setting set $colName = ? ", ["$colvalue"]);
   }
 
-  // Insert Operation: Insert a Note object to database
-  Future<int> insertSys(Setting setting) async {
-    final db = await database;
-    var result = await db.insert("Setting", setting.toBD());
-    return result;
-  }
+  // // Insert Operation: Insert a Note object to database
+  // Future<int> insertSys(Setting setting) async {
+  //   final db = await database;
+  //   var result = await db.insert("Setting", setting.toBD());
+  //   return result;
+  // }
 
-  // Delete Operation: Delete a Note object from database
-  Future<int> deleteSetting() async {
-    final db = await database;
-    var result = await db.rawDelete('DELETE FROM Setting');
-    return result;
-  }
-
-  // Get number of Note objects in database
-  Future<int> getCount() async {
-    final db = await database;
-    List<Map<String, dynamic>> x =
-        await db.rawQuery('SELECT COUNT (*) from Setting');
-    int result = Sqflite.firstIntValue(x);
-    return result;
-  }
+  // // Delete Operation: Delete a Note object from database
+  // Future<int> deleteSetting() async {
+  //   final db = await database;
+  //   var result = await db.rawDelete('DELETE FROM Setting');
+  //   return result;
+  // }
 
   // Fetch Operation: Get all note objects from database
   Future<List<Map<String, dynamic>>> getImageMapList() async {

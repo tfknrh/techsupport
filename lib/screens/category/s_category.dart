@@ -18,7 +18,7 @@ class _CategorysScreenState extends State<CategorysScreen> {
   void initState() {
     super.initState();
     WidgetsFlutterBinding.ensureInitialized();
-    Provider.of<CategoryProvider>(context, listen: false).obtenerCategorys();
+    Provider.of<CategoryProvider>(context, listen: false).getListCategorys();
   }
 
   @override
@@ -79,7 +79,7 @@ class _CategorysScreenState extends State<CategorysScreen> {
         ),
         body: RefreshIndicator(
           onRefresh: () async {
-            value.obtenerCategorys();
+            value.getListCategorys();
           },
           child: ListView.builder(
             physics: BouncingScrollPhysics(),

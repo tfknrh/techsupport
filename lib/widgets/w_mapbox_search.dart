@@ -282,10 +282,10 @@ class _MapBoxPlaceSearchWidgetState extends State<MapBoxPlaceSearchWidget>
     /// Will be called when a user selects one of the Place options.
 
     // Sets TextField value to be the location selected
-    _textEditingController.value = TextEditingValue(
-      text: prediction.placeName,
-      selection: TextSelection.collapsed(offset: prediction.placeName.length),
-    );
+    // _textEditingController.value = TextEditingValue(
+    //   text: prediction.placeName,
+    //   selection: TextSelection.collapsed(offset: prediction.placeName.length),
+    // );
 
     // Makes animation
     await _animationController.animateTo(0.5);
@@ -297,6 +297,6 @@ class _MapBoxPlaceSearchWidgetState extends State<MapBoxPlaceSearchWidget>
 
     // Calls the `onSelected` callback
     widget.onSelected(prediction);
-    if (widget.popOnSelect) Navigator.pop(context);
+    // if (widget.popOnSelect) Navigator.pop(context);
   }
 }

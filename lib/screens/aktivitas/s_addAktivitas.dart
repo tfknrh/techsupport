@@ -286,7 +286,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
                                 horizontal: _size.width * .04),
                             child: DropdownButtonHideUnderline(
                                 child: DropdownButton<int>(
-                              value: widget.isEdit == false ? 1 : c.customerId,
+                              value: c.customerId,
                               isExpanded: true,
                               hint: Text("Pilih Nama Customer"),
                               items: Provider.of<CustomerProvider>(context,
@@ -494,9 +494,8 @@ class _AddAktivitasState extends State<AddAktivitas> {
                             IconButton(
                                 onPressed: () {
                                   loadAssets();
-                                  if (_sharedFiles.length > 0) {
-                                    loadShared();
-                                  }
+
+                                  loadShared();
                                 },
                                 icon: Icon(Icons.add_a_photo))
                           ])),
@@ -870,6 +869,22 @@ class _AddAktivitasState extends State<AddAktivitas> {
     //   _shared = _sharedFiles;
     // });
     // return fileImageArray;
+  }
+
+  Widget listPath() {
+    return f.length == 0
+        ? Container()
+        : ListView.builder(
+            //controller: scrollController,
+            shrinkWrap: true,
+            addAutomaticKeepAlives: true,
+            addRepaintBoundaries: false,
+            scrollDirection: Axis.vertical,
+            physics: BouncingScrollPhysics(),
+            itemCount: f.length,
+            itemBuilder: (BuildContext listContext, int index) {
+              return ListTile(title: Text(f[index]));
+            });
   }
 
 //image PreView

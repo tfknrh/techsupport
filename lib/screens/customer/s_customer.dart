@@ -27,7 +27,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
   void initState() {
     super.initState();
     WidgetsFlutterBinding.ensureInitialized();
-    Provider.of<CustomerProvider>(context, listen: false).obtenerCustomers();
+    Provider.of<CustomerProvider>(context, listen: false).getListCustomers();
   }
 
   @override
@@ -118,7 +118,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
         ),
         body: RefreshIndicator(
             onRefresh: () async {
-              value.obtenerCustomers();
+              value.getListCustomers();
             },
             child: ListView.builder(
                 //controller: scrollController,

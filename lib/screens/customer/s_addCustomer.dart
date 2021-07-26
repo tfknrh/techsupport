@@ -153,7 +153,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                   if (x.identifier == "success") {
                     Navigator.pop(context);
                     Provider.of<CustomerProvider>(context, listen: false)
-                        .obtenerCustomers();
+                        .getListCustomers();
                   } else {
                     SnackBars.showErrorSnackBar(myScaContext, context,
                         Icons.error, "Customer", x.message);
@@ -184,7 +184,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                   if (x.identifier == "success") {
                     Navigator.pop(context);
                     Provider.of<CustomerProvider>(context, listen: false)
-                        .obtenerCustomers();
+                        .getListCustomers();
                   } else {
                     SnackBars.showErrorSnackBar(myScaContext, context,
                         Icons.error, "Customer", x.message);

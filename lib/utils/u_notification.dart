@@ -40,15 +40,13 @@ class NotificationManager {
 
   void showNotificationSpecificDaily(
       int id, String title, String body, DateTime dateTime) async {
-    dateTime = DateTime(dateTime.year, dateTime.month, dateTime.day,
-        dateTime.hour, dateTime.minute, dateTime.second);
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-        id, title, body, dateTime, getPlatformChannelSpecficsAlarm(),
-        androidAllowWhileIdle: true,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents:
-            DateTimeComponents.dayOfWeekAndTime); // showWeeklyAtDayAndTime(
+    await flutterLocalNotificationsPlugin.schedule(
+        id,
+        title,
+        body,
+        DateTime(dateTime.year, dateTime.month, dateTime.day, dateTime.hour,
+            dateTime.minute, dateTime.second),
+        getPlatformChannelSpecficsAlarm()); // showWeeklyAtDayAndTime(
   }
 
   showNotificationNow(
@@ -67,26 +65,20 @@ class NotificationManager {
         payload: payload);
   }
 
-  Future<void> showNotification(bool asAlarm) async {
-    await flutterLocalNotificationsPlugin.show(
-        0,
-        'Task Manager',
-        'Notification',
-        asAlarm
-            ? getPlatformChannelSpecficsAlarm()
-            : getPlatformChannelSpecfics(),
-        payload: 'item x');
+  Future<void> showNotification(int id, String title, String body) async {
+    await flutterLocalNotificationsPlugin
+        .show(id, title, body, getPlatformChannelSpecficsAlarm(), payload: '');
   }
 
-  void showAlarmDaysInterval(
-      int id, String title, String body, DateTime time, int isAlarm) async {
+  void showAlarmDaysInterval(int id, String title, String body, int day,
+      Time time, int isAlarm) async {
     tz.setLocalLocation(
         tz.getLocation(await FlutterNativeTimezone.getLocalTimezone()));
     await flutterLocalNotificationsPlugin.zonedSchedule(
         id,
         title,
         body,
-        _nextInstanceOfMondayTenAM(time),
+        _nextInstanceOfMondayTenAM(day, time),
         isAlarm == 0
             ? getPlatformChannelSpecfics()
             : getPlatformChannelSpecficsAlarm(),
@@ -97,19 +89,19 @@ class NotificationManager {
             DateTimeComponents.dayOfWeekAndTime); // showWeeklyAtDayAndTime(
   }
 
-  tz.TZDateTime _nextInstanceOfTenAM() {
+  tz.TZDateTime _nextInstanceOfTenAM(Time time) {
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
     tz.TZDateTime scheduledDate = tz.TZDateTime(
-        tz.local, now.year, now.month, now.day, now.hour, now.minute);
+        tz.local, now.year, now.month, now.day, time.hour, time.minute);
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
     return scheduledDate;
   }
 
-  tz.TZDateTime _nextInstanceOfMondayTenAM(DateTime time) {
-    tz.TZDateTime scheduledDate = _nextInstanceOfTenAM();
-    while (scheduledDate.weekday != time.day) {
+  tz.TZDateTime _nextInstanceOfMondayTenAM(int day, Time time) {
+    tz.TZDateTime scheduledDate = _nextInstanceOfTenAM(time);
+    while (scheduledDate.weekday != day) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
     return scheduledDate;
@@ -126,7 +118,7 @@ class NotificationManager {
         playSound: true,
         enableVibration: true,
         styleInformation: BigTextStyleInformation(''),
-        ticker: 'TimeManager');
+        ticker: 'TechSupport');
     var iOSPlatformChannelSpecifics = IOSNotificationDetails(
         // presentSound: false,
         // sound: 'iosAlarm.m4a',
@@ -150,7 +142,7 @@ class NotificationManager {
         enableVibration: true,
         icon: null,
         styleInformation: BigTextStyleInformation(''),
-        ticker: 'TimeManager');
+        ticker: 'TechSupport');
     var iOSPlatformChannelSpecifics = IOSNotificationDetails(
         // presentSound: true,
         // sound: 'iosAlarm.m4a',
@@ -164,7 +156,7 @@ class NotificationManager {
 
   getPlatformChannelSpecfics() {
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-        'TimeManagerRecorder', 'Recorder General', 'Recorder',
+        'TechSupportRecorder', 'Recorder General', 'Recorder',
         importance: Importance.max,
         priority: Priority.high,
         visibility: NotificationVisibility.public,
@@ -174,7 +166,7 @@ class NotificationManager {
         playSound: true,
         enableVibration: true,
         styleInformation: BigTextStyleInformation(''),
-        ticker: 'TimeManager');
+        ticker: 'TechSupport');
     var iOSPlatformChannelSpecifics = IOSNotificationDetails(
       presentSound: true,
     );
@@ -193,7 +185,7 @@ class NotificationManager {
   Future<dynamic> onSelectNotification(payload) async {
 // navigate to booking screen if the payload equal BOOKING
 //if(payload == "Aktivitas"){
-    final x = await DataBaseMain.obtenerAktivitasbyID(int.parse(payload));
+    final x = await DataBaseMain.getListAktivitasbyID(int.parse(payload));
 
     main.navigatorKey.currentState.push(
       MaterialPageRoute(

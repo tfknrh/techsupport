@@ -6,8 +6,8 @@ import 'package:techsupport/models/m_category.dart';
 class CategoryProvider with ChangeNotifier {
   List<Category> category = [];
 
-  void obtenerCategorys() async {
-    final x = await DataBaseMain.obtenerCategorys();
+  void getListCategorys() async {
+    final x = await DataBaseMain.getListCategorys();
     category = x;
     notifyListeners();
   }

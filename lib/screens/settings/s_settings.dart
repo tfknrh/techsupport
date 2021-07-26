@@ -6,35 +6,21 @@ import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:techsupport/controllers/c_category.dart';
 import 'package:techsupport/controllers/c_aktivitas.dart';
-//import 'package:techsupport/controllers/c_aktivitas.dart';
+import 'package:techsupport/controllers/c_setting.dart';
 import 'package:techsupport/utils/u_color.dart';
+import 'package:techsupport/utils/u_time.dart';
 
 import 'package:techsupport/utils/u_filesize.dart';
+import 'package:techsupport/widgets/w_customTimePicker.dart';
 import 'package:techsupport/widgets/w_customSwitch.dart';
+import 'package:techsupport/widgets/w_groupedList.dart';
 import 'package:techsupport/widgets/w_text.dart';
 import 'package:techsupport/models/m_setting.dart';
 import 'package:theme_mode_handler/theme_mode_handler.dart';
 
 import 'package:intl/intl.dart';
-import 'package:http/http.dart' as http;
 
-import 'package:googleapis/drive/v3.dart' as drive;
-import 'package:google_sign_in/google_sign_in.dart' as signIn;
-import 'package:techsupport/api/a_db.dart';
-import 'dart:io' as io;
-import 'package:ext_storage/ext_storage.dart';
-
-class GoogleAuthClient extends http.BaseClient {
-  final Map<String, String> _headers;
-
-  final http.Client _client = new http.Client();
-
-  GoogleAuthClient(this._headers);
-
-  Future<http.StreamedResponse> send(http.BaseRequest request) {
-    return _client.send(request..headers.addAll(_headers));
-  }
-}
+import 'package:techsupport/utils/u_notification.dart';
 
 class SettingsScreen extends StatefulWidget {
   SettingsScreen({Key key}) : super(key: key);
@@ -46,78 +32,24 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   Color _tempShadeColor = Colors.blueAccent[100];
   Color _shadeColor = Colors.blue[800];
-  List<Setting> _listSetting = [];
-  Setting sys;
+
+  Setting setting = Setting();
 
   bool ready = false;
   String fileId;
-  Future<void> getSetting() async {
-    _listSetting = await DataBaseMain.db.getListSys();
-    ready = true;
-    if (mounted) setState(() {});
-  }
 
   @override
   void initState() {
     super.initState();
-    getSetting();
+
+    _initData();
+    // addItemlist();
   }
 
-  Future<void> deletefromGdrive() async {
-    //  _listSetting.clear();
-    //  getSetting();
-
-    final googleSignIn =
-        signIn.GoogleSignIn.standard(scopes: [drive.DriveApi.driveScope]);
-    final signIn.GoogleSignInAccount account = await googleSignIn.signIn();
-    print("User account $account");
-
-    final authHeaders = await account.authHeaders;
-    final authenticateClient = GoogleAuthClient(authHeaders);
-    final driveApi = drive.DriveApi(authenticateClient);
-
-    await driveApi.files.delete(_listSetting.first.sysDBId);
-  }
-
-  Future<void> uploadtoGdrive() async {
-    // deletefromGdrive();
-    final googleSignIn =
-        signIn.GoogleSignIn.standard(scopes: [drive.DriveApi.driveScope]);
-    final signIn.GoogleSignInAccount account = await googleSignIn.signIn();
-    print("User account $account");
-
-    final authHeaders = await account.authHeaders;
-    final authenticateClient = GoogleAuthClient(authHeaders);
-    final driveApi = drive.DriveApi(authenticateClient);
-
-    var dir = await ExtStorage.getExternalStorageDirectory();
-    final filename = "techsupport.db";
-    var driveFile = new drive.File();
-    driveFile.name = filename;
-    final localFile = io.File("$dir/techsupport/techsupport.db");
-    await driveApi.files.delete(_listSetting.first.sysDBId);
-    final result = await driveApi.files.create(driveFile,
-        uploadMedia: drive.Media(localFile.openRead(), localFile.lengthSync()));
-
-    await DataBaseMain.db.updateSys("sysGmail", account.email);
-    await DataBaseMain.db.updateSys("sysDBId", result.id);
-    await DataBaseMain.db
-        .updateSys("sysBackupSize", localFile.lengthSync().toString());
-    await DataBaseMain.db
-        .updateSys("sysModified", result.modifiedTime.toString());
-    await DataBaseMain.db.updateSys("sysCreated",
-        DateFormat("dd-MM-yyyy HH:mm:ss").format(DateTime.now()).toString());
-
-    getSetting();
-// if (result == "success") {
-//                       Navigator.pop(context);
-//                       await Provider.of<AktivitasProvider>(context,
-//                               listen: false)
-//                           .initData();
-//                     } else {
-//                       SnackBars.showErrorSnackBar(myScaContext, context,
-//                           Icons.error, "Customer", x.message);
-//
+  _initData() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Provider.of<SettingProvider>(context, listen: false).initData();
+    });
   }
 
   int _intTable;
@@ -218,11 +150,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
         });
   }
 
+  Widget _buildGroupSeparator(dynamic groupByValue) {
+    return Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+        ),
+        child: groupByValue.toString() == "Backup ke GDrive"
+            ? Row(children: [
+                Icon(
+                  AntDesign.google,
+                  color: MColors.buttonColor(),
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Text(groupByValue.toString(),
+                    style: CText.primarycustomText(
+                        1.7, context, 'CircularStdBook'))
+              ])
+            : groupByValue.toString() == "Tampilan"
+                ? Row(children: [
+                    Icon(
+                      Icons.colorize,
+                      color: MColors.buttonColor(),
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text(groupByValue.toString(),
+                        style: CText.primarycustomText(
+                            1.7, context, 'CircularStdBook'))
+                  ])
+                : Text(groupByValue.toString(),
+                    style: CText.primarycustomText(
+                        1.7, context, 'CircularStdBook')));
+  }
+
+  addItemlist() {}
+  TimeOfDay _sch;
+  NotificationManager notificationManager = NotificationManager();
   @override
   Widget build(BuildContext context) {
-    final _size = MediaQuery.of(context).size;
     String languageCode = Localizations.localeOf(context).toLanguageTag();
-    return Consumer<AktivitasProvider>(builder: (context, value, child) {
+
+    final _size = MediaQuery.of(context).size;
+
+    return Consumer<SettingProvider>(builder: (context, value, child) {
       return Scaffold(
         backgroundColor: MColors.backgroundColor(context),
         appBar: AppBar(
@@ -234,398 +208,303 @@ class _SettingsScreenState extends State<SettingsScreen> {
             style: CText.primarycustomText(2.5, context, "CircularStdBold"),
           ),
         ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: _size.width * .05),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                InkWell(
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onTap: () {
-                    Provider.of<AktivitasProvider>(context, listen: false)
-                        .notificationManager
-                        .showNotification(true
-                            // value.sharedPrepeferencesGetValueIsAlarm()
+        body: RefreshIndicator(
+          onRefresh: () async {
+            value.initData();
+          },
+          child: ListView(
+            shrinkWrap: true,
+            physics: BouncingScrollPhysics(),
+            children: [
+              GroupedListView<ItemSetting, String>(
+                shrinkWrap: true,
+                elements: value.itemSetting,
+                groupBy: (ItemSetting _setting) => _setting.group,
+                order: GroupedListOrder.DESC,
+                separator: Divider(
+                  color: MColors.secondaryTextColor(context),
+                ),
+                //  useStickyGroupSeparators: true,
+                groupSeparatorBuilder: _buildGroupSeparator,
+                itemBuilder: (c, ItemSetting _setting) {
+                  return SettingItem(
+                    setting: _setting,
+                    onTap: () {
+                      if (_setting.title == "Tema") {
+                        showThemePickerDialog(contexts: this.context);
+                      } else if (_setting.title == "Color") {
+                        _openDialog(
+                          "Select Color",
+                          MaterialColorPicker(
+                            shrinkWrap: true,
+                            selectedColor: _shadeColor,
+                            onColorChange: (color) =>
+                                setState(() => _tempShadeColor = color),
+                            onBack: () => print("Back button pressed"),
+                          ),
+                        );
+                      }
+                      // else if (_setting.tipe == 2) {
+                      //   value.uploadtoGdrive();
+                      //   }
+                      else if (_setting.title == "Schedule") {
+                        showCustomTimePicker(
+                          initialTime: TimeOfDay.now(),
+                          context: context,
+                          builder: (BuildContext context, Widget child) {
+                            return Theme(
+                              data: Theme.of(context).copyWith(
+                                primaryColor: Colors.black,
+                                accentColor: MColors.buttonColor(),
+                              ),
+                              child: child,
                             );
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10.0),
-                    child: Row(
-                      children: [
-                        Icon(
-                          AntDesign.notification,
-                          color: MColors.buttonColor(),
-                        ),
-                        SizedBox(
-                          width: _size.width * .02,
-                        ),
-                        Expanded(
-                          child: Text(
-                            "Push Notificacion",
-                            style: CText.primarycustomText(
-                                1.7, context, 'CircularStdBook'),
-                          ),
-                        ),
-                        SizedBox(
-                          width: _size.width * 0.04,
-                        ),
-                        Icon(
-                          Icons.keyboard_arrow_right,
-                          color: Theme.of(context).iconTheme.color,
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-                Divider(
-                  color: MColors.secondaryTextColor(context),
-                ),
-                InkWell(
-                  onTap: () {
-                    _openDialog(
-                      "Select Color",
-                      MaterialColorPicker(
-                        shrinkWrap: true,
-                        selectedColor: _shadeColor,
-                        onColorChange: (color) =>
-                            setState(() => _tempShadeColor = color),
-                        onBack: () => print("Back button pressed"),
-                      ),
-                    );
-                  },
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10.0),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.colorize,
-                          color: MColors.buttonColor(),
-                        ),
-                        SizedBox(
-                          width: _size.width * .02,
-                        ),
-                        Expanded(
-                          child: Text(
-                            "Color",
-                            style: CText.primarycustomText(
-                                1.7, context, 'CircularStdBook'),
-                          ),
-                        ),
-                        SizedBox(
-                          width: _size.width * 0.04,
-                        ),
-                        Icon(
-                          Icons.keyboard_arrow_right,
-                          color: Theme.of(context).iconTheme.color,
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-                Divider(
-                  color: MColors.secondaryTextColor(context),
-                ),
-                InkWell(
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onTap: () {
-                    showThemePickerDialog(contexts: this.context);
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10.0),
-                    child: Row(
-                      children: [
-                        Icon(
-                          MaterialCommunityIcons.theme_light_dark,
-                          color: MColors.buttonColor(),
-                        ),
-                        SizedBox(
-                          width: _size.width * .02,
-                        ),
-                        Expanded(
-                          child: Text(
-                            "Ganti Tema",
-                            style: CText.primarycustomText(
-                                1.7, context, 'CircularStdBook'),
-                          ),
-                        ),
-                        SizedBox(
-                          width: _size.width * 0.04,
-                        ),
-                        Icon(
-                          Icons.keyboard_arrow_right,
-                          color: Theme.of(context).iconTheme.color,
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-                Divider(
-                  color: MColors.secondaryTextColor(context),
-                ),
-                InkWell(
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onTap: () {},
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10.0),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.settings_backup_restore,
-                          color: MColors.buttonColor(),
-                        ),
-                        SizedBox(
-                          width: _size.width * .02,
-                        ),
-                        Expanded(
-                          child: Text(
-                            "Backup to local",
-                            style: CText.primarycustomText(
-                                1.7, context, 'CircularStdBook'),
-                          ),
-                        ),
-                        SizedBox(
-                          width: _size.width * 0.04,
-                        ),
-                        Icon(
-                          Icons.keyboard_arrow_right,
-                          color: Theme.of(context).iconTheme.color,
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-                Divider(
-                  color: MColors.secondaryTextColor(context),
-                ),
-                InkWell(
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  onTap: () {
-                    // showDialog(
-                    //     context: context,
-                    //     builder: (_) {
-                    //       return BackdropFilter(
-                    //           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                    //           child: AlertDialog(
-                    //               contentPadding: const EdgeInsets.symmetric(
-                    //                   vertical: 6.0, horizontal: 20),
-                    //               backgroundColor:
-                    //                   MColors.dialogsColor(context),
-                    //               shape: RoundedRectangleBorder(
-                    //                   borderRadius: BorderRadius.circular(10)),
-                    //               title: Text("Backup ke GDrive"),
-                    //               content: SingleChildScrollView(
-                    //                 //   child: Padding(
-                    //                 // padding: EdgeInsets.symmetric(
-                    //                 //     horizontal: _size.width * .05),
-                    //                 child: Column(
-                    //                     mainAxisSize: MainAxisSize.min,
-                    //                     children: [
-                    //                       ListTile(
-                    //                         leading: Text("Account"),
-                    //                         trailing: Text(
-                    //                             _listSetting.first.sysGmail),
-                    //                       ),
-                    //                       Divider(
-                    //                         color: MColors.secondaryTextColor(
-                    //                             context),
-                    //                       ),
-                    //                       ListTile(
-                    //                         leading: Text("Backup Size"),
-                    //                         trailing: Text(filesize(_listSetting
-                    //                             .first.sysBackupSize)),
-                    //                       ),
-                    //                       Divider(
-                    //                         color: MColors.secondaryTextColor(
-                    //                             context),
-                    //                       ),
-                    //                       ListTile(
-                    //                         leading: Text("Last Backup"),
-                    //                         trailing: Text(
-                    //                           DateFormat("EEEE, dd MMMM yyyy",
-                    //                                   languageCode)
-                    //                               .format(DateFormat(
-                    //                                       "dd-MM-yyyy HH:mm:ss")
-                    //                                   .parse(_listSetting
-                    //                                       .first.sysCreated))
-                    //                               .toString(),
-                    //                         ),
-                    //                       ),
-                    //                     ]),
-                    //               ),
-                    //               actions: [
-                    //                 ElevatedButton(
-                    //                     child: Text('Batal'),
-                    //                     onPressed: () {
-                    //                       Navigator.of(context).pop();
-                    //                     }),
-                    //                 ElevatedButton(
-                    //                     child: Text('Backup'),
-                    //                     onPressed: () {
-                    //                       uploadtoGdrive();
-                    //                       Navigator.of(context).pop();
-                    //                     })
-                    //               ]));
-                    //     });
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10.0),
-                    child: Row(
-                      children: [
-                        Icon(
-                          AntDesign.google,
-                          color: MColors.buttonColor(),
-                        ),
-                        SizedBox(
-                          width: _size.width * .02,
-                        ),
-                        Expanded(
-                          child: Text(
-                            "Backup to Google Drive",
-                            style: CText.primarycustomText(
-                                1.7, context, 'CircularStdBook'),
-                          ),
-                        ),
-                        SizedBox(
-                          width: _size.width * 0.04,
-                        ),
-                        Icon(
-                          Icons.keyboard_arrow_right,
-                          color: Theme.of(context).iconTheme.color,
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    ListTile(
-                      leading: Text("Account"),
-                      trailing: Text(_listSetting.first.sysGmail),
-                    ),
-                    Divider(
-                      color: MColors.secondaryTextColor(context),
-                    ),
-                    ListTile(
-                      leading: Text("Backup Size"),
-                      trailing:
-                          Text(filesize(_listSetting.first.sysBackupSize)),
-                    ),
-                    Divider(
-                      color: MColors.secondaryTextColor(context),
-                    ),
-                    ListTile(
-                      leading: Text("Last Backup"),
-                      trailing: Text(
-                        DateFormat("EEEE, dd MMMM yyyy", languageCode)
-                            .format(DateFormat("dd-MM-yyyy HH:mm:ss")
-                                .parse(_listSetting.first.sysCreated))
-                            .toString(),
-                      ),
-                    ),
-                    Divider(
-                      color: MColors.secondaryTextColor(context),
-                    ),
-                    ListTile(
-                        trailing: ElevatedButton(
-                            child: Text('Backup'),
-                            onPressed: () {
-                              uploadtoGdrive();
-                            }))
-                  ]),
-                ),
-                Divider(
-                  color: MColors.secondaryTextColor(context),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: 10.0),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_today_outlined,
-                        color: MColors.buttonColor(),
-                      ),
-                      SizedBox(
-                        width: _size.width * .02,
-                      ),
-                      Expanded(
-                        child: Text(
-                          "Allow Time Schedule",
-                          style: CText.primarycustomText(
-                              1.7, context, 'CircularStdBook'),
-                        ),
-                      ),
-                      FlutterSwitch(
-                        width: _size.width * 0.12,
-                        height: 25.0,
-                        toggleSize: _size.width * 0.04,
-                        value:
-                            true, //value.sharedPrepeferencesGetValueIsNotif(),
-                        borderRadius: 30.0,
-                        activeColor: MColors.buttonColor(),
-                        inactiveColor:
-                            MColors.secondaryBackgroundColor(context),
-                        padding: _size.width * 0.01,
-                        showOnOff: false,
-                        onToggle: (val) {
-                          // value.setNotifValue(val);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Divider(
-                  color: MColors.secondaryTextColor(context),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: 10.0),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.alarm,
-                        color: MColors.buttonColor(),
-                      ),
-                      SizedBox(
-                        width: _size.width * .02,
-                      ),
-                      Expanded(
-                        child: Text(
-                          "Notification Alarm",
-                          style: CText.primarycustomText(
-                              1.7, context, 'CircularStdBook'),
-                        ),
-                      ),
-                      FlutterSwitch(
-                        width: _size.width * 0.12,
-                        height: 25.0,
-                        toggleSize: _size.width * 0.04,
-                        value:
-                            true, //value.sharedPrepeferencesGetValueIsAlarm(),
-                        borderRadius: 30.0,
-                        inactiveColor:
-                            MColors.secondaryBackgroundColor(context),
-                        activeColor: MColors.buttonColor(),
-                        padding: _size.width * 0.01,
-                        showOnOff: false,
-                        onToggle: (val) {
-                          //value.setNotifValueIsAlarm(val);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+                          },
+                        ).then((_value) {
+                          if (_value != null) {
+                            value.timeSelected = _value;
+                            value.updateScheduler(TimeValidator.dateandTime(
+                                DateTime.now(), _value));
+                            value.initData();
+                          }
+                        });
+                      }
+                    },
+                  );
+                },
+              ),
+              // ListView.separated(
+              //     shrinkWrap: true,
+              //     itemBuilder: (context, index) {
+              //       return SettingItem(
+              //         setting: _itemList[index],
+              //         onTap: () {
+              //           if (_itemList[index].title == "Tema") {
+              //             showThemePickerDialog(contexts: this.context);
+              //           } else if (_itemList[index].title == "Color") {
+              //             _openDialog(
+              //               "Select Color",
+              //               MaterialColorPicker(
+              //                 shrinkWrap: true,
+              //                 selectedColor: _shadeColor,
+              //                 onColorChange: (color) =>
+              //                     setState(() => _tempShadeColor = color),
+              //                 onBack: () => print("Back button pressed"),
+              //               ),
+              //             );
+              //           } else if (_itemList[index].title == "Backup") {
+              //             uploadtoGdrive();
+              //           } else if (_itemList[index].title == "Schedule") {
+              //             showCustomTimePicker(
+              //               initialTime: TimeOfDay.now(),
+              //               context: context,
+              //               builder: (BuildContext context, Widget child) {
+              //                 return Theme(
+              //                   data: Theme.of(context).copyWith(
+              //                     primaryColor: Colors.black,
+              //                     accentColor: MColors.buttonColor(),
+              //                   ),
+              //                   child: child,
+              //                 );
+              //               },
+              //             ).then((value) {
+              //               if (value != null) {
+              //                 _sch = value;
+              //                 // if (value != null) {
+              //                 //   _itemList[index].
+              //                 //       "${TimeValidator.needZero(aktivitas.timeStart.hour)}:${TimeValidator.needZero(aktivitas.timeStart.minute)}";
+              //                 //}
+              //               }
+              //             });
+              //           }
+              //         },
+              //       );
+              //     },
+              //     separatorBuilder: (context, index) {
+              //       return Divider(
+              //         color: MColors.secondaryTextColor(context),
+              //       );
+              //     },
+              //     itemCount: _itemList.length)
+              // InkWell(
+              //   onTap: () {
+              //     _openDialog(
+              //       "Select Color",
+              //       MaterialColorPicker(
+              //         shrinkWrap: true,
+              //         selectedColor: _shadeColor,
+              //         onColorChange: (color) =>
+              //             setState(() => _tempShadeColor = color),
+              //         onBack: () => print("Back button pressed"),
+              //       ),
+              //     );
+              //   },
+              //   splashColor: Colors.transparent,
+              //   highlightColor: Colors.transparent,
+              //   child: Padding(
+              //     padding: EdgeInsets.symmetric(vertical: 10.0),
+              //     child: Row(
+              //       children: [
+              //         Icon(
+              //           Icons.colorize,
+              //           color: MColors.buttonColor(),
+              //         ),
+              //         SizedBox(
+              //           width: _size.width * .02,
+              //         ),
+              //         Expanded(
+              //           child: Text(
+              //             "Color",
+              //             style: CText.primarycustomText(
+              //                 1.7, context, 'CircularStdBook'),
+              //           ),
+              //         ),
+              //         SizedBox(
+              //           width: _size.width * 0.04,
+              //         ),
+              //         Icon(
+              //           Icons.keyboard_arrow_right,
+              //           color: Theme.of(context).iconTheme.color,
+              //         )
+              //       ],
+              //     ),
+              //   ),
+              // ),
+              // Divider(
+              //   color: MColors.secondaryTextColor(context),
+              // ),
+              // InkWell(
+              //   splashColor: Colors.transparent,
+              //   highlightColor: Colors.transparent,
+              //   onTap: () {
+              //     showThemePickerDialog(contexts: this.context);
+              //   },
+              //   child: Padding(
+              //     padding: EdgeInsets.symmetric(vertical: 10.0),
+              //     child: Row(
+              //       children: [
+              //         Icon(
+              //           MaterialCommunityIcons.theme_light_dark,
+              //           color: MColors.buttonColor(),
+              //         ),
+              //         SizedBox(
+              //           width: _size.width * .02,
+              //         ),
+              //         Expanded(
+              //           child: Text(
+              //             "Ganti Tema",
+              //             style: CText.primarycustomText(
+              //                 1.7, context, 'CircularStdBook'),
+              //           ),
+              //         ),
+              //         SizedBox(
+              //           width: _size.width * 0.04,
+              //         ),
+              //         Icon(
+              //           Icons.keyboard_arrow_right,
+              //           color: Theme.of(context).iconTheme.color,
+              //         )
+              //       ],
+              //     ),
+              //   ),
+              // ),
+
+              // Divider(
+              //   color: MColors.secondaryTextColor(context),
+              // ),
+              // InkWell(
+              //   splashColor: Colors.transparent,
+              //   highlightColor: Colors.transparent,
+              //   onTap: () {},
+              //   child: Padding(
+              //     padding: EdgeInsets.symmetric(vertical: 10.0),
+              //     child: Row(
+              //       children: [
+              //         Icon(
+              //           AntDesign.google,
+              //           color: MColors.buttonColor(),
+              //         ),
+              //         SizedBox(
+              //           width: _size.width * .02,
+              //         ),
+              //         Expanded(
+              //           child: Text(
+              //             "Backup to Google Drive",
+              //             style: CText.primarycustomText(
+              //                 1.7, context, 'CircularStdBook'),
+              //           ),
+              //         ),
+              //         SizedBox(
+              //           width: _size.width * 0.04,
+              //         ),
+              //         // Icon(
+              //         //   Icons.keyboard_arrow_right,
+              //         //   color: Theme.of(context).iconTheme.color,
+              //         // )
+              //       ],
+              //     ),
+              //   ),
+              // ),
+              // Padding(
+              //   padding: EdgeInsets.symmetric(horizontal: 10),
+              //   child:
+            ],
           ),
         ),
+        // ),
       );
     });
+  }
+}
+
+class SettingItem extends StatefulWidget {
+  final Function onTap;
+  final Function onLongPress;
+  final ItemSetting setting;
+  //final Widget trailing;
+
+  const SettingItem({Key key, this.onTap, this.onLongPress, this.setting})
+      : super(key: key);
+
+  @override
+  _SettingItemState createState() => _SettingItemState();
+}
+
+class _SettingItemState extends State<SettingItem> {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+        padding: EdgeInsets.only(
+          left: 40,
+          right: 20,
+        ),
+        child: ListTile(
+          trailing: widget.setting.tipe == 2
+              ? Container(
+                  width: 100,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Provider.of<SettingProvider>(context, listen: false)
+                          .uploadtoGdrive();
+                      Provider.of<SettingProvider>(context, listen: false)
+                          .initData();
+                    },
+                    child: Text(
+                      widget.setting.title,
+                    ),
+                  ))
+              : Text(""),
+          onTap: widget.onTap,
+          onLongPress: widget.onLongPress,
+          title: widget.setting.tipe == 1
+              ? Text(widget.setting.title,
+                  style:
+                      CText.primarycustomText(1.7, context, 'CircularStdBook'))
+              : Text(""),
+          subtitle: Text(
+            widget.setting.subtitle,
+            style: CText.secondarycustomText(1.5, context, 'CircularStdBook'),
+          ),
+        ));
   }
 }

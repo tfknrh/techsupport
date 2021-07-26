@@ -207,7 +207,7 @@ class _MyMapsState extends State<MyMaps> {
             ].toSet(),
           ),
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.only(top: 100.0, right: 16),
             child: Align(
               alignment: Alignment.topRight,
               child: Column(
@@ -215,21 +215,21 @@ class _MyMapsState extends State<MyMaps> {
                   FloatingActionButton(
                     onPressed: _onMapTypeButtonPressed,
                     materialTapTargetSize: MaterialTapTargetSize.padded,
-                    backgroundColor: Colors.green,
+                    backgroundColor: MColors.buttonColor(),
                     child: const Icon(Icons.map, size: 36.0),
                   ),
                   SizedBox(height: 16.0),
                   FloatingActionButton(
                     onPressed: () => getCurrentLocation(),
                     materialTapTargetSize: MaterialTapTargetSize.padded,
-                    backgroundColor: Colors.green,
+                    backgroundColor: MColors.buttonColor(),
                     child: const Icon(Icons.gps_fixed, size: 36.0),
                   ),
                   SizedBox(height: 16.0),
                   FloatingActionButton(
                     onPressed: () => _sendCustomer(context),
                     materialTapTargetSize: MaterialTapTargetSize.padded,
-                    backgroundColor: Colors.green,
+                    backgroundColor: MColors.buttonColor(),
                     child: const Icon(Icons.save, size: 36.0),
                   ),
                 ],
@@ -237,9 +237,9 @@ class _MyMapsState extends State<MyMaps> {
             ),
           ),
           Positioned(
-            bottom: 48.0,
+            bottom: 15.0,
             left: 10.0,
-            right: 10.0,
+            right: 60.0,
             child: Card(
               elevation: 8.0,
               shape: RoundedRectangleBorder(

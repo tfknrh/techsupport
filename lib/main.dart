@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:techsupport/controllers/c_category.dart';
 import 'package:techsupport/controllers/c_customer.dart';
 import 'package:techsupport/controllers/c_aktivitas.dart';
+import 'package:techsupport/controllers/c_setting.dart';
 import 'package:techsupport/s_home.dart';
 import 'package:techsupport/utils/themes.dart';
 import 'package:theme_mode_handler/theme_mode_handler.dart';
@@ -65,6 +66,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => CategoryProvider()),
           ChangeNotifierProvider(create: (_) => AktivitasProvider()),
           ChangeNotifierProvider(create: (_) => CustomerProvider()),
+          ChangeNotifierProvider(create: (_) => SettingProvider()),
           // ChangeNotifierProvider(create: (_) => RutinaProvider()),
         ],
         child: ThemeModeHandler(
@@ -72,7 +74,7 @@ class MyApp extends StatelessWidget {
             builder: (ThemeMode themeMode) {
               return MaterialApp(
                   navigatorKey: navigatorKey,
-                  title: 'TechSupoort',
+                  title: 'TechSupport',
                   debugShowCheckedModeBanner: false,
                   themeMode: themeMode,
                   localizationsDelegates: [
@@ -88,10 +90,10 @@ class MyApp extends StatelessWidget {
                   darkTheme: Themes.dark,
                   theme: Themes.light,
                   home: SplashScreen.timer(
-                    seconds: 3,
+                    seconds: 1,
                     navigateAfterSeconds: HomeScreen(),
                     title: Text(
-                      'Techsupport',
+                      'TechSupport',
                       style: TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 20.0),
                     ),

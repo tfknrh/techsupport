@@ -45,9 +45,9 @@ class TimeValidator {
   //           : sleepTime
   //       : sleepTime;
   //   String minu = (minutes == 0 || minutes == 60) ? '' : ' $minutes minutos';
-  //   String showHora =
+  //   String showTime =
   //       horasd == 0 ? "" : "$horasd hora${horasd == 1 ? "" : "s"}";
-  //   return '$showHora$minu';
+  //   return '$showTime$minu';
   // }
 
   static String needZero(int i) {
@@ -83,8 +83,28 @@ class TimeValidator {
     return DateFormat('yyyy-MM-dd').parse(s);
   }
 
+  static DateTime stringtoDateTime(String s) {
+    return DateFormat('yyyy-MM-dd HH:mm:ss').parse(s);
+  }
+
   static String getDateTime(DateTime x) {
     return '${DateFormat('yyyy-MM-dd').format(x)}';
+  }
+
+  static String getDatenTime(DateTime x) {
+    return '${DateFormat('yyyy-MM-dd HH:mm:ss').format(x)}';
+  }
+
+  static String getTime(TimeOfDay time) {
+    return '${needZero(time.hour)}:${needZero(time.minute)}:00';
+  }
+
+  // static String getTime(DateTime x) {
+  //   return '${needZero(x.hour)}:${needZero(x.minute)}';
+  // }
+
+  static String getTimeOfDayS(TimeOfDay x) {
+    return '${needZero(x.hour)}:${needZero(x.minute)}:00';
   }
 
   static int weekDifference(DateTime a, DateTime b) {
@@ -367,18 +387,6 @@ class TimeValidator {
       re = true;
     }
     return re;
-  }
-
-  static String getHora(TimeOfDay hora) {
-    return '${needZero(hora.hour)}:${needZero(hora.minute)}:00';
-  }
-
-  static String getTime(DateTime x) {
-    return '${needZero(x.hour)}:${needZero(x.minute)}';
-  }
-
-  static String getTimeOfDayS(TimeOfDay x) {
-    return '${needZero(x.hour)}:${needZero(x.minute)}';
   }
 
   static String getDateAbrevation(number) {
