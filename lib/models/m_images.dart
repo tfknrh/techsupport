@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:techsupport/utils/u_colorHex.dart';
-
 class Images {
   int imgId;
   String imgName;

@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:techsupport/utils/u_colorHex.dart';
-import 'package:techsupport/utils/u_time.dart';
+import 'package:techsupport/utils.dart';
 
 class Setting {
   int sysCountAkt;

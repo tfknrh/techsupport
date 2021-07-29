@@ -40,7 +40,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     Provider.of<SettingProvider>(context, listen: false).getListSettings();
   }
 
-  int _intTable;
   var valTable = <String>["Aktivitas", "Customer", "Images"];
   String strTable;
 
@@ -176,7 +175,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   addItemlist() {}
-  TimeOfDay _sch;
+
   NotificationManager notificationManager = NotificationManager();
   @override
   Widget build(BuildContext context) {

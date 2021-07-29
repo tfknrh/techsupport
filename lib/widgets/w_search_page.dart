@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:techsupport/utils/themes.dart';
-
 import 'package:techsupport/utils/u_color.dart';
 
 typedef SearchFilter<T> = List<String> Function(T t);

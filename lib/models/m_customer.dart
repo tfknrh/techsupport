@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class Customer {
   int customerId;
   String customerName;

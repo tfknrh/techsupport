@@ -10,8 +10,6 @@ class LogPage extends StatefulWidget {
 }
 
 class _LogPageState extends State<LogPage> {
-  String _logs = 'Nothing yet';
-
   @override
   void initState() {
     super.initState();
@@ -28,7 +26,7 @@ class _LogPageState extends State<LogPage> {
           backgroundColor: MColors.backgroundColor(context),
           elevation: 0,
           title: Text(
-            "Setting",
+            "Log",
             style: CText.primarycustomText(2.5, context, "CircularStdBold"),
           ),
           actions: [

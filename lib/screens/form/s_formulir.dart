@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:techsupport/controllers.dart';
@@ -15,23 +13,11 @@ class FormulirsScreen extends StatefulWidget {
 }
 
 class _FormulirsScreenState extends State<FormulirsScreen> {
-  Color _tempShadeColor = Colors.blueAccent[100];
-  Color _shadeColor = Colors.blue[800];
-
   Formulir formulir = Formulir();
-
-  bool ready = false;
-  String fileId;
 
   @override
   void initState() {
     super.initState();
-
-    _initData();
-    // addItemlist();
-  }
-
-  _initData() {
     WidgetsFlutterBinding.ensureInitialized();
     Provider.of<FormulirProvider>(context, listen: false).getListFormulirs();
   }
@@ -42,7 +28,7 @@ class _FormulirsScreenState extends State<FormulirsScreen> {
 
     final _size = MediaQuery.of(context).size;
 
-    return Consumer<FormulirProvider>(builder: (context, value, child) {
+    return Consumer<FormulirProvider>(builder: (context, value, _) {
       return Scaffold(
         backgroundColor: MColors.backgroundColor(context),
         appBar: AppBar(
@@ -112,13 +98,15 @@ class _FormulirItemState extends State<FormulirItem> {
                     CText.primarycustomText(1.7, context, 'CircularStdBook')),
           ),
           SizedBox(width: _size.width * .04),
-          CTextField(
-              label: widget.formulir.formName,
-              radius: 5,
-              controller: _controller,
-              validator: (e) => e.isEmpty ? 'Tidak boleh kosong' : null,
-              padding: EdgeInsets.symmetric(
-                  vertical: 5, horizontal: _size.width * .02)),
+          Expanded(
+            child: CTextField(
+                label: widget.formulir.formName,
+                radius: 5,
+                controller: _controller,
+                validator: (e) => e.isEmpty ? 'Tidak boleh kosong' : null,
+                padding: EdgeInsets.symmetric(
+                    vertical: 5, horizontal: _size.width * .02)),
+          )
         ]),
       ),
     );

@@ -1,6 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:techsupport/utils/u_colorHex.dart';
-
 class Formulir {
   int formId;
   int formType;

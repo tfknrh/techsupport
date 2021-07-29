@@ -43,9 +43,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
   Category e;
   Customer c;
   Images images;
-  ScrollController _controller = ScrollController();
-  List<DropdownMenuItem> _listCustomer = [];
-  int _valueCustomer;
+
   String dateSelected;
   @override
   void initState() {

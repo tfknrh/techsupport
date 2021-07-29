@@ -18,9 +18,7 @@ class AktivitassScreen extends StatefulWidget {
 
 class _AktivitassScreenState extends State<AktivitassScreen> {
   AutoScrollController scrollController = AutoScrollController();
-  List<Aktivitas> _listData = [];
 
-  TextEditingController _search = TextEditingController();
   @override
   void initState() {
     WidgetsFlutterBinding.ensureInitialized();

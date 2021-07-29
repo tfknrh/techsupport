@@ -132,7 +132,6 @@ class _HomeScreenState extends State<HomeScreen> {
     CustomersScreen(),
     SettingsScreen(),
   ];
-  var _androidAppRetain = MethodChannel("android_app_retain");
 
   @override
   Widget build(BuildContext context) {

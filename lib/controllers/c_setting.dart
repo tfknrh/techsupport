@@ -1,23 +1,12 @@
 import 'package:flutter/widgets.dart';
-import 'package:techsupport/api/a_db.dart';
-import 'package:techsupport/api/a_response.dart';
-import 'package:techsupport/models/m_setting.dart';
-import 'package:techsupport/models/m_images.dart';
-
-import 'package:techsupport/utils/u_notification.dart';
-import 'package:techsupport/utils/u_time.dart';
+import 'package:techsupport/api.dart';
+import 'package:techsupport/utils.dart';
+import 'package:techsupport/models.dart';
 import 'package:flutter/material.dart';
-
-import 'package:techsupport/utils/u_color.dart';
-import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
-
-import 'package:techsupport/widgets/w_timer.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:google_sign_in/google_sign_in.dart' as signIn;
-
 import 'dart:io' as io;
 import 'package:ext_storage/ext_storage.dart';
 import 'package:techsupport/utils/u_filesize.dart';
@@ -54,10 +43,6 @@ class SettingProvider with ChangeNotifier {
   }
 
   _initData() async {
-    // Timer.periodic(
-    //     Duration(seconds: 5),
-    //     (Timer t) =>
-    //         setting.first.sysBackupSch = TimeOfDay.now() ?? uploadtoGdrive());
     setting.clear();
     final x = await DataBaseMain.db.getListSettings();
     setting = x;
@@ -246,6 +231,7 @@ class SettingProvider with ChangeNotifier {
     notifBackup();
 
     _initData();
+    notifyListeners();
   }
 
   Future<void> uploadtoGdriveSch() async {
@@ -306,6 +292,7 @@ class SettingProvider with ChangeNotifier {
     notifBackup();
 
     _initData();
+    notifyListeners();
   }
 
   Future<Response> updateSetting(

@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
-import 'package:techsupport/api/a_db.dart';
-import 'package:techsupport/api/a_response.dart';
-import 'package:techsupport/models/m_formulir.dart';
+import 'package:techsupport/api.dart';
+import 'package:techsupport/models.dart';
 
 class FormulirProvider with ChangeNotifier {
   List<Formulir> formulir = [];
