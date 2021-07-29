@@ -6,7 +6,8 @@ import 'package:techsupport/controllers/c_category.dart';
 import 'package:techsupport/controllers/c_customer.dart';
 import 'package:techsupport/controllers/c_aktivitas.dart';
 import 'package:techsupport/controllers/c_setting.dart';
-import 'package:techsupport/s_home.dart';
+import 'package:techsupport/controllers/c_formulir.dart';
+import 'package:techsupport/screens/s_home.dart';
 import 'package:techsupport/utils/themes.dart';
 import 'package:theme_mode_handler/theme_mode_handler.dart';
 import 'package:theme_mode_handler/theme_mode_manager_interface.dart';
@@ -67,7 +68,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => AktivitasProvider()),
           ChangeNotifierProvider(create: (_) => CustomerProvider()),
           ChangeNotifierProvider(create: (_) => SettingProvider()),
-          // ChangeNotifierProvider(create: (_) => RutinaProvider()),
+          ChangeNotifierProvider(create: (_) => FormulirProvider()),
         ],
         child: ThemeModeHandler(
             manager: MyManager(),

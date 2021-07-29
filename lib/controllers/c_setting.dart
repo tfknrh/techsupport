@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:techsupport/api/a_db.dart';
 import 'package:techsupport/api/a_response.dart';
 import 'package:techsupport/models/m_setting.dart';
-import 'package:techsupport/models/m_customer.dart';
+import 'package:techsupport/models/m_images.dart';
 
 import 'package:techsupport/utils/u_notification.dart';
 import 'package:techsupport/utils/u_time.dart';
@@ -40,6 +40,7 @@ class GoogleAuthClient extends http.BaseClient {
 class SettingProvider with ChangeNotifier {
   NotificationManager notificationManager = NotificationManager();
   List<Setting> setting = [];
+  List<Images> images = [];
   List<ItemSetting> itemSetting = [];
   String languageCode;
 
@@ -48,14 +49,20 @@ class SettingProvider with ChangeNotifier {
 
 //  SharedPreferences sharedPreferences;
   void getListSettings() async {
-    final x = await DataBaseMain.db.getListSettings();
-    setting = x;
+    _initData();
     notifyListeners();
   }
 
-  Future<void> initData() async {
+  _initData() async {
+    // Timer.periodic(
+    //     Duration(seconds: 5),
+    //     (Timer t) =>
+    //         setting.first.sysBackupSch = TimeOfDay.now() ?? uploadtoGdrive());
     setting.clear();
-    setting = await DataBaseMain.db.getListSettings();
+    final x = await DataBaseMain.db.getListSettings();
+    setting = x;
+    images.clear();
+    images = await DataBaseMain.getListImages();
     itemSetting.clear();
     itemSetting = [
       ItemSetting(
@@ -102,11 +109,6 @@ class SettingProvider with ChangeNotifier {
         tipe: 1,
       ),
     ];
-    // Timer.periodic(
-    //     Duration(seconds: 5),
-    //     (Timer t) =>
-    //         setting.first.sysBackupSch = TimeOfDay.now() ?? uploadtoGdrive());
-
     notifyListeners();
   }
 
@@ -194,6 +196,7 @@ class SettingProvider with ChangeNotifier {
   }
 
   Future<void> uploadtoGdrive() async {
+    _initData();
     // deletefromGdrive();
     final googleSignIn =
         signIn.GoogleSignIn.standard(scopes: [drive.DriveApi.driveScope]);
@@ -209,25 +212,44 @@ class SettingProvider with ChangeNotifier {
     var driveFile = new drive.File();
     driveFile.name = filename;
     final localFile = io.File("$dir/techsupport/techsupport.db");
-
+    try {
+      await driveApi.files.delete(setting.first.sysDBId);
+    } on Exception catch (e) {
+      print(e.toString());
+    }
     final result = await driveApi.files.create(driveFile,
         uploadMedia: drive.Media(localFile.openRead(), localFile.lengthSync()));
     updateSetting(
-        localFile.lengthSync().toString(),
-        account.email,
-        result.id,
-        DateTime.now(),
-        // DateFormat("dd-MM-yyyy HH:mm:ss").format(DateTime.now()).toString(),
-        result.modifiedTime);
+      localFile.lengthSync().toString(),
+      account.email,
+      result.id,
+      DateTime.now(),
+    );
 
-    initData();
-    if (localFile.lengthSync() > int.parse(setting.first.sysBackupSize)) {
-      await driveApi.files.delete(setting.first.sysDBId);
+    for (int i = 0; 0 < images.length; i++) {
+      if (images[i].isSync == 1) {
+        var driveImg = new drive.File();
+        driveImg.name = io.File(images[i].imgImage).path.split('/').last;
+        try {
+          await driveApi.files.delete(images[i].imgStr);
+        } on Exception catch (e) {
+          print(e.toString());
+        }
+        var img = await driveApi.files.create(driveImg,
+            uploadMedia: drive.Media(io.File(images[i].imgImage).openRead(),
+                io.File(images[i].imgImage).lengthSync()));
+        await DataBaseMain.db
+            .updateImagescol("imgStr", img.id, images[i].imgId);
+        await DataBaseMain.db.updateImagescol("isSync", "2", images[i].imgId);
+      }
     }
     notifBackup();
+
+    _initData();
   }
 
   Future<void> uploadtoGdriveSch() async {
+    _initData();
     // deletefromGdrive();
     final googleSignIn =
         signIn.GoogleSignIn.standard(scopes: [drive.DriveApi.driveScope]);
@@ -244,27 +266,46 @@ class SettingProvider with ChangeNotifier {
     driveFile.name = filename;
     final localFile = io.File("$dir/techsupport/techsupport.db");
 
+    try {
+      await driveApi.files.delete(setting.first.sysDBId);
+    } on Exception catch (e) {
+      print(e.toString());
+    }
     final result = await driveApi.files.create(driveFile,
         uploadMedia: drive.Media(localFile.openRead(), localFile.lengthSync()));
     updateSettingSch(
-        localFile.lengthSync().toString(),
-        DateTime(
-            DateTime.now().year,
-            DateTime.now().month,
-            DateTime.now().day + 1,
-            setting.first.sysBackupSch.hour,
-            setting.first.sysBackupSch.minute),
-        account.email,
-        result.id,
-        DateTime.now(),
-        // DateFormat("dd-MM-yyyy HH:mm:ss").format(DateTime.now()).toString(),
-        result.modifiedTime);
+      localFile.lengthSync().toString(),
+      DateTime(
+          DateTime.now().year,
+          DateTime.now().month,
+          DateTime.now().day + 1,
+          setting.first.sysBackupSch.hour,
+          setting.first.sysBackupSch.minute),
+      account.email,
+      result.id,
+      DateTime.now(),
+    );
 
-    initData();
-    if (localFile.lengthSync() > int.parse(setting.first.sysBackupSize)) {
-      await driveApi.files.delete(setting.first.sysDBId);
+    for (int i = 0; 0 < images.length; i++) {
+      if (images[i].isSync == 0) {
+        var driveImg = new drive.File();
+        driveImg.name = io.File(images[i].imgImage).path.split('/').last;
+        try {
+          await driveApi.files.delete(images[i].imgStr);
+        } on Exception catch (e) {
+          print(e.toString());
+        }
+        final img = await driveApi.files.create(driveImg,
+            uploadMedia: drive.Media(io.File(images[i].imgImage).openRead(),
+                io.File(images[i].imgImage).lengthSync()));
+        await DataBaseMain.db
+            .updateImagescol("imgStr", img.id, images[i].imgId);
+        await DataBaseMain.db.updateImagescol("isSync", "1", images[i].imgId);
+      }
     }
     notifBackup();
+
+    _initData();
   }
 
   Future<Response> updateSetting(
@@ -272,8 +313,7 @@ class SettingProvider with ChangeNotifier {
       //  DateTime sysBackupSch,
       String sysGmail,
       String sysDBId,
-      DateTime sysCreated,
-      DateTime sysModified) async {
+      DateTime sysCreated) async {
     Response r = Response();
 
     await DataBaseMain.db.updateSettingcol("sysBackupSize", sysBackupSize);
@@ -281,20 +321,13 @@ class SettingProvider with ChangeNotifier {
     await DataBaseMain.db.updateSettingcol("sysDBId", sysDBId);
     await DataBaseMain.db
         .updateSettingcol("sysCreated", TimeValidator.getDatenTime(sysCreated));
-    await DataBaseMain.db.updateSettingcol(
-        "sysModified", TimeValidator.getDatenTime(sysModified));
 
     notifyListeners();
     return r;
   }
 
-  Future<Response> updateSettingSch(
-      String sysBackupSize,
-      DateTime sysBackupSch,
-      String sysGmail,
-      String sysDBId,
-      DateTime sysCreated,
-      DateTime sysModified) async {
+  Future<Response> updateSettingSch(String sysBackupSize, DateTime sysBackupSch,
+      String sysGmail, String sysDBId, DateTime sysCreated) async {
     Response r = Response();
 
     await DataBaseMain.db.updateSettingcol("sysBackupSize", sysBackupSize);
@@ -302,10 +335,6 @@ class SettingProvider with ChangeNotifier {
     await DataBaseMain.db.updateSettingcol("sysDBId", sysDBId);
     await DataBaseMain.db
         .updateSettingcol("sysCreated", TimeValidator.getDatenTime(sysCreated));
-    await DataBaseMain.db.updateSettingcol(
-        "sysModified", TimeValidator.getDatenTime(sysModified));
-    await DataBaseMain.db.updateSettingcol(
-        "sysBackupSch", TimeValidator.getDatenTime(sysBackupSch));
 
     notifyListeners();
     return r;

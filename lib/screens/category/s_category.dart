@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
-import 'package:techsupport/controllers/c_category.dart';
-import 'package:techsupport/screens/category/s_addCategory.dart';
-import 'package:techsupport/utils/u_color.dart';
-import 'package:techsupport/widgets/w_text.dart';
+import 'package:techsupport/controllers.dart';
+import 'package:techsupport/widgets.dart';
+import 'package:techsupport/utils.dart';
+import 'package:techsupport/screens.dart';
 
 class CategorysScreen extends StatefulWidget {
   CategorysScreen({Key key}) : super(key: key);

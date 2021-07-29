@@ -1,22 +1,37 @@
-class ImagesAttrb {
-  final Map<String, dynamic> _data;
+import 'package:flutter/material.dart';
+import 'package:techsupport/utils/u_colorHex.dart';
 
-  ImagesAttrb(this._data);
+class Images {
+  int imgId;
+  String imgName;
+  String imgImage;
+  int aktivitasId;
+  String imgStr;
+  int isSync;
+  //String aktivitasName;
 
-  dynamic get imgId => _data["imgId"];
-  String get imgImage => _data["imgImage"];
-  String get imgName => _data["imgName"];
-  dynamic get aktivitasId => _data["aktivitasId"];
+  Images();
 
-  Map<String, dynamic> toMap() {
-    return {
-      "imgImage": imgImage,
-      "imgName": imgName,
-      "aktivitasId": aktivitasId
-    };
+  factory Images.fromJson(Map<String, dynamic> json) {
+    Images e = new Images();
+    e.imgId = json["imgId"];
+    e.imgName = json["imgName"];
+    e.imgImage = json["imgImage"];
+    e.aktivitasId = json["aktivitasId"];
+    e.imgStr = json["imgStr"];
+    e.isSync = json["isSync"];
+    return e;
   }
 
-  String toString() {
-    return toMap().toString();
+  Map<String, dynamic> toBD() {
+    var map = <String, dynamic>{
+      'imgId': this.imgId,
+      'imgName': this.imgName,
+      'imgImage': this.imgImage,
+      'aktivitasId': this.aktivitasId,
+      'imgStr': this.imgStr,
+      'isSync': this.isSync,
+    };
+    return map;
   }
 }

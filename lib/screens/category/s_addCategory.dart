@@ -1,14 +1,11 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:techsupport/controllers/c_category.dart';
-import 'package:techsupport/models/m_category.dart';
-import 'package:techsupport/utils/u_color.dart';
-import 'package:techsupport/widgets/w_snackBar.dart';
-import 'package:techsupport/widgets/w_text.dart';
-import 'package:techsupport/widgets/w_textField.dart';
+import 'package:techsupport/controllers.dart';
+import 'package:techsupport/widgets.dart';
+import 'package:techsupport/utils.dart';
+import 'package:techsupport/models.dart';
 
 class AddCategoryScreen extends StatefulWidget {
   final bool isEdit;

@@ -1,32 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
-import 'package:techsupport/controllers/c_aktivitas.dart';
-import 'package:techsupport/models/m_aktivitas.dart';
-import 'package:techsupport/screens/aktivitas/s_addAktivitas.dart';
-import 'package:techsupport/utils/u_color.dart';
-import 'package:techsupport/widgets/w_search_page.dart';
-
-import 'package:techsupport/widgets/w_text.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:animate_do/animate_do.dart';
-
-import 'package:techsupport/utils/u_time.dart';
-
-import 'package:techsupport/logcat.dart';
-
-import 'package:techsupport/screens/category/s_category.dart';
-
-import 'package:theme_mode_handler/theme_mode_handler.dart';
-import 'package:techsupport/maproute.dart';
-import 'package:techsupport/main.dart' as main;
-import 'dart:async';
 import 'package:intl/intl.dart';
-
-import 'package:techsupport/utils/themes.dart';
-import 'package:techsupport/api/a_db.dart';
-
-import 'package:techsupport/widgets/w_textField.dart';
+import 'package:techsupport/controllers.dart';
+import 'package:techsupport/widgets.dart';
+import 'package:techsupport/utils.dart';
+import 'package:techsupport/screens.dart';
+import 'package:techsupport/models.dart';
 
 class AktivitassScreen extends StatefulWidget {
   AktivitassScreen({Key key}) : super(key: key);
@@ -126,7 +107,9 @@ class _AktivitassScreenState extends State<AktivitassScreen> {
                               child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                Text('Tidak ditemukan aktivitas :('),
+                                Text('Tidak ditemukan aktivitas :(',
+                                    style: CText.primarycustomText(
+                                        1.8, context, 'CircularStdMedium')),
                                 SizedBox(height: 20),
                                 Image.asset(
                                   'assets/images/not_found.png',
@@ -151,12 +134,16 @@ class _AktivitassScreenState extends State<AktivitassScreen> {
                     value: 1,
                   ),
                   PopupMenuItem(
-                    child: Text("Log"),
+                    child: Text("Images"),
                     value: 2,
                   ),
                   PopupMenuItem(
-                    child: Text("Map"),
+                    child: Text("Log"),
                     value: 3,
+                  ),
+                  PopupMenuItem(
+                    child: Text("Formulir"),
+                    value: 4,
                   )
                 ];
               },
@@ -168,10 +155,15 @@ class _AktivitassScreenState extends State<AktivitassScreen> {
                           builder: (context) => CategorysScreen()));
                 } else if (value == 2) {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => LogPage()));
+                      MaterialPageRoute(builder: (context) => ImageList()));
                 } else if (value == 3) {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => MapPage()));
+                      MaterialPageRoute(builder: (context) => LogPage()));
+                } else if (value == 4) {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => FormulirsScreen()));
                 }
               },
             )

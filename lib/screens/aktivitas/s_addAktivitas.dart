@@ -1,40 +1,19 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:techsupport/controllers/c_category.dart';
-import 'package:techsupport/controllers/c_aktivitas.dart';
-import 'package:techsupport/controllers/c_customer.dart';
-//import 'package:techsupport/controllers/c_aktivitas.dart';
-import 'package:techsupport/models/m_aktivitas.dart';
-import 'package:techsupport/models/m_category.dart';
-import 'package:techsupport/models/m_customer.dart';
-
-import 'package:techsupport/models/m_images.dart';
-import 'package:techsupport/utils/u_color.dart';
-import 'package:techsupport/utils/u_time.dart';
-import 'package:techsupport/widgets/w_customSwitch.dart';
-import 'package:techsupport/widgets/w_customTimePicker.dart';
-import 'package:techsupport/widgets/w_snackBar.dart';
-import 'package:techsupport/widgets/w_text.dart';
-import 'package:techsupport/widgets/w_textField.dart';
-
-import 'package:techsupport/screens/s_imagedetail.dart';
-
-import 'package:techsupport/widgets/w_calendar.dart';
-import 'package:intl/intl.dart';
-import 'package:techsupport/api/a_db.dart';
-import 'package:techsupport/SQL.dart';
-
 import 'dart:async';
 import 'dart:io';
-
-import 'package:techsupport/widgets/images_picker/picker.dart';
-
-import 'package:flutter_absolute_path/flutter_absolute_path.dart';
-
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:techsupport/api.dart';
+import 'package:techsupport/controllers.dart';
+import 'package:techsupport/widgets.dart';
+import 'package:techsupport/utils.dart';
+import 'package:techsupport/screens.dart';
+import 'package:techsupport/models.dart';
+import 'package:intl/intl.dart';
+import 'package:images_picker/images_picker.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:path/path.dart' as path;
 import 'package:ext_storage/ext_storage.dart';
-
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 // ignore: must_be_immutable
@@ -54,6 +33,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
   TextEditingController _timeFinish = TextEditingController();
   TextEditingController _aktivitasName = TextEditingController();
   TextEditingController _description = TextEditingController();
+  TextEditingController _customerName = TextEditingController();
 
   TextEditingController _dateTime = TextEditingController();
   Aktivitas aktivitas = Aktivitas();
@@ -62,7 +42,8 @@ class _AddAktivitasState extends State<AddAktivitas> {
   bool _isStatus = false;
   Category e;
   Customer c;
-
+  Images images;
+  ScrollController _controller = ScrollController();
   List<DropdownMenuItem> _listCustomer = [];
   int _valueCustomer;
   String dateSelected;
@@ -106,6 +87,8 @@ class _AddAktivitasState extends State<AddAktivitas> {
       c = Customer();
       c.customerId = widget.aktivitas.customerId;
       c.customerName = widget.aktivitas.customerName;
+      images = Images();
+      images.aktivitasId = widget.aktivitas.aktivitasId;
 
       _timeStart.text = TimeValidator.getTimeOfDayS(aktivitas.timeStart);
       // "${TimeValidator.needZero(aktivitas.timeStart.hour)}:${TimeValidator.needZero(aktivitas.timeStart.minute)}";
@@ -118,6 +101,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
 
       dateSelected = DateFormat("yyyy-MM-dd").format(aktivitas.dateTime);
       _aktivitasName.text = aktivitas.aktivitasName;
+      _customerName.text = c.customerName;
 
       _ijinNotif = aktivitas.notifikasi == 1 ? true : false;
       _tipeAktivitas = aktivitas.aktivitasType == 1 ? true : false;
@@ -159,6 +143,10 @@ class _AddAktivitasState extends State<AddAktivitas> {
       });
     });
     getImageList();
+
+    // if (_sharedFiles.length > 0) {
+    //   loadShared();
+    // }
     super.initState();
     WidgetsFlutterBinding.ensureInitialized();
     // _ijinNotif = Provider.of<AktivitasProvider>(context, listen: false)
@@ -223,7 +211,9 @@ class _AddAktivitasState extends State<AddAktivitas> {
                             _timeStart.text + ":00",
                             _timeFinish.text + ":00",
                             dateSelected,
-                            _ijinNotif == true ? 1 : 0,
+                            _ijinNotif == true && _tipeAktivitas == false
+                                ? 1
+                                : 0,
                             _tipeAktivitas == true ? 1 : 0,
                             1,
                             e.categoryId == null ? 1 : e.categoryId,
@@ -236,7 +226,9 @@ class _AddAktivitasState extends State<AddAktivitas> {
                             _timeStart.text + ":00",
                             _timeFinish.text + ":00",
                             dateSelected,
-                            _ijinNotif == true ? 1 : 0,
+                            _ijinNotif == true && _tipeAktivitas == false
+                                ? 1
+                                : 0,
                             _tipeAktivitas == true ? 1 : 0,
                             1,
                             e.categoryId == null ? 1 : e.categoryId,
@@ -273,39 +265,70 @@ class _AddAktivitasState extends State<AddAktivitas> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                            color: MColors.secondaryBackgroundColor(context)),
-                        child: Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: _size.width * .04),
-                            child: DropdownButtonHideUnderline(
-                                child: DropdownButton<int>(
-                              value: c.customerId,
-                              isExpanded: true,
-                              hint: Text("Pilih Nama Customer"),
-                              items: Provider.of<CustomerProvider>(context,
-                                      listen: false)
-                                  .customer
-                                  .map<DropdownMenuItem<int>>((value) {
-                                return DropdownMenuItem<int>(
-                                    value: value.customerId,
-                                    child: Text(value.customerName));
-                              }).toList(),
-                              onChanged: (val) {
-                                c.customerId = val;
+                      // SizedBox(
+                      //   height: 20,
+                      // ),
+                      // Container(
+                      //   decoration: BoxDecoration(
+                      //       borderRadius: BorderRadius.circular(5),
+                      //       color: MColors.secondaryBackgroundColor(context)),
+                      //   child: Padding(
+                      //       padding: EdgeInsets.symmetric(
+                      //           horizontal: _size.width * .04),
+                      //       child: DropdownButtonHideUnderline(
+                      //           child: DropdownButton<int>(
+                      //         value: c.customerId,
+                      //         isExpanded: true,
+                      //         hint: Text("Pilih Nama Customer"),
+                      //         items: Provider.of<CustomerProvider>(context,
+                      //                 listen: false)
+                      //             .customer
+                      //             .map<DropdownMenuItem<int>>((value) {
+                      //           return DropdownMenuItem<int>(
+                      //               value: value.customerId,
+                      //               child: Text(value.customerName));
+                      //         }).toList(),
+                      //         onChanged: (val) {
+                      //           c.customerId = val;
 
-                                setState(() {});
-                              },
-                            ))),
-                      ),
+                      //           setState(() {});
+                      //         },
+                      //       ))),
+                      // ),
                       SizedBox(
                         height: 20,
                       ),
+
+                      Row(children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () async {
+                              _showModalCustomer(context);
+                            },
+                            child: Container(
+                              color: Colors.transparent,
+                              child: IgnorePointer(
+                                ignoring: true,
+                                child: CTextField(
+                                    prefixicon: Icons.people,
+                                    label: "Customer",
+                                    labelText: "Pilih Customer",
+                                    radius: 5,
+                                    controller: _customerName,
+                                    validator: (e) =>
+                                        e.isEmpty ? 'Tidak boleh kosong' : null,
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 5,
+                                        horizontal: _size.width * .02)),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ]),
+                      SizedBox(
+                        height: 20,
+                      ),
+
                       Row(children: [
                         Expanded(
                           child: GestureDetector(
@@ -468,6 +491,8 @@ class _AddAktivitasState extends State<AddAktivitas> {
                           labelText: "Nama Aktivitas",
                           controller: _aktivitasName,
                           radius: 5,
+                          validator: (e) =>
+                              e.isEmpty ? 'Tidak boleh kosong' : null,
                           padding: EdgeInsets.symmetric(
                               vertical: 5, horizontal: _size.width * .02)),
                       SizedBox(
@@ -492,15 +517,52 @@ class _AddAktivitasState extends State<AddAktivitas> {
                             ),
                             IconButton(
                                 onPressed: () {
-                                  loadAssets();
+                                  // loadAssets();
 
-                                  loadShared();
+                                  // loadShared();
+
+                                  showModalBottomSheet(
+                                      context: context,
+                                      builder: (context) {
+                                        return Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: <Widget>[
+                                            ListTile(
+                                              leading: new Icon(Icons.photo),
+                                              title: new Text('Galeri'),
+                                              onTap: () {
+                                                pickFromGallery();
+                                                Navigator.pop(context);
+                                              },
+                                            ),
+                                            ListTile(
+                                              leading:
+                                                  new Icon(Icons.music_note),
+                                              title: new Text('Camera'),
+                                              onTap: () {
+                                                pickFromCamera();
+                                                Navigator.pop(context);
+                                              },
+                                            ),
+                                            ListTile(
+                                              leading: new Icon(Icons.photo),
+                                              title: new Text('Shared'),
+                                              onTap: () {
+                                                loadShared();
+                                                Navigator.pop(context);
+                                              },
+                                            ),
+                                          ],
+                                        );
+                                      });
                                 },
                                 icon: Icon(Icons.add_a_photo))
                           ])),
                       getGridView(),
                       pickGridView(),
-                      shareGridView(),
+                      //   listViewPath(),
+
+                      //  shareGridView(),
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 10.0),
                         child: Row(
@@ -646,25 +708,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
                         height: 10,
                       ),
                       e != null
-                          ?
-
-                          // Container(
-                          //     decoration: BoxDecoration(
-                          //         color:
-                          //             MColors.secondaryBackgroundColor(context),
-                          //         borderRadius: BorderRadius.circular(50)),
-                          //     child: Padding(
-                          //       padding: EdgeInsets.symmetric(
-                          //           horizontal: _size.width * .05,
-                          //           vertical: 10),
-                          //       child: Text(
-                          //         'Pilih Kategori',
-                          //         style: CText.menucustomText(
-                          //             1.9, context, "CircularStdBook"),
-                          //       ),
-                          //     ),
-                          //   )
-                          Row(
+                          ? Row(
                               children: [
                                 Container(
                                   decoration: BoxDecoration(
@@ -694,13 +738,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
                                   ),
                               ],
                             )
-                          :
-                          // if (e == null)
-                          // SizedBox(
-                          //     width: 10,
-                          //   ),
-                          // if (e == null)
-                          SizedBox(
+                          : SizedBox(
                               height: 45,
                               child: ListView.builder(
                                 // shrinkWrap: true,
@@ -768,6 +806,159 @@ class _AddAktivitasState extends State<AddAktivitas> {
     });
   }
 
+  List<Customer> _tempList;
+  //1
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final TextEditingController textController = new TextEditingController();
+
+  //2
+  static List<Customer> _list = [];
+  void _showModalCustomer(context) {
+    _list = Provider.of<CustomerProvider>(context, listen: false).customer;
+    showModalBottomSheet(
+        isScrollControlled: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+        ),
+        context: context,
+        builder: (context) {
+          //3
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return DraggableScrollableSheet(
+                maxChildSize: 0.9,
+                expand: false,
+                builder:
+                    (BuildContext context, ScrollController scrollController) {
+                  return Column(children: <Widget>[
+                    Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Row(children: <Widget>[
+                          Expanded(
+                              child: TextField(
+                                  controller: textController,
+                                  decoration: InputDecoration(
+                                    hintText: "Cari Customer",
+                                    contentPadding: EdgeInsets.symmetric(
+                                        vertical: 10, horizontal: 20),
+                                    border: InputBorder.none,
+                                    filled: true,
+                                    hintStyle: TextStyle(
+                                        color: MColors.textColor(context)),
+                                    fillColor: Colors.grey[200],
+                                    focusedErrorBorder: InputBorder.none,
+                                    disabledBorder: InputBorder.none,
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(20.0)),
+                                      borderSide: BorderSide(
+                                          color: Color(0xffF9F9F9), width: 3),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(20.0)),
+                                      borderSide: BorderSide(
+                                          color: Color(0xffF9F9F9), width: 3),
+                                    ),
+                                    errorBorder: InputBorder.none,
+                                  ),
+                                  onChanged: (value) {
+                                    //4
+                                    setState(() {
+                                      _tempList = _buildSearchList(value);
+                                    });
+                                  })),
+                          IconButton(
+                              icon: Icon(Icons.close),
+                              color: Color(0xFF1F91E7),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                setState(() {
+                                  textController.clear();
+                                  _tempList.clear();
+                                });
+                              }),
+                        ])),
+                    Expanded(
+                      child: ListView.separated(
+                          controller: scrollController,
+                          //5
+                          itemCount: (_tempList != null && _tempList.length > 0)
+                              ? _tempList.length
+                              : _list.length,
+                          separatorBuilder: (context, int) {
+                            return Divider();
+                          },
+                          itemBuilder: (context, index) {
+                            return Padding(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 10, horizontal: 20),
+                                child: GestureDetector(
+
+                                    //6
+                                    child: (_tempList != null &&
+                                            _tempList.length > 0)
+                                        ? _showBottomSheetWithSearch(
+                                            index, _tempList)
+                                        : _showBottomSheetWithSearch(
+                                            index, _list),
+                                    onTap: () {
+                                      //7
+                                      c.customerName =
+                                          _tempList[index].customerName;
+                                      c.customerId =
+                                          _tempList[index].customerId;
+                                      _customerName.text = c.customerName;
+                                      setState(() {});
+                                      _scaffoldKey.currentState.showSnackBar(
+                                          SnackBar(
+                                              behavior:
+                                                  SnackBarBehavior.floating,
+                                              content: Text(
+                                                  (_tempList != null &&
+                                                          _tempList.length > 0)
+                                                      ? _tempList[index]
+                                                          .customerName
+                                                      : _list[index]
+                                                          .customerName)));
+                                      Navigator.of(context).pop();
+                                    }));
+                          }),
+                    )
+                  ]);
+                });
+          });
+        });
+  }
+
+  //8
+  Widget _showBottomSheetWithSearch(int index, List<Customer> listCust) {
+    return GestureDetector(
+        onTap: () {
+          c.customerName = listCust[index].customerName;
+          c.customerId = listCust[index].customerId;
+          _customerName.text = c.customerName;
+          setState(() {});
+          Navigator.of(context).pop();
+        },
+        child: Text(listCust[index].customerName,
+            style: CText.primarycustomText(1.7, context, 'CircularStdBook'),
+            textAlign: TextAlign.left));
+  }
+
+  //9
+  List<Customer> _buildSearchList(String userSearchTerm) {
+    List<Customer> _searchList = [];
+
+    for (int i = 0; i < _list.length; i++) {
+      String name = _list[i].customerName;
+      if (name.toLowerCase().contains(userSearchTerm.toLowerCase())) {
+        _searchList.add(_list[i]);
+      }
+    }
+    return _searchList;
+  }
+
   Future<File> moveFile(File sourceFile, String newPath) async {
     try {
       // prefer using rename as it is probably faster
@@ -781,56 +972,9 @@ class _AddAktivitasState extends State<AddAktivitas> {
     }
   }
 
-  List<ImagesAttrb> imageList = [];
+  List<Images> imageList = [];
   List<File> fileImageArray = [];
-  List<String> f = [];
-  List<Asset> resultList = [];
-  List<Asset> images = [];
-  String error = 'No Error Detected';
-  Future<void> loadAssets() async {
-    try {
-      resultList = await MultiImagePicker.pickImages(
-        maxImages: 10,
-        enableCamera: true,
-        selectedAssets: images,
-        cupertinoOptions: CupertinoOptions(takePhotoIcon: "chat"),
-        materialOptions: MaterialOptions(
-          actionBarColor: "#ff4169e1",
-          actionBarTitle: "Pilih Foto",
-          allViewTitle: "Semua Foto",
-          useDetailsView: true,
-          selectCircleStrokeColor: "#ff1e90ff",
-        ),
-      );
-    } on Exception catch (e) {
-      error = e.toString();
-    }
-    var dir = await ExtStorage.getExternalStorageDirectory();
-    if (!Directory("$dir/techsupport/images").existsSync()) {
-      Directory("$dir/techsupport/images").createSync(recursive: true);
-    }
-    if (!mounted) return;
-    f.clear();
-    for (int i = 0; i < resultList.length; i++) {
-      var path2 =
-          await FlutterAbsolutePath.getAbsolutePath(resultList[i].identifier);
-      var _ext = path.extension(path2);
-      var file = await moveFile(
-          File(path2),
-          "$dir/techsupport/images/IMG_" +
-              aktivitas.aktivitasId.toString() +
-              DateFormat("yyyyMMddHHmmss").format(DateTime.now()).toString() +
-              DateTime.now().millisecond.toString() +
-              _ext);
-
-      print(file.path);
-      f.add(file.path);
-    }
-    setState(() {
-      images = resultList;
-    });
-    // return fileImageArray;
-  }
+  List<String> _listPath = [];
 
   StreamSubscription _intentDataStreamSubscription;
   List<SharedMediaFile> _sharedFiles;
@@ -838,40 +982,36 @@ class _AddAktivitasState extends State<AddAktivitas> {
   String _sharedText;
   List<SharedMediaFile> _shared;
 
-  Future<void> loadShared() async {
+  loadShared() async {
     var dir = await ExtStorage.getExternalStorageDirectory();
     if (!Directory("$dir/techsupport/images").existsSync()) {
       Directory("$dir/techsupport/images").createSync(recursive: true);
     }
     if (!mounted) return;
-    showAboutDialog(context: context);
-    for (int i = 0; i < _sharedFiles.length; i++) {
-      var _ext = path.extension(_sharedFiles[i].path);
-      // var file = await File(_sharedFiles[i].path).rename(
-      //     "$dir/techsupport/images/IMG_" +
-      //         aktivitas.aktivitasId.toString() +
-      //         DateFormat("yyyyMMddHHmmss").format(DateTime.now()).toString() +
-      //         DateTime.now().millisecond.toString() +
-      //         _ext);
-      var file = await moveFile(
-          File(_sharedFiles[i].path),
-          "$dir/techsupport/images/IMG_" +
-              aktivitas.aktivitasId.toString() +
-              DateFormat("yyyyMMddHHmmss").format(DateTime.now()).toString() +
-              DateTime.now().millisecond.toString() +
-              _ext);
-
-      print(file.path);
-      f.add(file.path);
+    // showAboutDialog(context: context);
+    int _maxImgId = await DataBaseMain.db.maxImgId();
+    int id = widget.isEdit == true ? aktivitas.aktivitasId : _maxImgId;
+    if (_sharedFiles.length > 0) {
+      for (int i = 0; i < _sharedFiles.length; i++) {
+        var _ext = path.extension(_sharedFiles[i].path);
+        var file = await moveFile(
+            File(_sharedFiles[i].path),
+            "$dir/techsupport/images/IMG_" +
+                id.toString() +
+                "_" +
+                DateFormat("yyyyMMddHHmmss").format(DateTime.now()).toString() +
+                DateTime.now().millisecond.toString() +
+                _ext);
+        setState(() {
+          print(file.path);
+          _listPath.add(file.path);
+        });
+      }
     }
-    // setState(() {
-    //   _shared = _sharedFiles;
-    // });
-    // return fileImageArray;
   }
 
-  Widget listPath() {
-    return f.length == 0
+  Widget listViewPath() {
+    return _listPath.length == 0
         ? Container()
         : ListView.builder(
             //controller: scrollController,
@@ -880,10 +1020,91 @@ class _AddAktivitasState extends State<AddAktivitas> {
             addRepaintBoundaries: false,
             scrollDirection: Axis.vertical,
             physics: BouncingScrollPhysics(),
-            itemCount: f.length,
+            itemCount: _listPath.length,
             itemBuilder: (BuildContext listContext, int index) {
-              return ListTile(title: Text(f[index]));
+              return ListTile(title: Text(_listPath[index]));
             });
+  }
+
+  List<Media> _listTempPick = [];
+  pickFromGallery() async {
+    List<Media> _listGallery = await ImagesPicker.pick(
+      count: 5,
+      pickType: PickType.all,
+      language: Language.English,
+      // maxSize: 500,
+      // cropOpt: CropOption(
+      //  aspectRatio: CropAspectRatio.custom,
+      //  ),
+    );
+    if (_listGallery != null) {
+      //print(_listGallery.map((e) => e.path).toList());
+      var dir = await ExtStorage.getExternalStorageDirectory();
+      if (!Directory("$dir/techsupport/images").existsSync()) {
+        Directory("$dir/techsupport/images").createSync(recursive: true);
+      }
+      if (!mounted) return;
+      // showAboutDialog(context: context);
+      int _maxImgId = await DataBaseMain.db.maxImgId();
+      int id = widget.isEdit == true ? aktivitas.aktivitasId : _maxImgId;
+      _listTempPick.addAll(_listGallery);
+      for (int i = 0; i < _listGallery.length; i++) {
+        var _ext = path.extension(_listGallery[i].path);
+        var file = await moveFile(
+            File(_listGallery[i].path),
+            "$dir/techsupport/images/IMG_" +
+                id.toString() +
+                "_" +
+                DateFormat("yyyyMMddHHmmss").format(DateTime.now()).toString() +
+                DateTime.now().millisecond.toString() +
+                _ext);
+
+        setState(() {
+          print(file.path);
+          _listPath.add(file.path);
+        });
+      }
+    }
+  }
+
+  pickFromCamera() async {
+    List<Media> _listCamera = await ImagesPicker.openCamera(
+        //  cropOpt: CropAspectRatio.custom,
+        pickType: PickType.image,
+        quality: 0.5,
+        language: Language.English
+        // cropOpt: CropOption(
+        //   aspectRatio: CropAspectRatio.wh16x9,
+        // ),
+        // maxTime: 60,
+        );
+    if (_listCamera != null) {
+      var dir = await ExtStorage.getExternalStorageDirectory();
+      if (!Directory("$dir/techsupport/images").existsSync()) {
+        Directory("$dir/techsupport/images").createSync(recursive: true);
+      }
+      if (!mounted) return;
+      _listTempPick.addAll(_listCamera);
+      // showAboutDialog(context: context);
+      int _maxImgId = await DataBaseMain.db.maxImgId();
+      int id = widget.isEdit == true ? aktivitas.aktivitasId : _maxImgId;
+      for (int i = 0; i < _listCamera.length; i++) {
+        var _ext = path.extension(_listCamera[i].path);
+        var file = await moveFile(
+            File(_listCamera[i].path),
+            "$dir/techsupport/images/IMG_" +
+                id.toString() +
+                "_" +
+                DateFormat("yyyyMMddHHmmss").format(DateTime.now()).toString() +
+                DateTime.now().millisecond.toString() +
+                _ext);
+
+        setState(() {
+          print(file.path);
+          _listPath.add(file.path);
+        });
+      }
+    }
   }
 
 //image PreView
@@ -912,7 +1133,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
   }
 
   Widget pickGridView() {
-    return images.length == 0
+    return _listPath.length == 0
         ? Container()
         : GridView.count(
             crossAxisCount: 6,
@@ -920,27 +1141,19 @@ class _AddAktivitasState extends State<AddAktivitas> {
             mainAxisSpacing: 1,
             shrinkWrap: true,
             physics: ScrollPhysics(),
-            children:
-
-                //  widget.aktrd == null?
-                List.generate(images.length, (index) {
-              Asset asset = images[index];
+            children: List.generate(_listPath.length, (index) {
+              // Asset asset = images[index];
               return Card(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(2)),
                   child: ClipRRect(
-                      borderRadius: BorderRadius.circular(2),
-                      child: AssetThumb(
-                        asset: asset,
-                        width: 700,
-                        height: 700,
-                      )));
-            })
-
-            // : imageList.map((photo) {
-            //     return Utility.imageFromBase64String(photo.imgImage);
-            //   }).toList(),
-            );
+                    borderRadius: BorderRadius.circular(2),
+                    child: ExtendedImage.file(
+                      File(_listPath[index]),
+                      fit: BoxFit.fitHeight,
+                    ),
+                  ));
+            }));
   }
 
   int count = 0;
@@ -950,7 +1163,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
         : GridView.builder(
             shrinkWrap: true,
             physics: ScrollPhysics(),
-            itemCount: count,
+            itemCount: imageList.length,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3, crossAxisSpacing: 1, mainAxisSpacing: 1),
             itemBuilder: (context, index) {
@@ -969,28 +1182,18 @@ class _AddAktivitasState extends State<AddAktivitas> {
                       borderRadius: BorderRadius.circular(5)),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(5),
-                    child:
-                        // ExtendedImage.memory(
-                        //   Utility.dataFromBase64String(imageList[index].imgImage),
-                        //   fit: BoxFit.fitHeight,
-                        // ),
-                        ExtendedImage.file(
+                    child: ExtendedImage.file(
                       File(imageList[index].imgImage),
                       fit: BoxFit.fitHeight,
                     ),
-                    //Utility.imageFromBase64String(imageList[index].imgImage),
                   ),
-                  //  Image.file(File(imageList[index].imgImage),
-                  //   fit: BoxFit.cover,
-                  //  ),
-                  //  ),
                 ),
               );
             },
           );
   }
 
-  void _delete(BuildContext context, ImagesAttrb image) async {
+  void _delete(BuildContext context, Images image) async {
     AlertDialog alertDialog = AlertDialog(
       title: Text("Hapus Image"),
       content: Text("Yakin akan akan menghapus image ini?"),
@@ -998,7 +1201,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
         ElevatedButton(
           child: Text("Iya"),
           onPressed: () async {
-            int result = await DataBaseMain.db.deleteImage(image.imgId);
+            int result = await DataBaseMain.deleteImages(image);
             if (result != 0) {
               _showSnackBar(context, 'Hapus image berhasil');
               getImageList();
@@ -1022,51 +1225,43 @@ class _AddAktivitasState extends State<AddAktivitas> {
     Scaffold.of(context).showSnackBar(snackBar);
   }
 
-  int _maxAktId;
   _saveImage() async {
     try {
-      for (int i = 0; i < f.length; i++) {
-        // int result;
+      if (_listPath.length > 0) {
+        for (int i = 0; i < _listPath.length; i++) {
+          int _maxImgId = await DataBaseMain.db.maxImgId();
 
-        _maxAktId = await DataBaseMain.db.maxAktId();
-        // final bytes = File(f[i]).readAsBytesSync();
-        // String imgString = Utility.base64String(bytes);
-        String imgString = f[i];
-        ImagesAttrb image = ImagesAttrb(widget.aktivitas == null
-            ? {
-                "imgImage": imgString,
-                "imgName": _aktivitasName.text,
-                "aktivitasId": _maxAktId
-              }
-            : {
-                "imgImage": imgString,
-                "imgName": widget.aktivitas.aktivitasName,
-                "aktivitasId": widget.aktivitas.aktivitasId
-              });
+          Images _images = new Images();
+          if (widget.isEdit = true) {
+            _images.imgImage = _listPath[i];
+            _images.imgName = aktivitas.aktivitasName == null
+                ? "tidak ada nama"
+                : aktivitas.aktivitasName;
+            _images.aktivitasId = aktivitas.aktivitasId;
+          } else {
+            _images.imgImage = _listPath[i];
+            _images.imgName = _aktivitasName.text == null
+                ? "tidak ada nama"
+                : _aktivitasName.text;
+            _images.aktivitasId = _maxImgId;
+          }
 
-        await DataBaseMain.db.insertImage(image);
-
-        _sharedFiles.clear();
-        _intentDataStreamSubscription.cancel();
+          await DataBaseMain.db.insetImagesraw(_images);
+        }
       }
+
+      _sharedFiles.clear();
+      _intentDataStreamSubscription.cancel();
     } on Exception catch (e) {
       _showSnackBar(context, e.toString());
     }
   }
 
   void getImageList() async {
-    // try {
-
-    Future<List<ImagesAttrb>> imageListFuture =
-        DataBaseMain.db.getImage(widget.aktivitas.aktivitasId);
-    imageListFuture.then((contactList) {
-      setState(() {
-        this.imageList = contactList;
-        this.count = contactList.length;
-      });
-    });
-    // } on Exception catch (e) {
-    //   _showSnackBar(context, e.toString());
-    // }
+    if (widget.isEdit == true) {
+      imageList =
+          await DataBaseMain.getListImagesbyAktId(aktivitas.aktivitasId);
+      setState(() {});
+    }
   }
 }

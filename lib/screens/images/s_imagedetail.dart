@@ -1,10 +1,9 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-
-//import 'package:pinch_zoom/pinch_zoom.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:share/share.dart';
+import 'package:techsupport/widgets.dart';
+import 'package:techsupport/utils.dart';
 
 class ImageDetail extends StatefulWidget {
   final String image;
@@ -20,19 +19,17 @@ class _ImageDetailState extends State<ImageDetail> {
 
   final GlobalKey<ExtendedImageEditorState> editorKey =
       GlobalKey<ExtendedImageEditorState>();
-
+  ExtendedImageMode mode = ExtendedImageMode.gesture;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.name),
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: Colors.white,
-            size: 25,
-          ),
-          onPressed: () => Navigator.pop(context),
+        brightness: Theme.of(context).brightness,
+        backgroundColor: MColors.backgroundColor(context),
+        elevation: 2,
+        title: Text(
+          "Images",
+          style: CText.primarycustomText(2.5, context, "CircularStdBold"),
         ),
       ),
       body: SafeArea(
@@ -48,7 +45,7 @@ class _ImageDetailState extends State<ImageDetail> {
                 File(widget.image),
                 fit: BoxFit.contain,
                 //enableLoadState: false,
-                mode: ExtendedImageMode.gesture,
+                mode: mode,
                 extendedImageEditorKey: editorKey,
                 initGestureConfigHandler: (state) {
                   return GestureConfig(
@@ -69,9 +66,20 @@ class _ImageDetailState extends State<ImageDetail> {
             //     image: Utility.imageFromBase64String(image),
             //     zoomedBackgroundColor: Colors.white)),
             Align(
+                alignment: Alignment.topCenter,
+                child: Container(
+                    color: MColors.backgroundColor(context),
+                    padding: const EdgeInsets.all(20),
+                    child: Row(children: [
+                      Text(widget.name,
+                          style: CText.primarycustomText(
+                              1.8, context, 'CircularStdMedium'))
+                    ]))),
+            Align(
               alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 10),
+              child: Container(
+                color: MColors.backgroundColor(context),
+                padding: const EdgeInsets.all(20),
                 child:
                     // Text(
                     //   name,
@@ -80,17 +88,21 @@ class _ImageDetailState extends State<ImageDetail> {
                     Row(children: [
                   IconButton(
                       onPressed: () {
+                        mode = ExtendedImageMode.editor;
                         editorKey.currentState.rotate(right: false);
                       },
                       icon: Icon(Icons.rotate_left)),
                   IconButton(
                       onPressed: () {
+                        mode = ExtendedImageMode.editor;
                         editorKey.currentState.rotate(right: true);
                       },
                       icon: Icon(Icons.rotate_right)),
                   IconButton(
                       onPressed: () {
+                        mode = ExtendedImageMode.editor;
                         editorKey.currentState.reset();
+                        mode = ExtendedImageMode.gesture;
                       },
                       icon: Icon(Icons.restore)),
                   IconButton(
@@ -119,12 +131,12 @@ class _ImageDetailState extends State<ImageDetail> {
 
     if (File(widget.image) != null) {
       await Share.shareFiles([widget.image],
-          text: widget.name,
+          text: "",
           subject: widget.name,
           sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size);
     } else {
-      await Share.share(widget.name,
-          subject: widget.name,
+      await Share.share("",
+          subject: "",
           sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size);
     }
   }

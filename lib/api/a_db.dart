@@ -1,14 +1,8 @@
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import 'package:techsupport/models/m_aktivitas.dart';
-import 'package:techsupport/models/m_category.dart';
-import 'package:techsupport/models/m_customer.dart';
-import 'package:techsupport/models/m_setting.dart';
-
-import 'package:techsupport/models/m_images.dart';
-
-import 'package:techsupport/utils/u_time.dart';
-import 'package:techsupport/SQL.dart';
+import 'package:techsupport/models.dart';
+import 'package:techsupport/utils.dart';
+import 'package:techsupport/api/SQL.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -48,6 +42,7 @@ class DataBaseMain {
           categoryName TEXT ,
           color TEXT,
            candelete Integer)""");
+
     await db.execute("""CREATE TABLE Aktivitas (
           aktivitasId INTEGER PRIMARY KEY AUTOINCREMENT,
           aktivitasName TEXT,
@@ -75,7 +70,9 @@ class DataBaseMain {
               imgId INTEGER PRIMARY KEY AUTOINCREMENT,
               imgImage TEXT,
               imgName TEXT,
-              aktivitasId INTEGER)""");
+              aktivitasId INTEGER,
+              imgStr TEXT,
+              isSync INTEGER)""");
 
     await db.execute("""CREATE TABLE setting (
       sysCountAkt INTEGER,
@@ -94,10 +91,10 @@ class DataBaseMain {
       "sysCountCust": "0",
       "sysCountImg": "0",
       "sysBackupSize": "0",
-      "sysBackupSch": "0",
+      "sysBackupSch": "2021-01-01 00:00:00",
       "sysGmail": "No Account",
-      "sysCreated": "01-01-2021 00:00:00",
-      "sysModified": "01-01-2021 00:00:00"
+      "sysCreated": "2021-01-01 00:00:00",
+      "sysModified": "2021-01-01 00:00:00"
     });
     await db.execute(
         "INSERT INTO Category(categoryName,color,candelete) values('Installasi','ffDD3100',0)");
@@ -110,11 +107,11 @@ class DataBaseMain {
     await db.execute(
         "INSERT INTO Category(categoryName,color,candelete) values('Re-Install','ff683BB7',0)");
     await db.execute(
-        "INSERT INTO Category(categoryName,color,candelete) values('Pengecekan System','ff683BB7',0)");
+        "INSERT INTO Category(categoryName,color,candelete) values('Pengecekan System','fff5722',0)");
     await db.execute(
-        "INSERT INTO Category(categoryName,color,candelete) values('Training','ff683BB7',0)");
+        "INSERT INTO Category(categoryName,color,candelete) values('Training','ffe91e63',0)");
     await db.execute(
-        "INSERT INTO Category(categoryName,color,candelete) values('Lain-lain','ff683BB7',0)");
+        "INSERT INTO Category(categoryName,color,candelete) values('Lain-lain','ffff9800',0)");
   }
 
   static Future<List<Aktivitas>> onItemSearch(
@@ -217,6 +214,43 @@ class DataBaseMain {
     final db = await DataBaseMain.db.database;
     var raw = await db.delete('Category',
         where: 'categoryId = ${_category.categoryId}');
+    return raw;
+  }
+
+//Formulir
+  static Future<List<Formulir>> getListFormulirs() async {
+    final db = await DataBaseMain.db.database;
+    final res = await db.query('Formulir');
+    List<Formulir> list =
+        res.isNotEmpty ? res.map((c) => Formulir.fromBD(c)).toList() : [];
+    return list;
+  }
+
+  static Future<Formulir> getListFormulirbyID(int id) async {
+    final db = await DataBaseMain.db.database;
+    final res =
+        await db.rawQuery('select * from Formulir where formId = ?', [id]);
+    List<Formulir> list =
+        res.isNotEmpty ? res.map((c) => Formulir.fromBD(c)).toList() : [];
+    return list.isEmpty ? null : list[0];
+  }
+
+  static Future<int> insertFormulir(Formulir _form) async {
+    final db = await DataBaseMain.db.database;
+    var raw = await db.insert('Formulir', _form.toBD());
+    return raw;
+  }
+
+  static Future<int> updateFormulir(Formulir _form) async {
+    final db = await DataBaseMain.db.database;
+    var raw = await db.update('Formulir', _form.toBD(),
+        where: "formId = ?", whereArgs: [_form.formId]);
+    return raw;
+  }
+
+  static Future<int> deleteFormulir(Formulir _form) async {
+    final db = await DataBaseMain.db.database;
+    var raw = await db.delete('Formulir', where: 'formId = ${_form.formId}');
     return raw;
   }
 
@@ -329,6 +363,15 @@ class DataBaseMain {
     return raw;
   }
 
+  Future<int> insetImagesraw(Images _image) async {
+    final db = await database;
+    var raw = await db.rawInsert("""INSERT Into images (
+    imgImage,imgName, aktivitasId)
+         VALUES (?,?,?)""",
+        [_image.imgImage, _image.imgName, _image.aktivitasId]);
+    return raw;
+  }
+
   Future<List<Aktivitas>> getAktivitas() async {
     final db = await database;
 
@@ -389,63 +432,38 @@ class DataBaseMain {
     return list;
   }
 
-  // Future<List<Setting>> getListSys() async {
-  //   final db = await database;
-  //   List<Setting> list = [];
-  //   List<Map<String, dynamic>> dblist =
-  //       await db.rawQuery('SELECT * FROM Setting');
-
-  //   for (Map<String, dynamic> item in dblist) {
-  //     list.add(Setting.fromJson(item));
-  //   }
-  //   return list;
-  // }
-
   Future<int> updateSettingcol(String colName, String colvalue) async {
     final db = await database;
     return await db
         .rawUpdate("update Setting set $colName = ? ", ["$colvalue"]);
   }
 
-  // // Insert Operation: Insert a Note object to database
-  // Future<int> insertSys(Setting setting) async {
-  //   final db = await database;
-  //   var result = await db.insert("Setting", setting.toBD());
-  //   return result;
-  // }
-
-  // // Delete Operation: Delete a Note object from database
-  // Future<int> deleteSetting() async {
-  //   final db = await database;
-  //   var result = await db.rawDelete('DELETE FROM Setting');
-  //   return result;
-  // }
-
-  // Fetch Operation: Get all note objects from database
-  Future<List<Map<String, dynamic>>> getImageMapList() async {
-    var _database = await database;
-    //Database db = await database;
-    var result = await _database.query("images");
-    return result;
+  Future<int> updateImagescol(
+      String colName, String colvalue, int colId) async {
+    final db = await database;
+    return await db.rawUpdate("update Images set $colName = ? where imgId = ?",
+        ["$colvalue", "$colId"]);
   }
 
-  // Insert Operation: Insert a Note object to database
-  Future<int> insertImage(ImagesAttrb image) async {
-    // Database db = await database;
-
-    var _database = await database;
-    var result = await _database.insert("images", image.toMap());
-    return result;
-  }
-
-  // Delete Operation: Delete a Note object from database
-  Future<int> deleteImage(int id) async {
-    //var db = await database;
-
-    var _database = await database;
-    int result =
-        await _database.rawDelete('DELETE FROM images WHERE imgId = $id');
-    return result;
+  batchInsertImages(List<Images> _images) async {
+    final db = await database;
+    var buffer = new StringBuffer();
+    _images.forEach((c) {
+      if (buffer.isNotEmpty) {
+        buffer.write(",\n");
+      }
+      buffer.write("('");
+      buffer.write(c.imgImage);
+      buffer.write("', '");
+      buffer.write(c.imgName);
+      buffer.write("', '");
+      buffer.write(c.aktivitasId);
+      buffer.write("')");
+    });
+    var raw =
+        await db.rawInsert("INSERT Into Clients (imgImage,imgName,aktivitasId)"
+            " VALUES ${buffer.toString()}");
+    return raw;
   }
 
   // Get number of Note objects in database
@@ -456,42 +474,91 @@ class DataBaseMain {
     return result;
   }
 
-  Future<int> maxAktId() async {
+  Future<int> maxImgId() async {
     var _database = await database;
     List<Map<String, dynamic>> x =
-        await _database.rawQuery('SELECT max(aktivitasId) from aktivitas');
+        await _database.rawQuery('SELECT max(imgId) from images');
     int result = Sqflite.firstIntValue(x);
     return result;
   }
 
-  // Get the 'Map List' [ List<Map> ] and convert it to 'Image List' [ List<Image> ]
-  Future<List<ImagesAttrb>> getImageList() async {
-    var imageMapList = await getImageMapList(); // Get 'Map List' from database
-    int count =
-        imageMapList.length; // Count the number of map entries in db table
+  static Future<List<Images>> getListImages() async {
+    final db = await DataBaseMain.db.database;
+    final res = await db.query('Images');
+    List<Images> list =
+        res.isNotEmpty ? res.map((c) => Images.fromJson(c)).toList() : [];
+    // for (var i = 0; i < list.length; i++) {
+    //   final _aktivitas = await getListAktivitasbyID(list[i].aktivitasId);
 
-    List<ImagesAttrb> imageList = [];
-    // For loop to create a 'Image List' from a 'Map List'
-    for (int i = 0; i < count; i++) {
-      imageList.add(ImagesAttrb(imageMapList[i]));
-    }
-    return imageList;
+    //   list[i].aktivitasName = _aktivitas.aktivitasName;
+    // }
+    return list;
   }
 
-  Future<List<ImagesAttrb>> getImage(dynamic id) async {
-    var _database = await database;
-    var imageMapList = await _database.query("images",
-        where: "aktivitasId = ?",
-        whereArgs: [id],
-        orderBy: "imgId DESC"); // Get 'Map List' from database
-    int count =
-        imageMapList.length; // Count the number of map entries in db table
+  static Future<List<Images>> getListImagesbyAktId(int id) async {
+    final db = await DataBaseMain.db.database;
+    final res =
+        await db.rawQuery('select * from Images where aktivitasId = ?', [id]);
 
-    List<ImagesAttrb> imageList = [];
-    // For loop to create a 'Image List' from a 'Map List'
-    for (int i = 0; i < count; i++) {
-      imageList.add(ImagesAttrb(imageMapList[i]));
-    }
-    return imageList;
+    List<Images> list =
+        res.isNotEmpty ? res.map((c) => Images.fromJson(c)).toList() : [];
+    return list;
   }
+
+  static Future<Images> getListImagesbyID(int id) async {
+    final db = await DataBaseMain.db.database;
+    final res = await db.rawQuery('select * from Images where imgId = ?', [id]);
+    List<Images> list =
+        res.isNotEmpty ? res.map((c) => Images.fromJson(c)).toList() : [];
+    return list.isEmpty ? null : list[0];
+  }
+
+  static Future<int> insertImages(Images _images) async {
+    final db = await DataBaseMain.db.database;
+    var raw = await db.insert('Images', _images.toBD());
+    return raw;
+  }
+
+  static Future<int> updateImages(Images _images) async {
+    final db = await DataBaseMain.db.database;
+    var raw = await db.update('Images', _images.toBD(),
+        where: "imgId = ?", whereArgs: [_images.imgId]);
+    return raw;
+  }
+
+  static Future<int> deleteImages(Images _images) async {
+    final db = await DataBaseMain.db.database;
+    var raw = await db.delete('Images', where: 'imgId = ${_images.imgId}');
+    return raw;
+  }
+  // // Get the 'Map List' [ List<Map> ] and convert it to 'Image List' [ List<Image> ]
+  // Future<List<Images>> getImageList() async {
+  //   var imageMapList = await getImageMapList(); // Get 'Map List' from database
+  //   int count =
+  //       imageMapList.length; // Count the number of map entries in db table
+
+  //   List<Images> imageList = [];
+  //   // For loop to create a 'Image List' from a 'Map List'
+  //   for (int i = 0; i < count; i++) {
+  //     imageList.add(Images(imageMapList[i]));
+  //   }
+  //   return imageList;
+  // }
+
+  // Future<List<Images>> getImage(dynamic id) async {
+  //   var _database = await database;
+  //   var imageMapList = await _database.query("images",
+  //       where: "aktivitasId = ?",
+  //       whereArgs: [id],
+  //       orderBy: "imgId DESC"); // Get 'Map List' from database
+  //   int count =
+  //       imageMapList.length; // Count the number of map entries in db table
+
+  //   List<Images> imageList = [];
+  //   // For loop to create a 'Image List' from a 'Map List'
+  //   for (int i = 0; i < count; i++) {
+  //     imageList.add(Images(imageMapList[i]));
+  //   }
+  //   return imageList;
+  // }
 }

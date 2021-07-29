@@ -1,18 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
-import 'package:techsupport/controllers/c_customer.dart';
-import 'package:techsupport/screens/customer/s_addCustomer.dart';
-import 'package:techsupport/utils/u_color.dart';
-import 'package:techsupport/widgets/w_text.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:animate_do/animate_do.dart';
-
-import 'package:techsupport/models/m_customer.dart';
-
-import 'package:techsupport/widgets/w_search_page.dart';
-
-import 'package:techsupport/screens/s_maps.dart';
+import 'package:techsupport/controllers.dart';
+import 'package:techsupport/widgets.dart';
+import 'package:techsupport/utils.dart';
+import 'package:techsupport/screens.dart';
+import 'package:techsupport/models.dart';
 
 class CustomersScreen extends StatefulWidget {
   CustomersScreen({Key key}) : super(key: key);
@@ -102,7 +96,9 @@ class _CustomersScreenState extends State<CustomersScreen> {
                               child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                Text('Tidak ditemukan customer :('),
+                                Text('Tidak ditemukan customer :(',
+                                    style: CText.primarycustomText(
+                                        1.8, context, 'CircularStdMedium')),
                                 SizedBox(height: 20),
                                 Image.asset(
                                   'assets/images/not_found.png',

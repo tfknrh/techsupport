@@ -1,20 +1,15 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
-import 'package:googleapis/docs/v1.dart' as api;
 import 'package:provider/provider.dart';
-import 'package:techsupport/controllers/c_customer.dart';
-import 'package:techsupport/models/m_customer.dart';
-import 'package:techsupport/utils/u_color.dart';
-import 'package:techsupport/widgets/w_snackBar.dart';
-import 'package:techsupport/widgets/w_text.dart';
-import 'package:techsupport/widgets/w_textField.dart';
-
-import 'package:techsupport/secrets.dart';
+import 'package:techsupport/api.dart';
+import 'package:techsupport/controllers.dart';
+import 'package:techsupport/widgets.dart';
+import 'package:techsupport/utils.dart';
+import 'package:techsupport/screens.dart';
+import 'package:techsupport/models.dart';
+import 'package:techsupport/api/secrets.dart';
 import 'package:techsupport/screens/s_maps.dart';
 import 'package:mapbox_search/mapbox_search.dart' as mapbox;
-import 'package:techsupport/utils/u_colorHex.dart';
 import 'package:color/color.dart' as _color;
 
 class AddCustomerScreen extends StatefulWidget {

@@ -1,25 +1,14 @@
 import 'dart:ui';
-
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:provider/provider.dart';
-import 'package:techsupport/controllers/c_category.dart';
-import 'package:techsupport/controllers/c_aktivitas.dart';
-import 'package:techsupport/controllers/c_setting.dart';
-import 'package:techsupport/utils/u_color.dart';
-import 'package:techsupport/utils/u_time.dart';
-
-import 'package:techsupport/utils/u_filesize.dart';
-import 'package:techsupport/widgets/w_customTimePicker.dart';
-import 'package:techsupport/widgets/w_customSwitch.dart';
-import 'package:techsupport/widgets/w_groupedList.dart';
-import 'package:techsupport/widgets/w_text.dart';
-import 'package:techsupport/models/m_setting.dart';
+import 'package:techsupport/controllers.dart';
+import 'package:techsupport/widgets.dart';
+import 'package:techsupport/utils.dart';
+import 'package:techsupport/models.dart';
 import 'package:theme_mode_handler/theme_mode_handler.dart';
-
-import 'package:intl/intl.dart';
-
 import 'package:techsupport/utils/u_notification.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -47,9 +36,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   _initData() {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await Provider.of<SettingProvider>(context, listen: false).initData();
-    });
+    WidgetsFlutterBinding.ensureInitialized();
+    Provider.of<SettingProvider>(context, listen: false).getListSettings();
   }
 
   int _intTable;
@@ -210,7 +198,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         body: RefreshIndicator(
           onRefresh: () async {
-            value.initData();
+            value.getListSettings();
           },
           child: ListView(
             shrinkWrap: true,
@@ -273,181 +261,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   );
                 },
               ),
-              // ListView.separated(
-              //     shrinkWrap: true,
-              //     itemBuilder: (context, index) {
-              //       return SettingItem(
-              //         setting: _itemList[index],
-              //         onTap: () {
-              //           if (_itemList[index].title == "Tema") {
-              //             showThemePickerDialog(contexts: this.context);
-              //           } else if (_itemList[index].title == "Color") {
-              //             _openDialog(
-              //               "Select Color",
-              //               MaterialColorPicker(
-              //                 shrinkWrap: true,
-              //                 selectedColor: _shadeColor,
-              //                 onColorChange: (color) =>
-              //                     setState(() => _tempShadeColor = color),
-              //                 onBack: () => print("Back button pressed"),
-              //               ),
-              //             );
-              //           } else if (_itemList[index].title == "Backup") {
-              //             uploadtoGdrive();
-              //           } else if (_itemList[index].title == "Schedule") {
-              //             showCustomTimePicker(
-              //               initialTime: TimeOfDay.now(),
-              //               context: context,
-              //               builder: (BuildContext context, Widget child) {
-              //                 return Theme(
-              //                   data: Theme.of(context).copyWith(
-              //                     primaryColor: Colors.black,
-              //                     accentColor: MColors.buttonColor(),
-              //                   ),
-              //                   child: child,
-              //                 );
-              //               },
-              //             ).then((value) {
-              //               if (value != null) {
-              //                 _sch = value;
-              //                 // if (value != null) {
-              //                 //   _itemList[index].
-              //                 //       "${TimeValidator.needZero(aktivitas.timeStart.hour)}:${TimeValidator.needZero(aktivitas.timeStart.minute)}";
-              //                 //}
-              //               }
-              //             });
-              //           }
-              //         },
-              //       );
-              //     },
-              //     separatorBuilder: (context, index) {
-              //       return Divider(
-              //         color: MColors.secondaryTextColor(context),
-              //       );
-              //     },
-              //     itemCount: _itemList.length)
-              // InkWell(
-              //   onTap: () {
-              //     _openDialog(
-              //       "Select Color",
-              //       MaterialColorPicker(
-              //         shrinkWrap: true,
-              //         selectedColor: _shadeColor,
-              //         onColorChange: (color) =>
-              //             setState(() => _tempShadeColor = color),
-              //         onBack: () => print("Back button pressed"),
-              //       ),
-              //     );
-              //   },
-              //   splashColor: Colors.transparent,
-              //   highlightColor: Colors.transparent,
-              //   child: Padding(
-              //     padding: EdgeInsets.symmetric(vertical: 10.0),
-              //     child: Row(
-              //       children: [
-              //         Icon(
-              //           Icons.colorize,
-              //           color: MColors.buttonColor(),
-              //         ),
-              //         SizedBox(
-              //           width: _size.width * .02,
-              //         ),
-              //         Expanded(
-              //           child: Text(
-              //             "Color",
-              //             style: CText.primarycustomText(
-              //                 1.7, context, 'CircularStdBook'),
-              //           ),
-              //         ),
-              //         SizedBox(
-              //           width: _size.width * 0.04,
-              //         ),
-              //         Icon(
-              //           Icons.keyboard_arrow_right,
-              //           color: Theme.of(context).iconTheme.color,
-              //         )
-              //       ],
-              //     ),
-              //   ),
-              // ),
-              // Divider(
-              //   color: MColors.secondaryTextColor(context),
-              // ),
-              // InkWell(
-              //   splashColor: Colors.transparent,
-              //   highlightColor: Colors.transparent,
-              //   onTap: () {
-              //     showThemePickerDialog(contexts: this.context);
-              //   },
-              //   child: Padding(
-              //     padding: EdgeInsets.symmetric(vertical: 10.0),
-              //     child: Row(
-              //       children: [
-              //         Icon(
-              //           MaterialCommunityIcons.theme_light_dark,
-              //           color: MColors.buttonColor(),
-              //         ),
-              //         SizedBox(
-              //           width: _size.width * .02,
-              //         ),
-              //         Expanded(
-              //           child: Text(
-              //             "Ganti Tema",
-              //             style: CText.primarycustomText(
-              //                 1.7, context, 'CircularStdBook'),
-              //           ),
-              //         ),
-              //         SizedBox(
-              //           width: _size.width * 0.04,
-              //         ),
-              //         Icon(
-              //           Icons.keyboard_arrow_right,
-              //           color: Theme.of(context).iconTheme.color,
-              //         )
-              //       ],
-              //     ),
-              //   ),
-              // ),
-
-              // Divider(
-              //   color: MColors.secondaryTextColor(context),
-              // ),
-              // InkWell(
-              //   splashColor: Colors.transparent,
-              //   highlightColor: Colors.transparent,
-              //   onTap: () {},
-              //   child: Padding(
-              //     padding: EdgeInsets.symmetric(vertical: 10.0),
-              //     child: Row(
-              //       children: [
-              //         Icon(
-              //           AntDesign.google,
-              //           color: MColors.buttonColor(),
-              //         ),
-              //         SizedBox(
-              //           width: _size.width * .02,
-              //         ),
-              //         Expanded(
-              //           child: Text(
-              //             "Backup to Google Drive",
-              //             style: CText.primarycustomText(
-              //                 1.7, context, 'CircularStdBook'),
-              //           ),
-              //         ),
-              //         SizedBox(
-              //           width: _size.width * 0.04,
-              //         ),
-              //         // Icon(
-              //         //   Icons.keyboard_arrow_right,
-              //         //   color: Theme.of(context).iconTheme.color,
-              //         // )
-              //       ],
-              //     ),
-              //   ),
-              // ),
-              // Padding(
-              //   padding: EdgeInsets.symmetric(horizontal: 10),
-              //   child:
             ],
           ),
         ),
@@ -487,7 +300,8 @@ class _SettingItemState extends State<SettingItem> {
                       Provider.of<SettingProvider>(context, listen: false)
                           .uploadtoGdrive();
                       Provider.of<SettingProvider>(context, listen: false)
-                          .initData();
+                          .getListSettings();
+                      setState(() {});
                     },
                     child: Text(
                       widget.setting.title,
