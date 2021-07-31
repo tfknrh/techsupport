@@ -38,6 +38,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   _initData() {
     WidgetsFlutterBinding.ensureInitialized();
     Provider.of<SettingProvider>(context, listen: false).getListSettings();
+    setState(() {});
   }
 
   var valTable = <String>["Aktivitas", "Customer", "Images"];
@@ -67,10 +68,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Navigator.of(context).pop();
                     setState(() => MColors.main = _tempShadeColor);
                     Provider.of<AktivitasProvider>(context, listen: false)
-                        .update();
-                    Provider.of<AktivitasProvider>(context, listen: false)
-                        .update();
-                    Provider.of<CategoryProvider>(context, listen: false)
                         .update();
                   },
                 ),

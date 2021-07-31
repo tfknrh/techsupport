@@ -20,8 +20,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 class AddAktivitas extends StatefulWidget {
   bool isEdit;
   Aktivitas aktivitas;
-  AddAktivitas({Key key, this.isEdit = false, this.aktivitas})
-      : super(key: key);
+  AddAktivitas({Key key, this.isEdit, this.aktivitas}) : super(key: key);
 
   @override
   _AddAktivitasState createState() => _AddAktivitasState();
@@ -49,23 +48,20 @@ class _AddAktivitasState extends State<AddAktivitas> {
   void initState() {
     //getCustomer();
     String languageCode = Localizations.localeOf(context).toLanguageTag();
-    if (!widget.isEdit) {
+    if (widget.isEdit == false) {
       aktivitas.dateTime = DateTime.now();
       aktivitas.timeStart = TimeOfDay.now();
       aktivitas.timeFinish = TimeOfDay(
           hour: aktivitas.timeStart.hour,
           minute: aktivitas.timeStart.minute + 1);
       _timeStart.text = TimeValidator.getTimeOfDayS(aktivitas.timeStart);
-      // "${TimeValidator.needZero(aktivitas.timeStart.hour)}:${TimeValidator.needZero(aktivitas.timeStart.minute)}";
       _timeFinish.text = TimeValidator.getTimeOfDayS(aktivitas.timeFinish);
-      //"${TimeValidator.needZero(aktivitas.timeFinish.hour)}:${TimeValidator.needZero(aktivitas.timeFinish.minute)}";
-
       _dateTime.text = DateFormat("EEEE, dd MMMM yyyy", languageCode)
           .format(aktivitas.dateTime);
       c = Customer();
       c.customerId = 1;
       dateSelected = DateFormat("yyyy-MM-dd").format(aktivitas.dateTime);
-    } else {
+    } else if (widget.isEdit == true) {
       aktivitas.aktivitasId = widget.aktivitas.aktivitasId;
       aktivitas.timeStart = widget.aktivitas.timeStart;
       aktivitas.timeFinish = widget.aktivitas.timeFinish;
@@ -89,9 +85,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
       images.aktivitasId = widget.aktivitas.aktivitasId;
 
       _timeStart.text = TimeValidator.getTimeOfDayS(aktivitas.timeStart);
-      // "${TimeValidator.needZero(aktivitas.timeStart.hour)}:${TimeValidator.needZero(aktivitas.timeStart.minute)}";
       _timeFinish.text = TimeValidator.getTimeOfDayS(aktivitas.timeFinish);
-      //"${TimeValidator.needZero(aktivitas.timeFinish.hour)}:${TimeValidator.needZero(aktivitas.timeFinish.minute)}";
       _description.text = aktivitas.description;
 
       _dateTime.text = DateFormat("EEEE, dd MMMM yyyy", languageCode)
@@ -104,7 +98,6 @@ class _AddAktivitasState extends State<AddAktivitas> {
       _ijinNotif = aktivitas.notifikasi == 1 ? true : false;
       _tipeAktivitas = aktivitas.aktivitasType == 1 ? true : false;
       _isStatus = aktivitas.isStatus == 2 ? true : false;
-      //_valueCustomer = aktivitas.customerId;
     }
     // For sharing images coming from outside the app while the app is in the memory
     _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
@@ -142,15 +135,8 @@ class _AddAktivitasState extends State<AddAktivitas> {
     });
     getImageList();
 
-    // if (_sharedFiles.length > 0) {
-    //   loadShared();
-    // }
     super.initState();
     WidgetsFlutterBinding.ensureInitialized();
-    // _ijinNotif = Provider.of<AktivitasProvider>(context, listen: false)
-    //     .sharedPrepeferencesGetValueIsNotif();
-
-    setState(() {});
   }
 
   BuildContext myScaContext;
@@ -202,7 +188,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
                       return;
                     }
 
-                    final x = !widget.isEdit
+                    final x = widget.isEdit == false
                         ? await value.addAktivitas(
                             _aktivitasName.text,
                             _description.text,
@@ -216,7 +202,8 @@ class _AddAktivitasState extends State<AddAktivitas> {
                             1,
                             e.categoryId == null ? 1 : e.categoryId,
                             c.customerId,
-                            _isStatus == true ? 2 : 1)
+                            _isStatus == true ? 2 : 1,
+                            "")
                         : await value.updateAktivitas(
                             widget.aktivitas.aktivitasId,
                             _aktivitasName.text,
@@ -231,11 +218,37 @@ class _AddAktivitasState extends State<AddAktivitas> {
                             1,
                             e.categoryId == null ? 1 : e.categoryId,
                             c.customerId,
-                            _isStatus == true ? 2 : 1);
+                            _isStatus == true ? 2 : 1,
+                            "");
 
                     if (x.identifier == "success") {
-                      _saveImage();
-                      Navigator.pop(context);
+                      if (_listPath.length > 0) {
+                        for (int i = 0; i < _listPath.length; i++) {
+                          int _maxAktId = await DataBaseMain.db.maxAktId();
+                          final x = widget.isEdit == false
+                              ? await Provider.of<ImagesProvider>(context,
+                                      listen: false)
+                                  .addImages(_listPath[i], _aktivitasName.text,
+                                      "none", 1, _maxAktId)
+                              : await Provider.of<ImagesProvider>(context,
+                                      listen: false)
+                                  .addImages(
+                                      _listPath[i],
+                                      aktivitas.aktivitasName,
+                                      "none",
+                                      1,
+                                      aktivitas.aktivitasId);
+                          if (x.identifier == "success") {
+                          } else {
+                            SnackBars.showErrorSnackBar(myScaContext, context,
+                                Icons.error, "Images", x.message);
+                          }
+                        }
+                      }
+
+                      _sharedFiles.clear();
+                      _intentDataStreamSubscription.cancel();
+                      Navigator.of(context).pop();
                       await Provider.of<AktivitasProvider>(context,
                               listen: false)
                           .initData();
@@ -248,7 +261,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
                 icon: Icon(Icons.save)),
           ],
           title: Text(
-            "${widget.isEdit ? "Ubah" : "Tambah"} Aktivitas",
+            "${widget.isEdit == true ? "Ubah" : "Tambah"} Aktivitas",
             style: CText.primarycustomText(2.5, context, "CircularStdBold"),
           ),
         ),
@@ -263,40 +276,130 @@ class _AddAktivitasState extends State<AddAktivitas> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // SizedBox(
-                      //   height: 20,
-                      // ),
-                      // Container(
-                      //   decoration: BoxDecoration(
-                      //       borderRadius: BorderRadius.circular(5),
-                      //       color: MColors.secondaryBackgroundColor(context)),
-                      //   child: Padding(
-                      //       padding: EdgeInsets.symmetric(
-                      //           horizontal: _size.width * .04),
-                      //       child: DropdownButtonHideUnderline(
-                      //           child: DropdownButton<int>(
-                      //         value: c.customerId,
-                      //         isExpanded: true,
-                      //         hint: Text("Pilih Nama Customer"),
-                      //         items: Provider.of<CustomerProvider>(context,
-                      //                 listen: false)
-                      //             .customer
-                      //             .map<DropdownMenuItem<int>>((value) {
-                      //           return DropdownMenuItem<int>(
-                      //               value: value.customerId,
-                      //               child: Text(value.customerName));
-                      //         }).toList(),
-                      //         onChanged: (val) {
-                      //           c.customerId = val;
-
-                      //           setState(() {});
-                      //         },
-                      //       ))),
-                      // ),
                       SizedBox(
                         height: 20,
                       ),
 
+                      Text(
+                        "Kategori",
+                        style: CText.primarycustomText(
+                            1.8, context, "CircularStdMedium"),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+
+                      e != null
+                          ? Row(children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                    color: e.color,
+                                    borderRadius: BorderRadius.circular(50)),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: _size.width * .05,
+                                      vertical: 10),
+                                  child: Text(
+                                    e.categoryName,
+                                    style: CText.menucustomText(
+                                        1.9, context, "CircularStdBook"),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: _size.width * .03,
+                              ),
+                              if (e != null)
+                                IconButton(
+                                  icon: Icon(Icons.delete),
+                                  onPressed: () {
+                                    e = null;
+                                    setState(() {});
+                                  },
+                                )
+                            ])
+                          : SizedBox(
+                              height: 45,
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                scrollDirection: Axis.horizontal,
+                                physics: BouncingScrollPhysics(),
+                                itemBuilder: (context, index) {
+                                  return GestureDetector(
+                                    onTap: () {
+                                      e = Provider.of<CategoryProvider>(context,
+                                              listen: false)
+                                          .category[index];
+                                      setState(() {});
+                                    },
+                                    child: Padding(
+                                      padding: EdgeInsets.only(
+                                        right: 10,
+                                      ), //_size.width * .0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                            decoration: BoxDecoration(
+                                                color: Provider.of<
+                                                            CategoryProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .category[index]
+                                                    .color,
+                                                borderRadius:
+                                                    BorderRadius.circular(50)),
+                                            child: Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: _size.width * .05,
+                                                  vertical: 10),
+                                              child: Text(
+                                                Provider.of<CategoryProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .category[index]
+                                                    .categoryName,
+                                                style: CText.menucustomText(1.9,
+                                                    context, "CircularStdBook"),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                                itemCount: Provider.of<CategoryProvider>(
+                                        context,
+                                        listen: false)
+                                    .category
+                                    .length,
+                              )),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Row(children: [
+                        Text(
+                          "Tambahkan Form",
+                          style: CText.primarycustomText(
+                              1.6, context, "CircularStdMedium"),
+                        ),
+                        IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => AddFormulirsScreen(
+                                            isEdit: widget.isEdit == true
+                                                ? true
+                                                : false,
+                                            aktivitasId: aktivitas.aktivitasId,
+                                            categoryId: aktivitas.categoryId,
+                                          )));
+                            },
+                            icon: Icon(Icons.attachment))
+                      ]),
                       Row(children: [
                         Expanded(
                           child: GestureDetector(
@@ -558,7 +661,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
                           ])),
                       getGridView(),
                       pickGridView(),
-                      //   listViewPath(),
+                      // listViewPath(),
 
                       //  shareGridView(),
                       Padding(
@@ -697,104 +800,6 @@ class _AddAktivitasState extends State<AddAktivitas> {
                       SizedBox(
                         height: 20,
                       ),
-                      Text(
-                        "Kategori",
-                        style: CText.primarycustomText(
-                            1.8, context, "CircularStdMedium"),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      e != null
-                          ? Row(
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                      color: e.color,
-                                      borderRadius: BorderRadius.circular(50)),
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: _size.width * .05,
-                                        vertical: 10),
-                                    child: Text(
-                                      e.categoryName,
-                                      style: CText.menucustomText(
-                                          1.9, context, "CircularStdBook"),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: _size.width * .03,
-                                ),
-                                if (e != null)
-                                  IconButton(
-                                    icon: Icon(Icons.delete),
-                                    onPressed: () {
-                                      e = null;
-                                      setState(() {});
-                                    },
-                                  ),
-                              ],
-                            )
-                          : SizedBox(
-                              height: 45,
-                              child: ListView.builder(
-                                // shrinkWrap: true,
-                                scrollDirection: Axis.horizontal,
-                                physics: BouncingScrollPhysics(),
-                                itemBuilder: (context, index) {
-                                  return GestureDetector(
-                                    onTap: () {
-                                      e = Provider.of<CategoryProvider>(context,
-                                              listen: false)
-                                          .category[index];
-                                      setState(() {});
-                                    },
-                                    child: Padding(
-                                      padding: EdgeInsets.only(
-                                        right: 10,
-                                      ), //_size.width * .0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                            decoration: BoxDecoration(
-                                                color: Provider.of<
-                                                            CategoryProvider>(
-                                                        context,
-                                                        listen: false)
-                                                    .category[index]
-                                                    .color,
-                                                borderRadius:
-                                                    BorderRadius.circular(50)),
-                                            child: Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: _size.width * .05,
-                                                  vertical: 10),
-                                              child: Text(
-                                                Provider.of<CategoryProvider>(
-                                                        context,
-                                                        listen: false)
-                                                    .category[index]
-                                                    .categoryName,
-                                                style: CText.menucustomText(1.9,
-                                                    context, "CircularStdBook"),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                                itemCount: Provider.of<CategoryProvider>(
-                                        context,
-                                        listen: false)
-                                    .category
-                                    .length,
-                              ),
-                            ),
                     ],
                   ),
                 )),
@@ -987,8 +992,8 @@ class _AddAktivitasState extends State<AddAktivitas> {
     }
     if (!mounted) return;
     // showAboutDialog(context: context);
-    int _maxImgId = await DataBaseMain.db.maxImgId();
-    int id = widget.isEdit == true ? aktivitas.aktivitasId : _maxImgId;
+    int _maxAktId = await DataBaseMain.db.maxAktId();
+    int id = widget.isEdit == true ? aktivitas.aktivitasId : _maxAktId;
     if (_sharedFiles.length > 0) {
       for (int i = 0; i < _sharedFiles.length; i++) {
         var _ext = path.extension(_sharedFiles[i].path);
@@ -1043,8 +1048,8 @@ class _AddAktivitasState extends State<AddAktivitas> {
       }
       if (!mounted) return;
       // showAboutDialog(context: context);
-      int _maxImgId = await DataBaseMain.db.maxImgId();
-      int id = widget.isEdit == true ? aktivitas.aktivitasId : _maxImgId;
+      int _maxAktId = await DataBaseMain.db.maxAktId();
+      int id = widget.isEdit == true ? aktivitas.aktivitasId : _maxAktId;
       _listTempPick.addAll(_listGallery);
       for (int i = 0; i < _listGallery.length; i++) {
         var _ext = path.extension(_listGallery[i].path);
@@ -1084,8 +1089,8 @@ class _AddAktivitasState extends State<AddAktivitas> {
       if (!mounted) return;
       _listTempPick.addAll(_listCamera);
       // showAboutDialog(context: context);
-      int _maxImgId = await DataBaseMain.db.maxImgId();
-      int id = widget.isEdit == true ? aktivitas.aktivitasId : _maxImgId;
+      int _maxAktId = await DataBaseMain.db.maxAktId();
+      int id = widget.isEdit == true ? aktivitas.aktivitasId : _maxAktId;
       for (int i = 0; i < _listCamera.length; i++) {
         var _ext = path.extension(_listCamera[i].path);
         var file = await moveFile(
@@ -1154,7 +1159,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
             }));
   }
 
-  int count = 0;
+  // int count = 0;
   getGridView() {
     return imageList.length == 0
         ? Container()
@@ -1223,37 +1228,50 @@ class _AddAktivitasState extends State<AddAktivitas> {
     Scaffold.of(context).showSnackBar(snackBar);
   }
 
-  _saveImage() async {
-    try {
-      if (_listPath.length > 0) {
-        for (int i = 0; i < _listPath.length; i++) {
-          int _maxImgId = await DataBaseMain.db.maxImgId();
+  // _saveImage(BuildContext context_) async {
+  //   if (_listPath.length > 0) {
+  //     for (int i = 0; i < _listPath.length; i++) {
+  //       int _maxAktId = await DataBaseMain.db.maxAktId();
 
-          Images _images = new Images();
-          if (widget.isEdit = true) {
-            _images.imgImage = _listPath[i];
-            _images.imgName = aktivitas.aktivitasName == null
-                ? "tidak ada nama"
-                : aktivitas.aktivitasName;
-            _images.aktivitasId = aktivitas.aktivitasId;
-          } else {
-            _images.imgImage = _listPath[i];
-            _images.imgName = _aktivitasName.text == null
-                ? "tidak ada nama"
-                : _aktivitasName.text;
-            _images.aktivitasId = _maxImgId;
-          }
+  // if (widget.isEdit = true) {
+  //   Images _images = new Images();
+  //   _images.imgImage = _listPath[i];
+  //   _images.imgName = aktivitas.aktivitasName == null
+  //       ? "tidak ada nama"
+  //       : aktivitas.aktivitasName;
+  //   _images.aktivitasId = aktivitas.aktivitasId;
+  //   await DataBaseMain.db.insetImagesraw(_images);
+  // } else {
+  //   Images _images = new Images();
+  //   _images.imgImage = _listPath[i];
+  //   _images.imgName = _aktivitasName.text == null
+  //       ? "tidak ada nama"
+  //       : _aktivitasName.text;
+  //   _images.aktivitasId = _maxAktId;
+  //   await DataBaseMain.db.insetImagesraw(_images);
+  // }
 
-          await DataBaseMain.db.insetImagesraw(_images);
-        }
-      }
+  // await DataBaseMain.db.insetImagesraw(_images);
+  //     if (_formKey.currentState.validate()) {
+  //       final x = !widget.isEdit
+  //           ? await Provider.of<ImagesProvider>(context_, listen: false)
+  //               .addImages(
+  //                   _listPath[i], _aktivitasName.text, "", 1, _maxAktId)
+  //           : await Provider.of<ImagesProvider>(context_, listen: false)
+  //               .addImages(_listPath[i], widget.aktivitas.aktivitasName, "",
+  //                   1, widget.aktivitas.aktivitasId);
+  //       if (x.identifier == "success") {
+  //       } else {
+  //         SnackBars.showErrorSnackBar(
+  //             myScaContext, context, Icons.error, "Images", x.message);
+  //       }
+  //     }
+  //   }
+  // }
 
-      _sharedFiles.clear();
-      _intentDataStreamSubscription.cancel();
-    } on Exception catch (e) {
-      _showSnackBar(context, e.toString());
-    }
-  }
+  //   _sharedFiles.clear();
+  //   _intentDataStreamSubscription.cancel();
+  // }
 
   void getImageList() async {
     if (widget.isEdit == true) {

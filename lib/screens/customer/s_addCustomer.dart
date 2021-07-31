@@ -258,17 +258,6 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                     SizedBox(
                       height: 20,
                     ),
-
-                    // CTextField(
-                    //     label: "Customer GPS",
-                    //     radius: 5,
-                    //     controller: _customerGPS,
-                    //     padding: EdgeInsets.symmetric(
-                    //         vertical: 5, horizontal: _size.width * .02)),
-                    // SizedBox(
-                    //   height: 20,
-                    //  ),
-
                     CTextField(
                         label: "Tambahkan PIC",
                         labelText: "PIC",
@@ -283,6 +272,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                         label: "Tambahkan Akses Remote",
                         labelText: "Akses Remote",
                         inputType: TextInputType.multiline,
+                        maxLines: 5,
                         radius: 5,
                         controller: _customerAkses,
                         padding: EdgeInsets.symmetric(

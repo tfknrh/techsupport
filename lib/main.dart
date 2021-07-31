@@ -2,17 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
-import 'package:techsupport/controllers/c_category.dart';
-import 'package:techsupport/controllers/c_customer.dart';
-import 'package:techsupport/controllers/c_aktivitas.dart';
-import 'package:techsupport/controllers/c_setting.dart';
-import 'package:techsupport/controllers/c_formulir.dart';
-import 'package:techsupport/screens/s_home.dart';
-import 'package:techsupport/utils/themes.dart';
+import 'package:techsupport/controllers.dart';
+import 'package:techsupport/widgets.dart';
+import 'package:techsupport/utils.dart';
+import 'package:techsupport/screens.dart';
 import 'package:theme_mode_handler/theme_mode_handler.dart';
 import 'package:theme_mode_handler/theme_mode_manager_interface.dart';
 import 'package:timezone/data/latest.dart' as tz;
-import 'package:techsupport/widgets/w_splashscreen.dart';
+
 //import 'package:timezone/timezone.dart' as tz;
 
 void main() {
@@ -65,10 +62,11 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => CategoryProvider()),
-          ChangeNotifierProvider(create: (_) => AktivitasProvider()),
+          ChangeNotifierProvider(create: (_) => ImagesProvider()),
           ChangeNotifierProvider(create: (_) => CustomerProvider()),
           ChangeNotifierProvider(create: (_) => SettingProvider()),
           ChangeNotifierProvider(create: (_) => FormulirProvider()),
+          ChangeNotifierProvider(create: (_) => AktivitasProvider()),
         ],
         child: ThemeModeHandler(
             manager: MyManager(),

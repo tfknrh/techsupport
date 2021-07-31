@@ -17,6 +17,7 @@ class Aktivitas with ChangeNotifier {
   String customerName;
   Color color;
   int isStatus;
+  String formValue;
 
   Aktivitas();
 
@@ -33,11 +34,8 @@ class Aktivitas with ChangeNotifier {
     aktivitas.aktivitasType = json['type'];
     aktivitas.categoryId = json['categoryId'];
     aktivitas.customerId = json['customerId'];
-    // aktivitas.categoryName = json['categoryName'];
-
-    // aktivitas.color = HexColor(json['color']);
-    // aktivitas.customerName = json['customerName'];
     aktivitas.isStatus = json['isStatus'];
+    aktivitas.formValue = json['formValue'];
     return aktivitas;
   }
 
@@ -54,7 +52,8 @@ class Aktivitas with ChangeNotifier {
       'type': this.aktivitasType,
       'categoryId': this.categoryId,
       'customerId': this.customerId,
-      'isStatus': this.isStatus
+      'isStatus': this.isStatus,
+      'formValue': this.formValue
     };
     return map;
   }
@@ -82,6 +81,7 @@ class Aktivitas with ChangeNotifier {
     aktivitas.color = a.color;
     aktivitas.categoryName = a.categoryName;
     aktivitas.customerName = a.customerName;
+    aktivitas.formValue = a.formValue;
     return aktivitas;
   }
 }

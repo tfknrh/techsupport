@@ -26,9 +26,10 @@ class CTextField extends StatefulWidget {
   final List<TextInputFormatter> inputFormatters;
   final int maxLength;
   final TextInputAction inputAction;
+
   const CTextField(
       {Key key,
-      @required this.label,
+      this.label,
       this.validator,
       this.labelText,
       this.minLines,

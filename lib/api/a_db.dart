@@ -55,7 +55,8 @@ class DataBaseMain {
               type INTEGER,
               categoryId Integer,
              customerId INTEGER,
-             isStatus INTEGER)""");
+             isStatus INTEGER,
+             formValue TEXT)""");
 
     await db.execute("""CREATE TABLE Customer (
       customerId INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -84,6 +85,15 @@ class DataBaseMain {
       sysDBId TEXT,
       sysCreated TEXT,  
       sysModified TEXT  
+       )""");
+
+    await db.execute("""CREATE TABLE Formulir (
+      formId INTEGER,
+      formType INTEGER,
+      formName TEXT,
+      formValue TEXT,
+      categoryId INTEGER
+      
        )""");
 
     await db.insert("setting", {
@@ -423,13 +433,12 @@ class DataBaseMain {
     return list;
   }
 
-  Future<List<Customer>> getCustomer() async {
+  Future<int> updateAktivitascol(
+      String colName, String colvalue, int colId) async {
     final db = await database;
-    var res = await db.rawQuery('SELECT * FROM Customer');
-    List<Customer> list =
-        res.isNotEmpty ? res.map((c) => Customer.fromJson(c)).toList() : [];
-
-    return list;
+    return await db.rawUpdate(
+        "update Aktivitas set $colName = ? where aktivitasId = ?",
+        ["$colvalue", "$colId"]);
   }
 
   Future<int> updateSettingcol(String colName, String colvalue) async {
@@ -474,10 +483,10 @@ class DataBaseMain {
     return result;
   }
 
-  Future<int> maxImgId() async {
+  Future<int> maxAktId() async {
     var _database = await database;
     List<Map<String, dynamic>> x =
-        await _database.rawQuery('SELECT max(imgId) from images');
+        await _database.rawQuery('SELECT max(aktivitasId) from aktivitas');
     int result = Sqflite.firstIntValue(x);
     return result;
   }
@@ -531,34 +540,4 @@ class DataBaseMain {
     var raw = await db.delete('Images', where: 'imgId = ${_images.imgId}');
     return raw;
   }
-  // // Get the 'Map List' [ List<Map> ] and convert it to 'Image List' [ List<Image> ]
-  // Future<List<Images>> getImageList() async {
-  //   var imageMapList = await getImageMapList(); // Get 'Map List' from database
-  //   int count =
-  //       imageMapList.length; // Count the number of map entries in db table
-
-  //   List<Images> imageList = [];
-  //   // For loop to create a 'Image List' from a 'Map List'
-  //   for (int i = 0; i < count; i++) {
-  //     imageList.add(Images(imageMapList[i]));
-  //   }
-  //   return imageList;
-  // }
-
-  // Future<List<Images>> getImage(dynamic id) async {
-  //   var _database = await database;
-  //   var imageMapList = await _database.query("images",
-  //       where: "aktivitasId = ?",
-  //       whereArgs: [id],
-  //       orderBy: "imgId DESC"); // Get 'Map List' from database
-  //   int count =
-  //       imageMapList.length; // Count the number of map entries in db table
-
-  //   List<Images> imageList = [];
-  //   // For loop to create a 'Image List' from a 'Map List'
-  //   for (int i = 0; i < count; i++) {
-  //     imageList.add(Images(imageMapList[i]));
-  //   }
-  //   return imageList;
-  // }
 }

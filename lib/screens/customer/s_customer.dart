@@ -126,8 +126,12 @@ class _CustomersScreenState extends State<CustomersScreen> {
                 physics: BouncingScrollPhysics(),
                 itemCount: value.customer.length,
                 itemBuilder: (BuildContext listContext, int index) {
-                  return CustomerItem(
-                      customer: value.customer[index], index: index);
+                  if (value.customer.isEmpty) {
+                    return CircularProgressIndicator();
+                  } else {
+                    return CustomerItem(
+                        customer: value.customer[index], index: index);
+                  }
                 })),
       );
     });

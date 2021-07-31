@@ -139,10 +139,10 @@ class _AktivitassScreenState extends State<AktivitassScreen> {
                     child: Text("Log"),
                     value: 3,
                   ),
-                  PopupMenuItem(
-                    child: Text("Formulir"),
-                    value: 4,
-                  )
+                  // PopupMenuItem(
+                  //   child: Text("Formulir"),
+                  //   value: 4,
+                  // )
                 ];
               },
               onSelected: (value) {
@@ -157,12 +157,7 @@ class _AktivitassScreenState extends State<AktivitassScreen> {
                 } else if (value == 3) {
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => LogPage()));
-                } else if (value == 4) {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => FormulirsScreen()));
-                }
+                } else if (value == 4) {}
               },
             )
           ],
@@ -192,8 +187,12 @@ class _AktivitassScreenState extends State<AktivitassScreen> {
                       physics: BouncingScrollPhysics(),
                       itemCount: value.aktivitas.length,
                       itemBuilder: (BuildContext listContext, int index) {
-                        return AktivitasItem(
-                            akt: value.aktivitas[index], index: index);
+                        if (value.aktivitas.isEmpty) {
+                          return CircularProgressIndicator();
+                        } else {
+                          return AktivitasItem(
+                              akt: value.aktivitas[index], index: index);
+                        }
                       })
                 ])),
       );

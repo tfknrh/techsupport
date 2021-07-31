@@ -85,7 +85,8 @@ class AktivitasProvider with ChangeNotifier {
       int isAlarm,
       int categoryId,
       int customerId,
-      int isStatus) async {
+      int isStatus,
+      String formValue) async {
     Response r = Response();
     Aktivitas e = Aktivitas();
     // e.aktivitasId = aktivitasId;
@@ -100,6 +101,7 @@ class AktivitasProvider with ChangeNotifier {
     e.categoryId = categoryId;
     e.customerId = customerId;
     e.isStatus = isStatus;
+    e.formValue = formValue;
 
     final x = await DataBaseMain.insertAktivitas(e);
     if (x > 0) {
@@ -129,7 +131,8 @@ class AktivitasProvider with ChangeNotifier {
       int isAlarm,
       int categoryId,
       int customerId,
-      int isStatus) async {
+      int isStatus,
+      String formValue) async {
     Response r = Response();
     Aktivitas e = Aktivitas();
     e.aktivitasId = aktivitasId;
@@ -144,6 +147,7 @@ class AktivitasProvider with ChangeNotifier {
     e.categoryId = categoryId;
     e.customerId = customerId;
     e.isStatus = isStatus;
+    e.formValue = formValue;
 
     final x = await DataBaseMain.updateAktivitas(e);
 

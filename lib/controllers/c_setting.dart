@@ -11,7 +11,6 @@ import 'dart:io' as io;
 import 'package:ext_storage/ext_storage.dart';
 import 'package:techsupport/utils/u_filesize.dart';
 import 'dart:async';
-import 'dart:math';
 
 //import 'package:shared_preferences/shared_preferences.dart';
 class GoogleAuthClient extends http.BaseClient {
@@ -178,6 +177,22 @@ class SettingProvider with ChangeNotifier {
     final driveApi = drive.DriveApi(authenticateClient);
 
     await driveApi.files.delete(setting.first.sysDBId);
+  }
+
+  Future<void> downloadfromGdrive() async {
+    //  _listSetting.clear();
+    //  getSetting();
+
+    final googleSignIn =
+        signIn.GoogleSignIn.standard(scopes: [drive.DriveApi.driveScope]);
+    final signIn.GoogleSignInAccount account = await googleSignIn.signIn();
+    print("User account $account");
+
+    final authHeaders = await account.authHeaders;
+    final authenticateClient = GoogleAuthClient(authHeaders);
+    final driveApi = drive.DriveApi(authenticateClient);
+
+    await driveApi.files.get(setting.first.sysDBId);
   }
 
   Future<void> uploadtoGdrive() async {

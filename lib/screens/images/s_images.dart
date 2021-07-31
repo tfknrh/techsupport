@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:extended_image/extended_image.dart';
 import 'dart:typed_data';
 import 'package:techsupport/api.dart';
+import 'package:techsupport/controllers.dart';
 import 'package:techsupport/widgets.dart';
 import 'package:techsupport/utils.dart';
 import 'package:techsupport/screens.dart';
 import 'package:techsupport/models.dart';
+import 'package:provider/provider.dart';
 
 class ImageList extends StatefulWidget {
   @override
@@ -16,93 +18,97 @@ class ImageList extends StatefulWidget {
 
 class _ImageListState extends State<ImageList> {
   Images images;
-  List<Images> imageList;
+//  List<Images> imageList;
   bool result;
   int count = 0;
   @override
   void initState() {
     super.initState();
-
-    getImageList();
+    WidgetsFlutterBinding.ensureInitialized();
+    Provider.of<ImagesProvider>(context, listen: false).getListImagess();
+    // getImageList();
 
     // List<String> gps = widget.customer.customerGps.split("|");
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          brightness: Theme.of(context).brightness,
-          backgroundColor: MColors.backgroundColor(context),
-          elevation: 2,
-          title: Text(
-            "Daftar Images",
-            style: CText.primarycustomText(2.5, context, "CircularStdBold"),
-          ),
-          actions: <Widget>[
-            IconButton(
-                onPressed: () async {
-                  if (mounted) setState(() {});
-                  showSearch(
-                    context: context,
-                    delegate: SearchPage<Images>(
-                      onQueryUpdate: (s) => print(s),
-                      items: imageList,
-                      searchLabel: 'Cari image',
-                      suggestion: Center(
-                          child:
-                              Column(mainAxisSize: MainAxisSize.min, children: [
-                        Text('Tidak ditemukan aktivitas :(',
-                            style: CText.primarycustomText(
-                                1.8, context, 'CircularStdMedium')),
-                        SizedBox(height: 20),
-                        Image.asset(
-                          'assets/images/not_found.png',
+    return Consumer<ImagesProvider>(builder: (context, value, child) {
+      return Scaffold(
+          appBar: AppBar(
+            brightness: Theme.of(context).brightness,
+            backgroundColor: MColors.backgroundColor(context),
+            elevation: 2,
+            title: Text(
+              "Daftar Images",
+              style: CText.primarycustomText(2.5, context, "CircularStdBold"),
+            ),
+            actions: <Widget>[
+              IconButton(
+                  onPressed: () async {
+                    if (mounted) setState(() {});
+                    showSearch(
+                      context: context,
+                      delegate: SearchPage<Images>(
+                        onQueryUpdate: (s) => print(s),
+                        items: value.images,
+                        searchLabel: 'Cari image',
+                        suggestion: Center(
+                            child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                              Text('Tidak ditemukan aktivitas :(',
+                                  style: CText.primarycustomText(
+                                      1.8, context, 'CircularStdMedium')),
+                              SizedBox(height: 20),
+                              Image.asset(
+                                'assets/images/not_found.png',
+                              ),
+                            ])),
+                        failure: Center(
+                          child: Text('tidak ditemukan image :('),
                         ),
-                      ])),
-                      failure: Center(
-                        child: Text('tidak ditemukan image :('),
+                        filter: (img) => [img.imgName],
+                        builder: (img) {
+                          return ExtendedImage.file(
+                            File(img.imgImage),
+                            fit: BoxFit.fitHeight,
+                          );
+                        },
                       ),
-                      filter: (img) => [img.imgName],
-                      builder: (img) {
-                        return ExtendedImage.file(
-                          File(img.imgImage),
-                          fit: BoxFit.fitHeight,
-                        );
-                      },
-                    ),
-                  );
-                },
-                icon: Icon(Icons.search)),
-          ],
-        ),
-        body: SafeArea(
-          child: RefreshIndicator(
-            onRefresh: () async {
-              getImageList();
-            },
-            child: getGridView(),
+                    );
+                  },
+                  icon: Icon(Icons.search)),
+            ],
           ),
-        )
-        // floatingActionButton: FloatingActionButton(
-        //   onPressed: () async {
-        //     result = await Navigator.push(
-        //         context,
-        //         MaterialPageRoute(
-        //           builder: (context) => AddImage(),
-        //         ));
+          body: SafeArea(
+            child: RefreshIndicator(
+              onRefresh: () async {
+                value.getListImagess();
+              },
+              child: getGridView(context),
+            ),
+          )
+          // floatingActionButton: FloatingActionButton(
+          //   onPressed: () async {
+          //     result = await Navigator.push(
+          //         context,
+          //         MaterialPageRoute(
+          //           builder: (context) => AddImage(),
+          //         ));
 
-        //     if (result == true) {
-        //       Navigator.pushReplacement(
-        //           context,
-        //           MaterialPageRoute(
-        //             builder: (context) => ImageList(),
-        //           ));
-        //     }
-        //   },
-        //   child: Icon(Icons.add),
-        // ),
-        );
+          //     if (result == true) {
+          //       Navigator.pushReplacement(
+          //           context,
+          //           MaterialPageRoute(
+          //             builder: (context) => ImageList(),
+          //           ));
+          //     }
+          //   },
+          //   child: Icon(Icons.add),
+          // ),
+          );
+    });
   }
 
   gridView() {
@@ -113,60 +119,135 @@ class _ImageListState extends State<ImageList> {
         childAspectRatio: 1.0,
         mainAxisSpacing: 4.0,
         crossAxisSpacing: 4.0,
-        children: imageList.map((photo) {
+        children: Provider.of<ImagesProvider>(context, listen: false)
+            .images
+            .map((photo) {
           return Utility.imageFromBase64String(photo.imgImage);
         }).toList(),
       ),
     );
   }
 
-  Widget getGridView() {
+  Widget getGridView(context) {
     return GridView.builder(
       shrinkWrap: true,
       physics: ScrollPhysics(),
-      itemCount: imageList.length,
+      itemCount:
+          Provider.of<ImagesProvider>(context, listen: false).images.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3, crossAxisSpacing: 1, mainAxisSpacing: 1),
       itemBuilder: (context, index) {
-        return GestureDetector(
-          onLongPress: () => _delete(context, imageList[index]),
-          onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ImageDetail(
-                  image: imageList[index].imgImage,
-                  name: imageList[index].imgName,
-                ),
-              )),
-          child: Card(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(5),
-              child: Column(children: [
-                ExtendedImage.file(
-                  File(imageList[index].imgImage),
-                  fit: BoxFit.fitHeight,
-                ),
-                Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Text(imageList[index].imgName,
-                        style: CText.primarycustomText(
-                            1.6, context, 'CircularStdMedium'))),
-              ]
-                  //Utility.imageFromBase64String(imageList[index].imgImage),
+        if (Provider.of<ImagesProvider>(context, listen: false)
+            .images
+            .isEmpty) {
+          return CircularProgressIndicator();
+        } else {
+          return GestureDetector(
+            onLongPress: () => _delete(
+                context,
+                Provider.of<ImagesProvider>(context, listen: false)
+                    .images[index]),
+            onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ImageDetail(
+                    image: Provider.of<ImagesProvider>(context, listen: false)
+                        .images[index]
+                        .imgImage,
+                    name: Provider.of<ImagesProvider>(context, listen: false)
+                        .images[index]
+                        .imgName,
                   ),
+                )),
+            child: Card(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5)),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(5),
+                child: Stack(children: [
+                  ExtendedImage.file(
+                    File(Provider.of<ImagesProvider>(context, listen: false)
+                        .images[index]
+                        .imgImage),
+                    fit: BoxFit.contain,
+                  ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      verticalDirection: VerticalDirection.up,
+                      children: <Widget>[
+                        Container(
+                          padding: EdgeInsets.all(10),
+                          color: MColors.buttonColor().withOpacity(.1),
+                          child: Text(
+                            Provider.of<ImagesProvider>(context, listen: false)
+                                .images[index]
+                                .imgName,
+                            style: CText.primarycustomText(
+                                1.4, context, 'CircularStdMedium'),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ]
+                    //Utility.imageFromBase64String(imageList[index].imgImage),
+                    ),
+              ),
+              //  Image.file(File(imageList[index].imgImage),
+              //   fit: BoxFit.cover,
+              //  ),
+              //  ),
             ),
-            //  Image.file(File(imageList[index].imgImage),
-            //   fit: BoxFit.cover,
-            //  ),
-            //  ),
-          ),
-        );
+          );
+        }
       },
     );
   }
 
+  // void _delete(BuildContext context, Images image) async {
+  //   AlertDialog alertDialog = AlertDialog(
+  //     title: Text("Hapus Image"),
+  //     content: Text("Yakin akan akan menghapus image ini?"),
+  //     actions: [
+  //       ElevatedButton(
+  //         child: Text("Iya"),
+  //         onPressed: () async {
+  //           int result = await DataBaseMain.deleteImages(image);
+  //           if (result != 0) {
+  //             _showSnackBar(context, 'Hapus image berhasil');
+  //             getImageList();
+  //           }
+  //           Navigator.pop(context, true);
+  //         },
+  //       ),
+  //       ElevatedButton(
+  //         child: Text("Tidak"),
+  //         onPressed: () {
+  //           Navigator.pop(context, false);
+  //         },
+  //       ),
+  //     ],
+  //   );
+  //   showDialog(context: context, builder: (_) => alertDialog);
+  // }
+
+  void _showSnackBar(BuildContext context, String message) {
+    final snackBar = SnackBar(content: Text(message));
+    Scaffold.of(context).showSnackBar(snackBar);
+  }
+
+  // void getImageList() async {
+  //   imageList = await DataBaseMain.getListImages();
+  //   setState(() {});
+
+  // } on Exception catch (e) {
+  //   _showSnackBar(context, e.toString());
+  // }
+  //}
+
+  BuildContext myScaContext;
   void _delete(BuildContext context, Images image) async {
     AlertDialog alertDialog = AlertDialog(
       title: Text("Hapus Image"),
@@ -175,12 +256,16 @@ class _ImageListState extends State<ImageList> {
         ElevatedButton(
           child: Text("Iya"),
           onPressed: () async {
-            int result = await DataBaseMain.deleteImages(image);
-            if (result != 0) {
-              _showSnackBar(context, 'Hapus image berhasil');
-              getImageList();
+            final x = await Provider.of<ImagesProvider>(context, listen: false)
+                .deleteImages(image);
+
+            if (x.identifier == "success") {
+              Navigator.pop(context);
+            } else {
+              Navigator.pop(context);
+              SnackBars.showErrorSnackBar(
+                  myScaContext, context, Icons.error, "Images", x.message);
             }
-            Navigator.pop(context, true);
           },
         ),
         ElevatedButton(
@@ -192,20 +277,6 @@ class _ImageListState extends State<ImageList> {
       ],
     );
     showDialog(context: context, builder: (_) => alertDialog);
-  }
-
-  void _showSnackBar(BuildContext context, String message) {
-    final snackBar = SnackBar(content: Text(message));
-    Scaffold.of(context).showSnackBar(snackBar);
-  }
-
-  void getImageList() async {
-    imageList = await DataBaseMain.getListImages();
-    setState(() {});
-
-    // } on Exception catch (e) {
-    //   _showSnackBar(context, e.toString());
-    // }
   }
 }
 
