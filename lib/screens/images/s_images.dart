@@ -70,10 +70,17 @@ class _ImageListState extends State<ImageList> {
                         ),
                         filter: (img) => [img.imgName],
                         builder: (img) {
-                          return ExtendedImage.file(
-                            File(img.imgImage),
-                            fit: BoxFit.fitHeight,
-                          );
+                          return Column(children: [
+                            ExtendedImage.file(
+                              File(img.imgImage),
+                              fit: BoxFit.fitHeight,
+                            ),
+                            SizedBox(height: 5),
+                            Text(img.imgName,
+                                style: CText.primarycustomText(
+                                    1.6, context, 'CircularStdMedium')),
+                            SizedBox(height: 20),
+                          ]);
                         },
                       ),
                     );
@@ -86,7 +93,69 @@ class _ImageListState extends State<ImageList> {
               onRefresh: () async {
                 value.getListImagess();
               },
-              child: getGridView(context),
+              child: GridView.builder(
+                shrinkWrap: true,
+                physics: ScrollPhysics(),
+                itemCount: value.images.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3, crossAxisSpacing: 1, mainAxisSpacing: 1),
+                itemBuilder: (context, index) {
+                  if (value.images.isEmpty) {
+                    return CircularProgressIndicator();
+                  } else {
+                    return GestureDetector(
+                      onLongPress: () async {},
+                      onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ImageDetail(
+                              //   image: value.images[index].imgImage,
+                              //   name: value.images[index].imgName,
+                              images: value.images[index],
+                            ),
+                          )),
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5)),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(5),
+                          child: Stack(children: [
+                            ExtendedImage.file(
+                              File(value.images[index].imgImage),
+                              fit: BoxFit.contain,
+                            ),
+                            Align(
+                              alignment: Alignment.bottomCenter,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                verticalDirection: VerticalDirection.up,
+                                children: <Widget>[
+                                  Container(
+                                    padding: EdgeInsets.all(10),
+                                    color:
+                                        MColors.buttonColor().withOpacity(.1),
+                                    child: Text(
+                                      value.images[index].imgName,
+                                      style: CText.primarycustomText(
+                                          1.4, context, 'CircularStdMedium'),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ]
+                              //Utility.imageFromBase64String(imageList[index].imgImage),
+                              ),
+                        ),
+                        //  Image.file(File(imageList[index].imgImage),
+                        //   fit: BoxFit.cover,
+                        //  ),
+                        //  ),
+                      ),
+                    );
+                  }
+                },
+              ),
             ),
           )
           // floatingActionButton: FloatingActionButton(
@@ -125,84 +194,6 @@ class _ImageListState extends State<ImageList> {
           return Utility.imageFromBase64String(photo.imgImage);
         }).toList(),
       ),
-    );
-  }
-
-  Widget getGridView(context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: ScrollPhysics(),
-      itemCount:
-          Provider.of<ImagesProvider>(context, listen: false).images.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3, crossAxisSpacing: 1, mainAxisSpacing: 1),
-      itemBuilder: (context, index) {
-        if (Provider.of<ImagesProvider>(context, listen: false)
-            .images
-            .isEmpty) {
-          return CircularProgressIndicator();
-        } else {
-          return GestureDetector(
-            onLongPress: () => _delete(
-                context,
-                Provider.of<ImagesProvider>(context, listen: false)
-                    .images[index]),
-            onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ImageDetail(
-                    image: Provider.of<ImagesProvider>(context, listen: false)
-                        .images[index]
-                        .imgImage,
-                    name: Provider.of<ImagesProvider>(context, listen: false)
-                        .images[index]
-                        .imgName,
-                  ),
-                )),
-            child: Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5)),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(5),
-                child: Stack(children: [
-                  ExtendedImage.file(
-                    File(Provider.of<ImagesProvider>(context, listen: false)
-                        .images[index]
-                        .imgImage),
-                    fit: BoxFit.contain,
-                  ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      verticalDirection: VerticalDirection.up,
-                      children: <Widget>[
-                        Container(
-                          padding: EdgeInsets.all(10),
-                          color: MColors.buttonColor().withOpacity(.1),
-                          child: Text(
-                            Provider.of<ImagesProvider>(context, listen: false)
-                                .images[index]
-                                .imgName,
-                            style: CText.primarycustomText(
-                                1.4, context, 'CircularStdMedium'),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ]
-                    //Utility.imageFromBase64String(imageList[index].imgImage),
-                    ),
-              ),
-              //  Image.file(File(imageList[index].imgImage),
-              //   fit: BoxFit.cover,
-              //  ),
-              //  ),
-            ),
-          );
-        }
-      },
     );
   }
 
@@ -263,8 +254,6 @@ class _ImageListState extends State<ImageList> {
               Navigator.pop(context);
             } else {
               Navigator.pop(context);
-              SnackBars.showErrorSnackBar(
-                  myScaContext, context, Icons.error, "Images", x.message);
             }
           },
         ),

@@ -38,7 +38,7 @@ class ImagesProvider with ChangeNotifier {
       images.add(e);
       notifyListeners();
       r = Response(
-          identifier: "success", message: "Kategori berhasil ditambahkan");
+          identifier: "success", message: "Images berhasil ditambahkan");
     } else {
       r = Response(identifier: "error", message: "Terjadi kesalahan");
     }
@@ -65,7 +65,7 @@ class ImagesProvider with ChangeNotifier {
       images.singleWhere((es) => es.imgId == e.imgId).aktivitasId = aktivitasId;
       notifyListeners();
       r = Response(
-          identifier: "success", message: "Kategori berhasil diperbarui");
+          identifier: "success", message: "Images berhasil diperbarui");
     } else {
       r = Response(identifier: "error", message: "Terjadi kesalahan");
     }
@@ -77,15 +77,13 @@ class ImagesProvider with ChangeNotifier {
     final list =
         await DataBaseMain.db.getAktivitasesByAktivitasID(img.aktivitasId);
     if (list.isNotEmpty) {
-      r = Response(
-          identifier: "error", message: "Kategori ini sedang digunakan");
+      r = Response(identifier: "error", message: "Images ini sedang digunakan");
     } else {
       final x = await DataBaseMain.deleteImages(img);
       if (x > 0) {
         images.removeWhere((element) => img.imgId == img.imgId);
         notifyListeners();
-        r = Response(
-            identifier: "success", message: "Kategori berhasil dihapus");
+        r = Response(identifier: "success", message: "Images berhasil dihapus");
       } else {
         r = Response(identifier: "error", message: "Terjadi kesalahan");
       }

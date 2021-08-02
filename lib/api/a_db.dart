@@ -424,6 +424,15 @@ class DataBaseMain {
     return list;
   }
 
+  static Future<List<Formulir>> getFormulirByCategoryID(int categoryId) async {
+    final db = await DataBaseMain.db.database;
+    var res = await db
+        .rawQuery("select * from Formulir WHERE categoryId = ? ", [categoryId]);
+    List<Formulir> list =
+        res.isNotEmpty ? res.map((c) => Formulir.fromBD(c)).toList() : [];
+    return list;
+  }
+
   Future<List<Aktivitas>> getAktivitasesByAktivitasID(int aktivitasId) async {
     final db = await database;
     var res = await db.rawQuery(

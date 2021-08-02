@@ -8,11 +8,12 @@ import 'package:techsupport/api.dart';
 
 class AddFormulirsScreen extends StatefulWidget {
   final bool isEdit;
-  final Formulir formulir;
+  // final Formulir formulir;
   final int aktivitasId;
   final int categoryId;
+  final String formValue;
   AddFormulirsScreen(
-      {Key key, this.isEdit, this.formulir, this.aktivitasId, this.categoryId})
+      {Key key, this.formValue, this.isEdit, this.aktivitasId, this.categoryId})
       : super(key: key);
 
   @override
@@ -20,33 +21,47 @@ class AddFormulirsScreen extends StatefulWidget {
 }
 
 class _AddFormulirsScreenState extends State<AddFormulirsScreen> {
-  Formulir formulir = Formulir();
+  // Formulir formulir = Formulir();
   List<Formulir> listFormulir = [];
   List<String> listValue = [];
+  List<String> templistValue = [];
   String _formValue;
   BuildContext myScaContext;
   List<TextEditingController> _controllers = [];
+  void getListForm() async {
+    // listFormulir.clear();
+    //  _controllers.clear();
+    listFormulir =
+        await DataBaseMain.getFormulirByCategoryID(widget.categoryId);
+    if (widget.formValue != null) {
+      listValue = widget.formValue.split("|");
+      for (int i = 0; i < listValue.length; i++) {
+        _controllers.add(new TextEditingController(text: listValue[i]));
+      }
+    } else if (widget.formValue == null) {
+      for (int i = 0; i < listFormulir.length; i++) {
+        _controllers.add(new TextEditingController(text: ""));
+      }
+    }
+    setState(() {});
+  }
+
   @override
   void initState() {
-    if (widget.isEdit == false) {
-    } else {
-      formulir.categoryId = widget.categoryId;
-      _formValue = Provider.of<AktivitasProvider>(context, listen: false)
-          .aktivitas
-          .singleWhere((es) => es.aktivitasId == widget.aktivitasId)
-          .formValue;
-      listValue = _formValue.split("|");
-    }
-    for (int i = 0; i < listValue.length; i++) {
-      _controllers.add(new TextEditingController(
-          text: widget.isEdit == true ? listValue[i] : ""));
-    }
     super.initState();
-    WidgetsFlutterBinding.ensureInitialized();
-    Provider.of<FormulirProvider>(context, listen: false).getListFormulirs();
+    //  Provider.of<FormulirProvider>(context, listen: false).getListFormulirs();
+    getListForm();
+    // if (widget.isEdit == false) {
+    //   for (int i = 0; i < listFormulir.length; i++) {
+    //     _controllers.add(new TextEditingController(text: ""));
+    //   }
+    // } else {
 
-    listFormulir =
-        Provider.of<FormulirProvider>(context, listen: false).formulir;
+    // }
+
+    // WidgetsFlutterBinding.ensureInitialized();
+
+    //Provider.of<FormulirProvider>(context, listen: false).getListFormulirs();
   }
 
   //Map<String, int> tempformulir = {};
@@ -127,10 +142,10 @@ class _AddFormulirsScreenState extends State<AddFormulirsScreen> {
                     label: listFormulir[index].formName,
                     inputType: TextInputType.text,
                     controller: _controllers[index],
-                    function: (text) {
-                      //   formulir.formValue = listFormulir[index].formValue;
-                      listValue[index] = _controllers[index].text;
-                    },
+                    // function: (text) {
+                    //   formulir.formValue = listFormulir[index].formValue;
+                    //   listValue[index] = _controllers[index].text;
+                    //  },
                     padding: EdgeInsets.symmetric(
                         vertical: 5, horizontal: _size.width * .02)),
               ),
@@ -146,73 +161,80 @@ class _AddFormulirsScreenState extends State<AddFormulirsScreen> {
 
     final _size = MediaQuery.of(context).size;
 
-    return Consumer<FormulirProvider>(builder: (context, value, _) {
-      return Scaffold(
+    //  return Consumer<FormulirProvider>(builder: (context, value, _) {
+    return Scaffold(
+      backgroundColor: MColors.backgroundColor(context),
+      appBar: AppBar(
+        brightness: Theme.of(context).brightness,
         backgroundColor: MColors.backgroundColor(context),
-        appBar: AppBar(
-          brightness: Theme.of(context).brightness,
-          backgroundColor: MColors.backgroundColor(context),
-          elevation: 0,
-          title: Text(
-            "Formulir",
-            style: CText.primarycustomText(2.5, context, "CircularStdBold"),
-          ),
-          actions: [
-            if (widget.isEdit)
-              IconButton(
-                onPressed: () async {
-                  // final x = await value.deleteFormulir(widget.formulir);
-                  // if (x.identifier == "success") {
-                  //   Navigator.pop(context);
-                  // } else {
-                  //   SnackBars.showErrorSnackBar(myScaContext, context,
-                  //       Icons.error, "Category", x.message);
-                  // }
-                },
-                icon: Icon(Icons.delete),
-              ),
-            IconButton(
-              onPressed: () async {
-                _formValue = listValue.join("|");
-                DataBaseMain.db.updateAktivitascol(
-                    "formValue", _formValue, widget.aktivitasId);
-                Navigator.of(context).pop();
-              },
-              icon: Icon(Icons.save),
-            ),
-          ],
+        elevation: 0,
+        title: Text(
+          "Formulir " +
+              Provider.of<CategoryProvider>(context, listen: false)
+                  .category
+                  .singleWhere((es) => es.categoryId == widget.categoryId)
+                  .categoryName,
+          style: CText.primarycustomText(2.5, context, "CircularStdBold"),
         ),
-        body: RefreshIndicator(
-            onRefresh: () async {
-              value.getListFormulirs();
+        actions: [
+          IconButton(
+            onPressed: () async {
+              // final x = await value.deleteFormulir(widget.formulir);
+              // if (x.identifier == "success") {
+              //   Navigator.pop(context);
+              // } else {
+              //   SnackBars.showErrorSnackBar(myScaContext, context,
+              //       Icons.error, "Category", x.message);
+              // }
             },
-            child: ListView.separated(
-                itemBuilder: (context, index) {
-                  if (value.formulir.isEmpty) {
-                    return CircularProgressIndicator();
-                  } else {
-                    return singleItemList(index);
-                  }
-                },
-                separatorBuilder: (context, int) {
-                  return Divider(color: MColors.secondaryTextColor(context));
-                },
-                itemCount: value.formulir.length)),
+            icon: Icon(Icons.delete),
+          ),
+          IconButton(
+            onPressed: () async {
+              //  _formValue = listValue.join("|");
+              for (int i = 0; i < _controllers.length; i++) {
+                templistValue.add(_controllers[i].text);
+              }
 
-        // ListView.builder(
-        //     shrinkWrap: true,
-        //     itemCount: itemList.length,
-        //     physics: BouncingScrollPhysics(),
-        //     itemBuilder: (context, index) {
-        //       if (itemList.isEmpty) {
-        //         return CircularProgressIndicator();
-        //       } else {
-        //         return singleItemList(index);
-        //       }
-        //     }),
+              Navigator.pop(context, templistValue);
+              Provider.of<AktivitasProvider>(context, listen: false).initData();
+              _controllers.clear();
+            },
+            icon: Icon(Icons.save),
+          ),
+        ],
+      ),
+      body: RefreshIndicator(
+          onRefresh: () async {
+            //  getListForm();
+          },
+          child: ListView.separated(
+              itemBuilder: (context, index) {
+                if (listFormulir.isEmpty) {
+                  return CircularProgressIndicator();
+                } else {
+                  return singleItemList(index);
+                }
+              },
+              separatorBuilder: (context, int) {
+                return Divider(color: MColors.secondaryTextColor(context));
+              },
+              itemCount: listFormulir.length)),
 
-        // ),
-      );
-    });
+      // ListView.builder(
+      //     shrinkWrap: true,
+      //     itemCount: itemList.length,
+      //     physics: BouncingScrollPhysics(),
+      //     itemBuilder: (context, index) {
+      //       if (itemList.isEmpty) {
+      //         return CircularProgressIndicator();
+      //       } else {
+      //         return singleItemList(index);
+      //       }
+      //     }),
+
+      // ),
+    );
+    // });
   }
 }

@@ -4,12 +4,17 @@ import 'package:extended_image/extended_image.dart';
 import 'package:share/share.dart';
 import 'package:techsupport/widgets.dart';
 import 'package:techsupport/utils.dart';
+import 'package:techsupport/api.dart';
+import 'package:techsupport/models.dart';
+import 'package:techsupport/controllers.dart';
+import 'package:provider/provider.dart';
 
 class ImageDetail extends StatefulWidget {
-  final String image;
-  final String name;
+//  final String image;
+  // final String name;
+  final Images images;
 
-  const ImageDetail({Key key, this.image, this.name}) : super(key: key);
+  const ImageDetail({Key key, this.images}) : super(key: key);
   @override
   _ImageDetailState createState() => _ImageDetailState();
 }
@@ -42,7 +47,7 @@ class _ImageDetailState extends State<ImageDetail> {
                   //  ExtendedImage.memory(
                   //   Utility.dataFromBase64String(image),
                   ExtendedImage.file(
-                File(widget.image),
+                File(widget.images.imgImage),
                 fit: BoxFit.contain,
                 //enableLoadState: false,
                 mode: mode,
@@ -71,7 +76,7 @@ class _ImageDetailState extends State<ImageDetail> {
                     color: MColors.backgroundColor(context),
                     padding: const EdgeInsets.all(20),
                     child: Row(children: [
-                      Text(widget.name,
+                      Text(widget.images.imgName,
                           style: CText.primarycustomText(
                               1.8, context, 'CircularStdMedium'))
                     ]))),
@@ -110,6 +115,20 @@ class _ImageDetailState extends State<ImageDetail> {
                         _onShare(context);
                       },
                       icon: Icon(Icons.share)),
+                  IconButton(
+                    onPressed: () async {
+                      final x = await Provider.of<ImagesProvider>(context,
+                              listen: false)
+                          .deleteImages(widget.images);
+                      if (x.identifier == "success") {
+                        Navigator.pop(context);
+                      } else {
+                        SnackBars.showErrorSnackBar(myScaContext, context,
+                            Icons.error, "Images", x.message);
+                      }
+                    },
+                    icon: Icon(Icons.delete),
+                  )
                 ]),
               ),
             ),
@@ -119,6 +138,7 @@ class _ImageDetailState extends State<ImageDetail> {
     );
   }
 
+  BuildContext myScaContext;
   _onShare(BuildContext context) async {
     // A builder is used to retrieve the context immediately
     // surrounding the ElevatedButton.
@@ -129,10 +149,10 @@ class _ImageDetailState extends State<ImageDetail> {
     // has its position and size after it's built.
     final RenderBox box = context.findRenderObject() as RenderBox;
 
-    if (File(widget.image) != null) {
-      await Share.shareFiles([widget.image],
+    if (File(widget.images.imgImage) != null) {
+      await Share.shareFiles([widget.images.imgImage],
           text: "",
-          subject: widget.name,
+          subject: widget.images.imgName,
           sharePositionOrigin: box.localToGlobal(Offset.zero) & box.size);
     } else {
       await Share.share("",

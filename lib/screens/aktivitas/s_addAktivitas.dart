@@ -42,13 +42,21 @@ class _AddAktivitasState extends State<AddAktivitas> {
   Category e;
   Customer c;
   Images images;
-
+  String _formValue;
   String dateSelected;
+  int maxId;
+  getMaxId() async {
+    maxId = await DataBaseMain.db.maxAktId();
+  }
+
+  int _categoryId;
   @override
   void initState() {
     //getCustomer();
+    getMaxId();
     String languageCode = Localizations.localeOf(context).toLanguageTag();
     if (widget.isEdit == false) {
+      aktivitas.aktivitasId = maxId;
       aktivitas.dateTime = DateTime.now();
       aktivitas.timeStart = TimeOfDay.now();
       aktivitas.timeFinish = TimeOfDay(
@@ -60,6 +68,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
           .format(aktivitas.dateTime);
       c = Customer();
       c.customerId = 1;
+
       dateSelected = DateFormat("yyyy-MM-dd").format(aktivitas.dateTime);
     } else if (widget.isEdit == true) {
       aktivitas.aktivitasId = widget.aktivitas.aktivitasId;
@@ -72,12 +81,15 @@ class _AddAktivitasState extends State<AddAktivitas> {
       aktivitas.dateTime = widget.aktivitas.dateTime;
       aktivitas.aktivitasType = widget.aktivitas.aktivitasType;
       aktivitas.customerId = widget.aktivitas.customerId;
-      aktivitas.categoryId = widget.aktivitas.categoryId;
+      //aktivitas.categoryId = widget.aktivitas.categoryId;
       aktivitas.isStatus = widget.aktivitas.isStatus;
+      aktivitas.formValue = widget.aktivitas.formValue;
+
       e = Category();
       e.categoryId = widget.aktivitas.categoryId;
       e.categoryName = widget.aktivitas.categoryName;
       e.color = widget.aktivitas.color;
+
       c = Customer();
       c.customerId = widget.aktivitas.customerId;
       c.customerName = widget.aktivitas.customerName;
@@ -94,7 +106,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
       dateSelected = DateFormat("yyyy-MM-dd").format(aktivitas.dateTime);
       _aktivitasName.text = aktivitas.aktivitasName;
       _customerName.text = c.customerName;
-
+      _categoryId = widget.aktivitas.categoryId;
       _ijinNotif = aktivitas.notifikasi == 1 ? true : false;
       _tipeAktivitas = aktivitas.aktivitasType == 1 ? true : false;
       _isStatus = aktivitas.isStatus == 2 ? true : false;
@@ -203,7 +215,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
                             e.categoryId == null ? 1 : e.categoryId,
                             c.customerId,
                             _isStatus == true ? 2 : 1,
-                            "")
+                            _formValue)
                         : await value.updateAktivitas(
                             widget.aktivitas.aktivitasId,
                             _aktivitasName.text,
@@ -219,7 +231,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
                             e.categoryId == null ? 1 : e.categoryId,
                             c.customerId,
                             _isStatus == true ? 2 : 1,
-                            "");
+                            _formValue);
 
                     if (x.identifier == "success") {
                       if (_listPath.length > 0) {
@@ -330,7 +342,15 @@ class _AddAktivitasState extends State<AddAktivitas> {
                                       e = Provider.of<CategoryProvider>(context,
                                               listen: false)
                                           .category[index];
-                                      setState(() {});
+
+                                      setState(() {
+                                        _categoryId =
+                                            Provider.of<CategoryProvider>(
+                                                    context,
+                                                    listen: false)
+                                                .category[index]
+                                                .categoryId;
+                                      });
                                     },
                                     child: Padding(
                                       padding: EdgeInsets.only(
@@ -386,17 +406,35 @@ class _AddAktivitasState extends State<AddAktivitas> {
                               1.6, context, "CircularStdMedium"),
                         ),
                         IconButton(
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => AddFormulirsScreen(
-                                            isEdit: widget.isEdit == true
-                                                ? true
-                                                : false,
-                                            aktivitasId: aktivitas.aktivitasId,
-                                            categoryId: aktivitas.categoryId,
-                                          )));
+                            onPressed: () async {
+                              // final formcek = await DataBaseMain.db
+                              //     .getFormulirByCategoryID(_categoryId);
+                              // if (formcek.isNotEmpty) {
+                              if (e != null) {
+                                final result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            AddFormulirsScreen(
+                                                formValue: aktivitas.formValue,
+                                                isEdit: widget.isEdit,
+                                                aktivitasId:
+                                                    aktivitas.aktivitasId,
+                                                categoryId: _categoryId)));
+
+                                setState(() {
+                                  if (result != null) {
+                                    _formValue = result.join("|");
+                                  }
+                                });
+                              } else {
+                                SnackBars.showErrorSnackBar(
+                                    myScaContext,
+                                    context,
+                                    Icons.error,
+                                    "Error",
+                                    "Form tidak ditemukan");
+                              }
                             },
                             icon: Icon(Icons.attachment))
                       ]),
@@ -1176,8 +1214,9 @@ class _AddAktivitasState extends State<AddAktivitas> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => ImageDetail(
-                        image: imageList[index].imgImage,
-                        name: imageList[index].imgName,
+                        //  image: imageList[index].imgImage,
+                        // name: imageList[index].imgName,
+                        images: imageList[index],
                       ),
                     )),
                 child: Card(
