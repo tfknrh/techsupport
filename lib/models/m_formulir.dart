@@ -3,7 +3,9 @@ class Formulir {
   int formType;
   String formName;
   String formValue;
+  String formGroup;
   int categoryId;
+  bool isCheck;
 
   Formulir();
 
@@ -13,6 +15,7 @@ class Formulir {
     e.formType = json["formType"];
     e.formName = json["formName"];
     e.formValue = json["formValue"];
+    e.formGroup = json["formGroup"];
     e.categoryId = json["categoryId"];
     return e;
   }
@@ -23,6 +26,7 @@ class Formulir {
       'formType': this.formType,
       'formName': this.formName,
       'formValue': this.formValue,
+      'formGroup': this.formGroup,
       'categoryId': this.categoryId,
     };
     return map;

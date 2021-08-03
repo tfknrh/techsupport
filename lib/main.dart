@@ -67,6 +67,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (_) => SettingProvider()),
           ChangeNotifierProvider(create: (_) => FormulirProvider()),
           ChangeNotifierProvider(create: (_) => AktivitasProvider()),
+          //    ChangeNotifierProvider(create: (_) => ListData()),
         ],
         child: ThemeModeHandler(
             manager: MyManager(),

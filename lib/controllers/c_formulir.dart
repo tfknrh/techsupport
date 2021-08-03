@@ -4,6 +4,8 @@ import 'package:techsupport/models.dart';
 
 class FormulirProvider with ChangeNotifier {
   List<Formulir> formulir = [];
+//List<Formulir> textFieldList = [];
+  List<TextEditingController> controllers = [];
 
   void getListFormulirs() async {
     final x = await DataBaseMain.getListFormulirs();
@@ -12,6 +14,13 @@ class FormulirProvider with ChangeNotifier {
   }
 
   void update() {
+    notifyListeners();
+  }
+
+  //list of controllers
+
+  void addTextField() {
+    formulir.add(Formulir());
     notifyListeners();
   }
 

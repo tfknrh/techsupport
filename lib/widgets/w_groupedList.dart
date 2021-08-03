@@ -144,14 +144,14 @@ class GroupedListView<T, E> extends StatefulWidget {
   /// {@macro flutter.widgets.Clip}
   ///
   /// Defaults to [Clip.hardEdge].
-  final Clip clipBehavior;
+  //final Clip clipBehavior;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
-  final DragStartBehavior dragStartBehavior;
+  // final DragStartBehavior dragStartBehavior;
 
   /// [ScrollViewKeyboardDismissBehavior] the defines how this [ScrollView] will
   /// dismiss the keyboard automatically.
-  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
+  // final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
 
   /// {@macro flutter.widgets.scrollable.restorationId}
   final String restorationId;
@@ -208,9 +208,9 @@ class GroupedListView<T, E> extends StatefulWidget {
     this.addRepaintBoundaries = true,
     this.addSemanticIndexes = true,
     this.cacheExtent,
-    this.clipBehavior = Clip.hardEdge,
-    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
-    this.dragStartBehavior = DragStartBehavior.start,
+    //  this.clipBehavior = Clip.hardEdge,
+    //  this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
+    //  this.dragStartBehavior = DragStartBehavior.start,
     this.restorationId,
     this.semanticChildCount,
     this.itemExtent,
@@ -280,11 +280,11 @@ class _GroupedListViewState<T, E> extends State<GroupedListView<T, E>> {
           shrinkWrap: widget.shrinkWrap,
           padding: widget.padding,
           reverse: widget.reverse,
-          clipBehavior: widget.clipBehavior,
-          dragStartBehavior: widget.dragStartBehavior,
+          //   clipBehavior: widget.clipBehavior,
+          // dragStartBehavior: widget.dragStartBehavior,
           itemExtent: widget.itemExtent,
           restorationId: widget.restorationId,
-          keyboardDismissBehavior: widget.keyboardDismissBehavior,
+          //   keyboardDismissBehavior: widget.keyboardDismissBehavior,
           semanticChildCount: widget.semanticChildCount,
           itemCount: _sortedElements.length * 2,
           addAutomaticKeepAlives: widget.addAutomaticKeepAlives,

@@ -92,6 +92,7 @@ class DataBaseMain {
       formType INTEGER,
       formName TEXT,
       formValue TEXT,
+       formGroup TEXT,
       categoryId INTEGER
       
        )""");

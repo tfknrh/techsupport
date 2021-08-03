@@ -8,6 +8,7 @@ import 'package:techsupport/controllers.dart';
 import 'package:techsupport/widgets.dart';
 import 'package:techsupport/utils.dart';
 import 'package:techsupport/screens.dart';
+import 'package:techsupport/screens/form/test.dart';
 import 'package:techsupport/models.dart';
 import 'package:intl/intl.dart';
 import 'package:images_picker/images_picker.dart';
@@ -416,6 +417,45 @@ class _AddAktivitasState extends State<AddAktivitas> {
                                     MaterialPageRoute(
                                         builder: (context) =>
                                             AddFormulirsScreen(
+                                                formValue: aktivitas.formValue,
+                                                isEdit: widget.isEdit,
+                                                aktivitasId:
+                                                    aktivitas.aktivitasId,
+                                                categoryId: _categoryId)));
+
+                                setState(() {
+                                  if (result != null) {
+                                    _formValue = result.join("|");
+                                  }
+                                });
+                              } else {
+                                SnackBars.showErrorSnackBar(
+                                    myScaContext,
+                                    context,
+                                    Icons.error,
+                                    "Error",
+                                    "Form tidak ditemukan");
+                              }
+                            },
+                            icon: Icon(Icons.attachment))
+                      ]),
+                      Row(children: [
+                        Text(
+                          "Tambahkan Form test",
+                          style: CText.primarycustomText(
+                              1.6, context, "CircularStdMedium"),
+                        ),
+                        IconButton(
+                            onPressed: () async {
+                              // final formcek = await DataBaseMain.db
+                              //     .getFormulirByCategoryID(_categoryId);
+                              // if (formcek.isNotEmpty) {
+                              if (e != null) {
+                                final result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            AddFormulirsScreentest(
                                                 formValue: aktivitas.formValue,
                                                 isEdit: widget.isEdit,
                                                 aktivitasId:

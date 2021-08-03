@@ -132,12 +132,12 @@ class _AddFormulirsScreenState extends State<AddFormulirsScreen> {
           child: Row(
             children: [
               Expanded(
-                  flex: 1,
+                  flex: 2,
                   child: Text(listFormulir[index].formName,
                       style: CText.primarycustomText(
                           1.7, context, 'CircularStdBook'))),
               Expanded(
-                flex: 3,
+                flex: 2,
                 child: CTextField(
                     label: listFormulir[index].formName,
                     inputType: TextInputType.text,

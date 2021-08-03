@@ -11,3 +11,4 @@ export 'screens/settings/s_settings.dart';
 export 'screens/s_maps.dart';
 export 'screens/s_logcat.dart';
 export 'screens/s_home.dart';
+export 'screens/form/test.dart';

@@ -106,6 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Provider.of<SettingProvider>(context, listen: false).getListSettings();
     Provider.of<ImagesProvider>(context, listen: false).getListImagess();
     Provider.of<AktivitasProvider>(context, listen: false).initData();
+    //Provider.of<ListData>(context, listen: false);
 
     TimerLoop(
         duration: Duration(seconds: 30),
