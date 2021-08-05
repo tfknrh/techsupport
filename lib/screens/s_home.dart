@@ -2,14 +2,18 @@ import 'package:flashy_tab_bar/flashy_tab_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:techsupport/api/a_db.dart';
 import 'package:techsupport/controllers.dart';
 import 'package:techsupport/widgets.dart';
 import 'package:techsupport/utils.dart';
 import 'package:techsupport/screens.dart';
+import 'package:techsupport/models.dart';
 import 'package:permissions_plugin/permissions_plugin.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:move_to_background/move_to_background.dart';
+
+import 'package:theme_mode_handler/theme_mode_handler.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key key}) : super(key: key);
@@ -96,15 +100,25 @@ class _HomeScreenState extends State<HomeScreen> {
         });
   }
 
+  getSetting() async {
+    List<Setting> list = await DataBaseMain.getListSettings();
+    ThemeModeHandler.of(context).saveThemeMode(
+        list.first.sysTheme == "dark" ? ThemeMode.dark : ThemeMode.light);
+    MColors.main =
+        list.first.sysColor == null ? Colors.blue[100] : list.first.sysColor;
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsFlutterBinding.ensureInitialized();
+    getSetting();
     Provider.of<CustomerProvider>(context, listen: false).getListCustomers();
     Provider.of<CategoryProvider>(context, listen: false).getListCategorys();
     Provider.of<FormulirProvider>(context, listen: false).getListFormulirs();
-    Provider.of<SettingProvider>(context, listen: false).getListSettings();
     Provider.of<ImagesProvider>(context, listen: false).getListImagess();
+    Provider.of<SettingProvider>(context, listen: false).getListSettings();
     Provider.of<AktivitasProvider>(context, listen: false).initData();
     //Provider.of<ListData>(context, listen: false);
 
@@ -144,48 +158,95 @@ class _HomeScreenState extends State<HomeScreen> {
       return false;
     }, child: Consumer<AktivitasProvider>(builder: (context, value, _) {
       return Scaffold(
-          backgroundColor: MColors.backgroundColor(context),
-          body: _children[value.selectedIndex],
-          bottomNavigationBar: FlashyTabBar(
-            animationCurve: Curves.easeIn,
-            height: 70,
-            animationDuration: Duration(milliseconds: 300),
-            selectedIndex: value.selectedIndex,
-            backgroundColor: MColors.dialogsColor(context),
-            iconSize: _responsive.ip(2.3),
-            showElevation: true,
-            onItemSelected: (index) => value.setTabBarIndex(index),
-            items: [
-              // FlashyTabBarItem(
-              //   activeColor: MColors.buttonColor(),
-              //   inactiveColor: MColors.textColor(context).withOpacity(0.7),
-              //   icon: Icon(AntDesign.home),
-              //   title: Text('Aktivitas',
-              //       style: TextStyle(fontFamily: 'CircularStdBold')),
-              // ),
-              FlashyTabBarItem(
-                activeColor: MColors.buttonColor(),
-                inactiveColor: MColors.textColor(context).withOpacity(0.7),
-                icon: Icon(AntDesign.calendar),
-                title: Text('Aktivitas',
-                    style: TextStyle(fontFamily: 'CircularStdBold')),
+        backgroundColor: MColors.backgroundColor(context),
+        body: _children[value.selectedIndex],
+        bottomNavigationBar:
+            // FlashyTabBar(
+            //   animationCurve: Curves.easeIn,
+            //   height: 70,
+            //   animationDuration: Duration(milliseconds: 300),
+            //   selectedIndex: value.selectedIndex,
+            //   backgroundColor: MColors.dialogsColor(context),
+            //   iconSize: _responsive.ip(2.3),
+            //   showElevation: true,
+            //   onItemSelected: (index) => value.setTabBarIndex(index),
+            //   items: [
+
+            //     FlashyTabBarItem(
+            //       activeColor: MColors.buttonColor(),
+            //       inactiveColor: MColors.textColor(context).withOpacity(0.7),
+            //       icon: Icon(AntDesign.calendar),
+            //       title: Text('Aktivitas',
+            //           style: TextStyle(fontFamily: 'CircularStdBold')),
+            //     ),
+            //     FlashyTabBarItem(
+            //       activeColor: MColors.buttonColor(),
+            //       inactiveColor: MColors.textColor(context).withOpacity(0.7),
+            //       icon: Icon(Icons.person),
+            //       title: Text('Customer',
+            //           style: TextStyle(fontFamily: 'CircularStdBold')),
+            //     ),
+            //     FlashyTabBarItem(
+            //       activeColor: MColors.buttonColor(),
+            //       inactiveColor: MColors.textColor(context).withOpacity(0.7),
+            //       icon: Icon(AntDesign.setting),
+            //       title: Text('Setting',
+            //           style: TextStyle(fontFamily: 'CircularStdBold')),
+            //     ),
+            //   ],
+            // )
+            BottomNavigationBar(
+          currentIndex: value.selectedIndex,
+          type: BottomNavigationBarType.fixed,
+          selectedFontSize: 10,
+          selectedLabelStyle: TextStyle(color: MColors.buttonColor()),
+          selectedItemColor: MColors.buttonColor(),
+          unselectedFontSize: 10,
+          items: [
+            BottomNavigationBarItem(
+              icon: Container(
+                margin: EdgeInsets.only(bottom: 5),
+                child: Icon(
+                  Icons.local_activity,
+                  color: (value.selectedIndex == 0)
+                      ? MColors.buttonColor()
+                      : MColors.textColor(context).withOpacity(0.7),
+                ),
               ),
-              FlashyTabBarItem(
-                activeColor: MColors.buttonColor(),
-                inactiveColor: MColors.textColor(context).withOpacity(0.7),
-                icon: Icon(Icons.person),
-                title: Text('Customer',
-                    style: TextStyle(fontFamily: 'CircularStdBold')),
+              label: 'Aktivitas',
+            ),
+            BottomNavigationBarItem(
+              icon: Container(
+                margin: EdgeInsets.only(bottom: 5),
+                child: Icon(
+                  Icons.person,
+                  color: (value.selectedIndex == 1)
+                      ? MColors.buttonColor()
+                      : MColors.textColor(context).withOpacity(0.7),
+                ),
               ),
-              FlashyTabBarItem(
-                activeColor: MColors.buttonColor(),
-                inactiveColor: MColors.textColor(context).withOpacity(0.7),
-                icon: Icon(AntDesign.setting),
-                title: Text('Setting',
-                    style: TextStyle(fontFamily: 'CircularStdBold')),
+              label: 'Customer',
+            ),
+            BottomNavigationBarItem(
+              icon: Container(
+                margin: EdgeInsets.only(bottom: 5),
+                child: Icon(
+                  Icons.image,
+                  color: (value.selectedIndex == 2)
+                      ? MColors.buttonColor()
+                      : MColors.textColor(context).withOpacity(0.7),
+                ),
               ),
-            ],
-          ));
+              label: 'Images',
+            ),
+          ],
+          onTap: (index) {
+            setState(() {
+              value.selectedIndex = index;
+            });
+          },
+        ),
+      );
     }));
   }
 }

@@ -43,10 +43,10 @@ class SettingProvider with ChangeNotifier {
 
   _initData() async {
     setting.clear();
-    final x = await DataBaseMain.db.getListSettings();
+    final x = await DataBaseMain.getListSettings();
     setting = x;
     images.clear();
-    images = await DataBaseMain.getListImages();
+    images = await DataBaseMain.getListImagesbySync(1);
     itemSetting.clear();
     itemSetting = [
       ItemSetting(
@@ -192,7 +192,10 @@ class SettingProvider with ChangeNotifier {
     final authenticateClient = GoogleAuthClient(authHeaders);
     final driveApi = drive.DriveApi(authenticateClient);
 
-    await driveApi.files.get(setting.first.sysDBId);
+    final result = await driveApi.files.list(q: "'root' in parents");
+    for (int i = 0; 0 < result.files.length; i++) {
+      print(result.files.toList()[i].id);
+    }
   }
 
   Future<void> uploadtoGdrive() async {
@@ -225,9 +228,8 @@ class SettingProvider with ChangeNotifier {
       result.id,
       DateTime.now(),
     );
-
-    for (int i = 0; 0 < images.length; i++) {
-      if (images[i].isSync == 1) {
+    if (images.length > 0) {
+      for (int i = 0; 0 < images.length; i++) {
         var driveImg = new drive.File();
         driveImg.name = io.File(images[i].imgImage).path.split('/').last;
         try {
@@ -246,6 +248,7 @@ class SettingProvider with ChangeNotifier {
     notifBackup();
 
     _initData();
+    downloadfromGdrive();
     notifyListeners();
   }
 
@@ -287,8 +290,8 @@ class SettingProvider with ChangeNotifier {
       DateTime.now(),
     );
 
-    for (int i = 0; 0 < images.length; i++) {
-      if (images[i].isSync == 0) {
+    if (images.length > 0) {
+      for (int i = 0; 0 < images.length; i++) {
         var driveImg = new drive.File();
         driveImg.name = io.File(images[i].imgImage).path.split('/').last;
         try {
@@ -296,12 +299,12 @@ class SettingProvider with ChangeNotifier {
         } on Exception catch (e) {
           print(e.toString());
         }
-        final img = await driveApi.files.create(driveImg,
+        var img = await driveApi.files.create(driveImg,
             uploadMedia: drive.Media(io.File(images[i].imgImage).openRead(),
                 io.File(images[i].imgImage).lengthSync()));
         await DataBaseMain.db
             .updateImagescol("imgStr", img.id, images[i].imgId);
-        await DataBaseMain.db.updateImagescol("isSync", "1", images[i].imgId);
+        await DataBaseMain.db.updateImagescol("isSync", "2", images[i].imgId);
       }
     }
     notifBackup();

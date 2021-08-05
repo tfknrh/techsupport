@@ -84,7 +84,9 @@ class DataBaseMain {
       sysGmail TEXT,
       sysDBId TEXT,
       sysCreated TEXT,  
-      sysModified TEXT  
+      sysModified TEXT,  
+      sysTheme TEXT,  
+      sysColor TEXT  
        )""");
 
     await db.execute("""CREATE TABLE Formulir (
@@ -105,7 +107,9 @@ class DataBaseMain {
       "sysBackupSch": "2021-01-01 00:00:00",
       "sysGmail": "No Account",
       "sysCreated": "2021-01-01 00:00:00",
-      "sysModified": "2021-01-01 00:00:00"
+      "sysModified": "2021-01-01 00:00:00",
+      "sysTheme": "light",
+      "sysColor": "ff913D00"
     });
     await db.execute(
         "INSERT INTO Category(categoryName,color,candelete) values('Installasi','ffDD3100',0)");
@@ -267,7 +271,7 @@ class DataBaseMain {
 
   // #endregion
   // #region Setting
-  Future<List<Setting>> getListSettings() async {
+  static Future<List<Setting>> getListSettings() async {
     final db = await DataBaseMain.db.database;
     final res = await db.query('Setting');
     List<Setting> list =
@@ -518,6 +522,16 @@ class DataBaseMain {
     final db = await DataBaseMain.db.database;
     final res =
         await db.rawQuery('select * from Images where aktivitasId = ?', [id]);
+
+    List<Images> list =
+        res.isNotEmpty ? res.map((c) => Images.fromJson(c)).toList() : [];
+    return list;
+  }
+
+  static Future<List<Images>> getListImagesbySync(int id) async {
+    final db = await DataBaseMain.db.database;
+    final res =
+        await db.rawQuery('select * from Images where isSync = ?', [id]);
 
     List<Images> list =
         res.isNotEmpty ? res.map((c) => Images.fromJson(c)).toList() : [];

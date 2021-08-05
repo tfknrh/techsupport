@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:group_list_view/group_list_view.dart';
+
 import 'package:provider/provider.dart';
 import 'package:techsupport/controllers.dart';
 import 'package:techsupport/widgets.dart';
 import 'package:techsupport/utils.dart';
 import 'package:techsupport/models.dart';
 import 'package:techsupport/api.dart';
+import "package:collection/collection.dart";
+import 'dart:convert';
 
 class AddFormulirsScreen extends StatefulWidget {
   final bool isEdit;
@@ -17,151 +21,72 @@ class AddFormulirsScreen extends StatefulWidget {
       : super(key: key);
 
   @override
-  _AddFormulirsScreenState createState() => _AddFormulirsScreenState();
+  _GroupListScreenState createState() => _GroupListScreenState();
 }
 
-class _AddFormulirsScreenState extends State<AddFormulirsScreen> {
+class _GroupListScreenState extends State<AddFormulirsScreen> {
   // Formulir formulir = Formulir();
   List<Formulir> listFormulir = [];
   List<String> listValue = [];
   List<String> templistValue = [];
+  Map<dynamic, List<Formulir>> listdata;
   String _formValue;
   BuildContext myScaContext;
   List<TextEditingController> _controllers = [];
+  List<bool> listCheck = [];
+
   void getListForm() async {
     // listFormulir.clear();
     //  _controllers.clear();
     listFormulir =
         await DataBaseMain.getFormulirByCategoryID(widget.categoryId);
+
     if (widget.formValue != null) {
       listValue = widget.formValue.split("|");
       for (int i = 0; i < listValue.length; i++) {
-        _controllers.add(new TextEditingController(text: listValue[i]));
+        //_controllers.add(new TextEditingController(text: listValue[i]));
+
+        if (listValue[i] != "") {
+          listFormulir[i].formValue = listValue[i];
+          listFormulir[i].isCheck = true;
+        } else {
+          listFormulir[i].isCheck = false;
+        }
+
+        //  listCheck.add(listValue[i] == "ok" ? true : false);
       }
     } else if (widget.formValue == null) {
       for (int i = 0; i < listFormulir.length; i++) {
-        _controllers.add(new TextEditingController(text: ""));
+        listFormulir[i].isCheck = false;
+
+        //   _controllers.add(new TextEditingController(text: ""));
+        //   listFormulir[i].formValue = "";
+        // listCheck.add(false);
+      }
+      // listCheck = List<bool>.filled(listFormulir.length, false);
+    }
+    listdata = groupBy(listFormulir, (form) => form.formGroup);
+    setState(() {});
+  }
+
+  dynamic getData(Map data, List<Formulir> way) {
+    dynamic dataTemp = data;
+    if (way.length > 0) {
+      for (int x = 0; x < way.length; x++) {
+        dataTemp = dataTemp[way[x]];
       }
     }
-    setState(() {});
+    return dataTemp;
   }
 
   @override
   void initState() {
     super.initState();
-    //  Provider.of<FormulirProvider>(context, listen: false).getListFormulirs();
     getListForm();
-    // if (widget.isEdit == false) {
-    //   for (int i = 0; i < listFormulir.length; i++) {
-    //     _controllers.add(new TextEditingController(text: ""));
-    //   }
-    // } else {
-
-    // }
-
-    // WidgetsFlutterBinding.ensureInitialized();
-
-    //Provider.of<FormulirProvider>(context, listen: false).getListFormulirs();
   }
 
-  //Map<String, int> tempformulir = {};
-
-  // void takeNumber(String text, String itemId) {
-  //   try {
-  //     int number = int.parse(text);
-  //     tempformulir[itemId] = number;
-  //     print(tempformulir);
-  //   } on FormatException {}
-  // }
-  @override
-  void dispose() {
-    _controllers.clear();
-    super.dispose();
-  }
-
-  _bodyList(List<Formulir> problemList) => ListView.builder(
-      physics: const BouncingScrollPhysics(),
-      itemCount: problemList.length,
-      shrinkWrap: true,
-      itemBuilder: (BuildContext context, int index) {
-        _controllers.add(new TextEditingController());
-        _controllers[index].text = problemList[index].formValue;
-
-        return Container(
-            padding: EdgeInsets.only(top: 0, right: 10, left: 10),
-            child: Row(children: <Widget>[
-              expandStyle(
-                  2,
-                  Container(
-                      margin: EdgeInsets.only(top: 35),
-                      child: Text(problemList[index].formName))),
-              expandStyle(
-                  1,
-                  TextFormField(
-                      controller: TextEditingController.fromValue(
-                          TextEditingValue(
-                              text: problemList[index].formValue,
-                              selection: new TextSelection.collapsed(
-                                  offset:
-                                      problemList[index].formValue.length))),
-                      keyboardType: TextInputType.number,
-                      onChanged: (String str) {
-                        problemList[index].formValue = str;
-                        var total = problemList.fold(
-                            0,
-                            (t, e) =>
-                                t +
-                                double.parse(
-                                    e.formValue.isEmpty ? '0' : e.formValue));
-                        print(total);
-                      }))
-            ]));
-      });
-  expandStyle(int flex, Widget child) => Expanded(flex: flex, child: child);
-
-  Widget singleItemList(int index) {
-    final _size = MediaQuery.of(context).size;
-    //Formulir item = listFormulir[index];
-
-    return Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-        ),
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-          child: Row(
-            children: [
-              Expanded(
-                  flex: 2,
-                  child: Text(listFormulir[index].formName,
-                      style: CText.primarycustomText(
-                          1.7, context, 'CircularStdBook'))),
-              Expanded(
-                flex: 2,
-                child: CTextField(
-                    label: listFormulir[index].formName,
-                    inputType: TextInputType.text,
-                    controller: _controllers[index],
-                    // function: (text) {
-                    //   formulir.formValue = listFormulir[index].formValue;
-                    //   listValue[index] = _controllers[index].text;
-                    //  },
-                    padding: EdgeInsets.symmetric(
-                        vertical: 5, horizontal: _size.width * .02)),
-              ),
-            ],
-          ),
-        ));
-  }
-
-  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
-    String languageCode = Localizations.localeOf(context).toLanguageTag();
-
-    final _size = MediaQuery.of(context).size;
-
-    //  return Consumer<FormulirProvider>(builder: (context, value, _) {
     return Scaffold(
       backgroundColor: MColors.backgroundColor(context),
       appBar: AppBar(
@@ -178,63 +103,121 @@ class _AddFormulirsScreenState extends State<AddFormulirsScreen> {
         ),
         actions: [
           IconButton(
-            onPressed: () async {
-              // final x = await value.deleteFormulir(widget.formulir);
-              // if (x.identifier == "success") {
-              //   Navigator.pop(context);
-              // } else {
-              //   SnackBars.showErrorSnackBar(myScaContext, context,
-              //       Icons.error, "Category", x.message);
-              // }
-            },
+            onPressed: () async {},
             icon: Icon(Icons.delete),
           ),
           IconButton(
             onPressed: () async {
-              //  _formValue = listValue.join("|");
-              for (int i = 0; i < _controllers.length; i++) {
-                templistValue.add(_controllers[i].text);
-              }
+              // for (int i = 0; i < _controllers.length; i++) {
+              //   templistValue.add(_controllers[i].text);
+              // }
+              listdata.forEach((key, value) {
+                templistValue.addAll(value
+                    .toList()
+                    .map((e) => e.isCheck == true ? e.formValue : ""));
+              });
 
+              // for (int i = 0; i <    listFormulir.length; i++) {
+              //   templistValue.add(listFormulir[i].formValue);
+              // }
               Navigator.pop(context, templistValue);
               Provider.of<AktivitasProvider>(context, listen: false).initData();
-              _controllers.clear();
+              //_controllers.clear();
             },
             icon: Icon(Icons.save),
           ),
         ],
       ),
-      body: RefreshIndicator(
-          onRefresh: () async {
-            //  getListForm();
-          },
-          child: ListView.separated(
-              itemBuilder: (context, index) {
-                if (listFormulir.isEmpty) {
-                  return CircularProgressIndicator();
-                } else {
-                  return singleItemList(index);
-                }
-              },
-              separatorBuilder: (context, int) {
-                return Divider(color: MColors.secondaryTextColor(context));
-              },
-              itemCount: listFormulir.length)),
-
-      // ListView.builder(
-      //     shrinkWrap: true,
-      //     itemCount: itemList.length,
-      //     physics: BouncingScrollPhysics(),
-      //     itemBuilder: (context, index) {
-      //       if (itemList.isEmpty) {
-      //         return CircularProgressIndicator();
-      //       } else {
-      //         return singleItemList(index);
-      //       }
-      //     }),
-
-      // ),
+      body: GroupListView(
+        sectionsCount: listdata.keys.toList().length,
+        countOfItemInSection: (int section) {
+          return listdata.values.toList()[section].length;
+        },
+        itemBuilder: _itemBuilder,
+        groupHeaderBuilder: (BuildContext context, int section) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 0),
+            child: Text(listdata.keys.toList()[section],
+                style:
+                    CText.primarycustomText(1.8, context, 'CircularStdBold')),
+          );
+        },
+        separatorBuilder: (context, index) =>
+            Divider(color: MColors.secondaryTextColor(context)),
+        sectionSeparatorBuilder: (context, section) => SizedBox(height: 10),
+      ),
     );
-    // });
+  }
+
+  Widget _itemBuilder(BuildContext context, IndexPath index) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+        title: Row(
+          children: [
+            Expanded(
+                flex: 2,
+                child: Text(
+                    listdata.values
+                        .toList()[index.section][index.index]
+                        .formName,
+                    style: CText.primarycustomText(
+                        1.7, context, 'CircularStdBook'))),
+            Checkbox(
+                value: listdata.values
+                    .toList()[index.section][index.index]
+                    .isCheck,
+                onChanged: (val) {
+                  setState(() {
+                    listdata.values
+                        .toList()[index.section][index.index]
+                        .isCheck = val;
+                  });
+                }),
+            Expanded(
+              flex: 2,
+              child: CTextField(
+                  label: listdata.values
+                      .toList()[index.section][index.index]
+                      .formName,
+                  inputType: TextInputType.text,
+                  controller: TextEditingController.fromValue(TextEditingValue(
+                      text: listdata.values
+                                  .toList()[index.section][index.index]
+                                  .isCheck ==
+                              true
+                          ? listdata.values
+                              .toList()[index.section][index.index]
+                              .formValue
+                          : "",
+                      selection: new TextSelection.collapsed(
+                          offset: listdata.values
+                                      .toList()[index.section][index.index]
+                                      .isCheck ==
+                                  true
+                              ? listdata.values
+                                  .toList()[index.section][index.index]
+                                  .formValue
+                                  .length
+                              : 0))),
+                  function: (text) {
+                    listdata.values
+                        .toList()[index.section][index.index]
+                        .formValue = text;
+                  },
+                  padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10)),
+            ),
+          ],
+        ),
+        //  Text(
+        //   listdata.values.toList()[index.section][index.index].formName,
+        //   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+        // ),
+        //  trailing: Icon(Icons.arrow_forward_ios),
+      ),
+      //  ),
+    );
   }
 }

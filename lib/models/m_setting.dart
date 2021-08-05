@@ -1,4 +1,5 @@
 import 'package:techsupport/utils.dart';
+import 'package:flutter/material.dart';
 
 class Setting {
   int sysCountAkt;
@@ -10,6 +11,8 @@ class Setting {
   String sysDBId;
   DateTime sysCreated;
   DateTime sysModified;
+  String sysTheme;
+  Color sysColor;
 
   Setting();
 
@@ -24,20 +27,24 @@ class Setting {
     e.sysDBId = json["sysDBId"];
     e.sysCreated = TimeValidator.stringtoDateTime(json["sysCreated"]);
     e.sysModified = TimeValidator.stringtoDateTime(json["sysModified"]);
+    e.sysTheme = json["sysTheme"];
+    e.sysColor = HexColor(json["sysColor"]);
     return e;
   }
 
   Map<String, dynamic> toBD() {
     var map = <String, dynamic>{
-      "sysCountAkt": sysCountAkt,
-      "sysCountCust": sysCountCust,
-      "sysCountImg": sysCountImg,
-      "sysBackupSize": sysBackupSize,
-      "sysBackupSch": TimeValidator.getDatenTime(sysBackupSch),
-      "sysGmail": sysGmail,
-      "sysDBId": sysDBId,
-      "sysCreated": TimeValidator.getDatenTime(sysCreated),
-      "sysModified": TimeValidator.getDatenTime(sysModified),
+      "sysCountAkt": this.sysCountAkt,
+      "sysCountCust": this.sysCountCust,
+      "sysCountImg": this.sysCountImg,
+      "sysBackupSize": this.sysBackupSize,
+      "sysBackupSch": TimeValidator.getDatenTime(this.sysBackupSch),
+      "sysGmail": this.sysGmail,
+      "sysDBId": this.sysDBId,
+      "sysCreated": TimeValidator.getDatenTime(this.sysCreated),
+      "sysModified": TimeValidator.getDatenTime(this.sysModified),
+      "sysTheme": this.sysTheme,
+      "sysColor": HexColorMaterial.colorToHext(this.sysColor),
     };
     return map;
   }

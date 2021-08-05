@@ -67,7 +67,7 @@ class _InputTextState extends State<CTextField> {
       maxLength: widget.maxLength == null ? null : widget.maxLength,
       keyboardType: widget.inputType,
       minLines: widget.minLines != null ? 1 : widget.minLines,
-      maxLines: widget.maxLines == null ? 1 : widget.maxLines,
+      maxLines: widget.maxLines,
       obscureText: widget.sisecure,
       cursorColor: Theme.of(context).buttonColor,
       style: TextStyle(

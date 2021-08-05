@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:provider/provider.dart';
+import 'package:techsupport/api.dart';
 import 'package:techsupport/controllers.dart';
 import 'package:techsupport/widgets.dart';
 import 'package:techsupport/utils.dart';
@@ -88,6 +89,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   ];
   static void _selectThemeMode(BuildContext context, ThemeMode value) async {
     ThemeModeHandler.of(context).saveThemeMode(value);
+    await DataBaseMain.db.updateSettingcol(
+        "sysTheme", value == ThemeMode.dark ? "dark" : "light");
     Navigator.pop(context, value);
   }
 
@@ -222,8 +225,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           MaterialColorPicker(
                             shrinkWrap: true,
                             selectedColor: _shadeColor,
-                            onColorChange: (color) =>
-                                setState(() => _tempShadeColor = color),
+                            onColorChange: (color) async {
+                              await DataBaseMain.db.updateSettingcol("sysColor",
+                                  HexColorMaterial.colorToHext(color));
+                              setState(() {
+                                _tempShadeColor = color;
+                              });
+                            },
                             onBack: () => print("Back button pressed"),
                           ),
                         );
