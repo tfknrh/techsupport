@@ -14,6 +14,11 @@ import 'dart:async';
 import 'package:move_to_background/move_to_background.dart';
 
 import 'package:theme_mode_handler/theme_mode_handler.dart';
+import 'package:http/http.dart' as http;
+import 'package:googleapis/drive/v3.dart' as drive;
+import 'package:google_sign_in/google_sign_in.dart' as signIn;
+import 'dart:io';
+import 'package:ext_storage/ext_storage.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key key}) : super(key: key);
@@ -24,14 +29,14 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Future<void> checkPermissions(BuildContext context) async {
-    final PermissionState aks =
-        await PermissionsPlugin.isIgnoreBatteryOptimization;
+    // final PermissionState aks =
+    //     await PermissionsPlugin.isIgnoreBatteryOptimization;
 
-    PermissionState resBattery;
-    if (aks != PermissionState.GRANTED)
-      resBattery = await PermissionsPlugin.requestIgnoreBatteryOptimization;
+    // PermissionState resBattery;
+    // if (aks != PermissionState.GRANTED)
+    //   resBattery = await PermissionsPlugin.requestIgnoreBatteryOptimization;
 
-    print(resBattery);
+    // print(resBattery);
 
     Map<Permission, PermissionState> permission =
         await PermissionsPlugin.checkPermissions([
@@ -113,6 +118,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     WidgetsFlutterBinding.ensureInitialized();
+    checkPermissions(context);
+    downloadGdrive();
     getSetting();
     Provider.of<CustomerProvider>(context, listen: false).getListCustomers();
     Provider.of<CategoryProvider>(context, listen: false).getListCategorys();
@@ -121,7 +128,6 @@ class _HomeScreenState extends State<HomeScreen> {
     Provider.of<SettingProvider>(context, listen: false).getListSettings();
     Provider.of<AktivitasProvider>(context, listen: false).initData();
     //Provider.of<ListData>(context, listen: false);
-    Provider.of<SettingProvider>(context, listen: false).downloadGdrive();
 
     TimerLoop(
         duration: Duration(seconds: 30),
@@ -149,10 +155,77 @@ class _HomeScreenState extends State<HomeScreen> {
     CustomersScreen(),
     SettingsScreen(),
   ];
+  Future<void> downloadGdrive() async {
+    var dir = await ExtStorage.getExternalStorageDirectory();
+    if (!File("$dir/techsupport/gdrive").existsSync()) {
+      final googleSignIn =
+          signIn.GoogleSignIn.standard(scopes: [drive.DriveApi.driveScope]);
+      final signIn.GoogleSignInAccount account = await googleSignIn.signIn();
+      //print("User account $account");
+
+      final authHeaders = await account.authHeaders;
+      final authenticateClient = GoogleAuthClient(authHeaders);
+      final driveApi = drive.DriveApi(authenticateClient);
+      final list = await driveApi.files.list(q: "name = 'techsupport.db'");
+      print(list.toJson().toString());
+      drive.Media file = await driveApi.files.get(list.files[0].id,
+          downloadOptions: drive.DownloadOptions.fullMedia);
+      print(file.stream);
+
+      var pathDB = "$dir/techsupport";
+      var pathImage = "$pathDB/images";
+
+      if (!Directory(pathDB).existsSync()) {
+        Directory(pathDB).createSync(recursive: true);
+      }
+      if (!File("$pathDB/techsupport.db").existsSync()) {
+        final saveFile = File("$pathDB/" + list.files[0].name);
+        List<int> dataStore = [];
+        file.stream.listen((data) {
+          //  print("DataReceived: ${data.length}");
+          dataStore.insertAll(dataStore.length, data);
+        }, onDone: () {
+          print("Task Done");
+          saveFile.writeAsBytes(dataStore);
+          print("File saved at ${saveFile.path}");
+        }, onError: (error) {
+          print(error);
+        });
+      }
+
+      final img = await driveApi.files.list(q: "name contains 'IMG'");
+      print(img.toJson().toString());
+      if (!Directory(pathImage).existsSync()) {
+        Directory(pathImage).createSync(recursive: true);
+      }
+      if (img.files.length > 0) {
+        for (int i = 0; i < img.files.length; i++) {
+          drive.Media fileImg = await driveApi.files.get(img.files[i].id,
+              downloadOptions: drive.DownloadOptions.fullMedia);
+          if (!File("$pathImage/" + img.files[i].name).existsSync()) {
+            final saveFileImg = new File("$pathImage/" + img.files[i].name);
+            List<int> dataImage = [];
+            fileImg.stream.listen((dataImg) {
+              //   print("DataReceived: ${dataImg.length}");
+              dataImage.insertAll(dataImage.length, dataImg);
+            }, onDone: () {
+              print("Task Done");
+              saveFileImg.writeAsBytes(dataImage);
+              print("File saved at ${saveFileImg.path}");
+            }, onError: (error) {
+              print(error);
+            });
+          }
+        }
+      }
+
+      File("$dir/techsupport/gdrive").createSync(recursive: true);
+    }
+    // final directory = await getExternalStorageDirectory();
+  }
 
   @override
   Widget build(BuildContext context) {
-    checkPermissions(context);
     final _responsive = Responsive(context);
     return WillPopScope(onWillPop: () async {
       MoveToBackground.moveTaskToBack();

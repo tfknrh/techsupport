@@ -1,12 +1,17 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
+import 'package:techsupport/controllers.dart';
 import 'package:techsupport/models.dart';
 import 'package:techsupport/utils.dart';
 import 'package:techsupport/api/SQL.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-
+import 'package:provider/provider.dart';
 import 'package:ext_storage/ext_storage.dart';
+import 'package:http/http.dart' as http;
+import 'package:googleapis/drive/v3.dart' as drive;
+import 'package:google_sign_in/google_sign_in.dart' as signIn;
 
 class DataBaseMain {
   DataBaseMain._();
@@ -27,6 +32,11 @@ class DataBaseMain {
     // Directory documentsDirectory = await getApplicationDocumentsDirectory();
     // String path = join(documentsDirectory.path, 'TaskManagerDB1.db');
     var dir = await ExtStorage.getExternalStorageDirectory();
+    // if (!File("$dir/techsupport/gdrive").existsSync()) {
+    //   downloadGdrive();
+    //   File("$dir/techsupport/gdrive").createSync(recursive: true);
+    // }
+
     if (!Directory("$dir/techsupport").existsSync()) {
       Directory("$dir/techsupport").createSync(recursive: true);
     }
@@ -501,6 +511,14 @@ class DataBaseMain {
     var _database = await database;
     List<Map<String, dynamic>> x =
         await _database.rawQuery('SELECT max(aktivitasId) from aktivitas');
+    int result = Sqflite.firstIntValue(x);
+    return result;
+  }
+
+  Future<int> maxformId() async {
+    var _database = await database;
+    List<Map<String, dynamic>> x =
+        await _database.rawQuery('SELECT max(formId) from Formulir');
     int result = Sqflite.firstIntValue(x);
     return result;
   }

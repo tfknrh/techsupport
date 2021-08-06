@@ -207,9 +207,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
                             _timeStart.text + ":00",
                             _timeFinish.text + ":00",
                             dateSelected,
-                            _ijinNotif == true && _tipeAktivitas == false
-                                ? 1
-                                : 0,
+                            _ijinNotif == true && _isStatus == false ? 1 : 0,
                             _tipeAktivitas == true ? 1 : 0,
                             1,
                             e.categoryId == null ? 1 : e.categoryId,
@@ -223,9 +221,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
                             _timeStart.text + ":00",
                             _timeFinish.text + ":00",
                             dateSelected,
-                            _ijinNotif == true && _tipeAktivitas == false
-                                ? 1
-                                : 0,
+                            _ijinNotif == true && _isStatus == false ? 1 : 0,
                             _tipeAktivitas == true ? 1 : 0,
                             1,
                             e.categoryId == null ? 1 : e.categoryId,

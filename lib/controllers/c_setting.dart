@@ -202,12 +202,14 @@ class SettingProvider with ChangeNotifier {
         downloadOptions: drive.DownloadOptions.fullMedia);
     print(file.stream);
     var dir = await ExtStorage.getExternalStorageDirectory();
-    print(dir);
-    if (!io.Directory("$dir/techsupport2").existsSync()) {
-      io.Directory("$dir/techsupport2").createSync(recursive: true);
+    var pathDB = "$dir/techsupport";
+    var pathImage = "$pathDB/images";
+
+    if (!io.Directory(pathDB).existsSync()) {
+      io.Directory(pathDB).createSync(recursive: true);
     }
-    if (!io.File("$dir/techsupport2/techsupport.db").existsSync()) {
-      final saveFile = io.File(dir + "/" + list.files[0].name);
+    if (!io.File("$pathDB/techsupport.db").existsSync()) {
+      final saveFile = io.File("$pathDB/" + list.files[0].name);
       List<int> dataStore = [];
       file.stream.listen((data) {
         print("DataReceived: ${data.length}");
@@ -220,6 +222,30 @@ class SettingProvider with ChangeNotifier {
         print(error);
       });
     }
+    final img = await driveApi.files.list(q: "name contains 'IMG'");
+    print(img.toJson().toString());
+    if (!io.Directory(pathImage).existsSync()) {
+      io.Directory(pathImage).createSync(recursive: true);
+    }
+    if (img.files.length > 0) {
+      for (int i = 0; i < img.files.length; i++) {
+        if (!io.File("$pathImage/" + img.files[i].name).existsSync()) {
+          final saveFileImg = io.File("$pathImage/" + img.files[i].name);
+          List<int> dataImage = [];
+          file.stream.listen((dataImg) {
+            print("DataReceived: ${dataImg.length}");
+            dataImage.insertAll(dataImage.length, dataImg);
+          }, onDone: () {
+            print("Task Done");
+            saveFileImg.writeAsBytes(dataImage);
+            print("File saved at ${saveFileImg.path}");
+          }, onError: (error) {
+            print(error);
+          });
+        }
+      }
+    }
+
     // final directory = await getExternalStorageDirectory();
   }
 

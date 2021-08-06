@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:techsupport/api.dart';
 import 'package:techsupport/models.dart';
+import 'package:techsupport/Json/j_formulir.dart';
 
 class FormulirProvider with ChangeNotifier {
   List<Formulir> formulir = [];
@@ -8,6 +9,7 @@ class FormulirProvider with ChangeNotifier {
   List<TextEditingController> controllers = [];
 
   void getListFormulirs() async {
+    insertFormulirDefault();
     final x = await DataBaseMain.getListFormulirs();
     formulir = x;
     notifyListeners();
@@ -18,6 +20,24 @@ class FormulirProvider with ChangeNotifier {
   }
 
   //list of controllers
+  void insertFormulirDefault() async {
+    int maxId = await DataBaseMain.db.maxformId();
+    if (maxId < formulirData.length) {
+      Map<String, dynamic> toDatabase(int index) => {
+            "categoryId": formulir[index].categoryId,
+            "formGroup": formulir[index].formGroup,
+            "formId": formulir[index].formId,
+            "formName": formulir[index].formName,
+            "formType": formulir[index].formType,
+            "formValue": formulir[index].formValue,
+          };
+      final db = await DataBaseMain.db.database;
+
+      for (int i = 0; i < formulirData.length; i++) {
+        await db.insert("formulir", toDatabase(i));
+      }
+    }
+  }
 
   void addTextField() {
     formulir.add(Formulir());
