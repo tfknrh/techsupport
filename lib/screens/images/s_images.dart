@@ -41,7 +41,7 @@ class _ImageListState extends State<ImageList> {
             elevation: 2,
             title: Text(
               "Daftar Images",
-              style: CText.primarycustomText(2.5, context, "CircularStdBold"),
+              style: CText.primarycustomText(2.5, context, "CircularStdBook"),
             ),
             actions: <Widget>[
               IconButton(
@@ -59,7 +59,7 @@ class _ImageListState extends State<ImageList> {
                                 children: [
                               Text('Tidak ditemukan aktivitas :(',
                                   style: CText.primarycustomText(
-                                      1.8, context, 'CircularStdMedium')),
+                                      1.8, context, 'CircularStdBook')),
                               SizedBox(height: 20),
                               Image.asset(
                                 'assets/images/not_found.png',
@@ -78,14 +78,17 @@ class _ImageListState extends State<ImageList> {
                             SizedBox(height: 5),
                             Text(img.imgName,
                                 style: CText.primarycustomText(
-                                    1.6, context, 'CircularStdMedium')),
+                                    1.6, context, 'CircularStdBook')),
                             SizedBox(height: 20),
                           ]);
                         },
                       ),
                     );
                   },
-                  icon: Icon(Icons.search)),
+                  icon: Icon(
+                    AntDesign.search1,
+                    color: MColors.buttonColor(),
+                  )),
             ],
           ),
           body: SafeArea(
@@ -122,7 +125,7 @@ class _ImageListState extends State<ImageList> {
                           child: Stack(children: [
                             ExtendedImage.file(
                               File(value.images[index].imgImage),
-                              fit: BoxFit.contain,
+                              fit: BoxFit.fitHeight,
                             ),
                             Align(
                               alignment: Alignment.bottomCenter,
@@ -133,11 +136,11 @@ class _ImageListState extends State<ImageList> {
                                   Container(
                                     padding: EdgeInsets.all(10),
                                     color:
-                                        MColors.buttonColor().withOpacity(.1),
+                                        MColors.buttonColor().withOpacity(.3),
                                     child: Text(
                                       value.images[index].imgName,
                                       style: CText.primarycustomText(
-                                          1.4, context, 'CircularStdMedium'),
+                                          1.4, context, 'CircularStdBook'),
                                     ),
                                   )
                                 ],

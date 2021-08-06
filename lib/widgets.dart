@@ -12,3 +12,4 @@ export 'widgets/w_splashscreen.dart';
 export 'widgets/w_text.dart';
 export 'widgets/w_textfield.dart';
 export 'widgets/w_timer.dart';
+export 'package:flutter_vector_icons/flutter_vector_icons.dart';

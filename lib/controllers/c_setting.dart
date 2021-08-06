@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:googleapis/cloudresourcemanager/v2.dart';
 import 'package:techsupport/api.dart';
 import 'package:techsupport/utils.dart';
 import 'package:techsupport/models.dart';
@@ -179,44 +180,88 @@ class SettingProvider with ChangeNotifier {
     await driveApi.files.delete(setting.first.sysDBId);
   }
 
-  Future<void> downloadfromGdrive() async {
-    //  _listSetting.clear();
-    //  getSetting();
+  void logoutFromGoogle() async {
+    final googleSignIn =
+        signIn.GoogleSignIn.standard(scopes: [drive.DriveApi.driveScope]);
+    final signIn.GoogleSignInAccount account = await googleSignIn.signOut();
+    print("User account $account");
+  }
 
+  Future<void> downloadGdrive() async {
     final googleSignIn =
         signIn.GoogleSignIn.standard(scopes: [drive.DriveApi.driveScope]);
     final signIn.GoogleSignInAccount account = await googleSignIn.signIn();
-    print("User account $account");
+    //print("User account $account");
 
     final authHeaders = await account.authHeaders;
     final authenticateClient = GoogleAuthClient(authHeaders);
     final driveApi = drive.DriveApi(authenticateClient);
-
-    final result = await driveApi.files.list(q: "'root' in parents");
-    for (int i = 0; 0 < result.files.length; i++) {
-      print(result.files.toList()[i].id);
+    final list = await driveApi.files.list(q: "name = 'techsupport.db'");
+    print(list.toJson().toString());
+    drive.Media file = await driveApi.files.get(list.files[0].id,
+        downloadOptions: drive.DownloadOptions.fullMedia);
+    print(file.stream);
+    var dir = await ExtStorage.getExternalStorageDirectory();
+    print(dir);
+    if (!io.Directory("$dir/techsupport2").existsSync()) {
+      io.Directory("$dir/techsupport2").createSync(recursive: true);
     }
+    if (!io.File("$dir/techsupport2/techsupport.db").existsSync()) {
+      final saveFile = io.File(dir + "/" + list.files[0].name);
+      List<int> dataStore = [];
+      file.stream.listen((data) {
+        print("DataReceived: ${data.length}");
+        dataStore.insertAll(dataStore.length, data);
+      }, onDone: () {
+        print("Task Done");
+        saveFile.writeAsBytes(dataStore);
+        print("File saved at ${saveFile.path}");
+      }, onError: (error) {
+        print(error);
+      });
+    }
+    // final directory = await getExternalStorageDirectory();
   }
 
   Future<void> uploadtoGdrive() async {
-    _initData();
-    // deletefromGdrive();
     final googleSignIn =
         signIn.GoogleSignIn.standard(scopes: [drive.DriveApi.driveScope]);
     final signIn.GoogleSignInAccount account = await googleSignIn.signIn();
-    print("User account $account");
+    //print("User account $account");
 
     final authHeaders = await account.authHeaders;
     final authenticateClient = GoogleAuthClient(authHeaders);
     final driveApi = drive.DriveApi(authenticateClient);
+    // final test = await driveApi.files.list(q: "name = 'techsupport.db'");
+    //print(test.toJson().toString());
+    final getList = await driveApi.files
+        .list(q: "mimeType = 'application/vnd.google-apps.folder'");
+    // print(getList.toJson().toString());
+    String folderId;
+    if (getList.files.toList().where((e) => e.name == "techsupport").isEmpty) {
+      final folder = await driveApi.files.create(
+        drive.File()
+          ..name = 'techsupport'
+          ..mimeType =
+              'application/vnd.google-apps.folder', // this defines its folder
+      );
 
+      // print(folder.toJson().toString());
+      folderId = folder.id;
+    } else {
+      folderId = setting.first.sysDBId.split("|")[0];
+    }
     var dir = await ExtStorage.getExternalStorageDirectory();
     final filename = "techsupport.db";
     var driveFile = new drive.File();
+    driveFile.parents = [folderId];
     driveFile.name = filename;
+
     final localFile = io.File("$dir/techsupport/techsupport.db");
+
     try {
-      await driveApi.files.delete(setting.first.sysDBId);
+      if (setting.first.sysDBId.split("|").length == 2)
+        await driveApi.files.delete(setting.first.sysDBId.split("|")[1]);
     } on Exception catch (e) {
       print(e.toString());
     }
@@ -225,12 +270,13 @@ class SettingProvider with ChangeNotifier {
     updateSetting(
       localFile.lengthSync().toString(),
       account.email,
-      result.id,
+      folderId + "|" + result.id,
       DateTime.now(),
     );
     if (images.length > 0) {
       for (int i = 0; 0 < images.length; i++) {
         var driveImg = new drive.File();
+        driveImg.parents = [folderId];
         driveImg.name = io.File(images[i].imgImage).path.split('/').last;
         try {
           await driveApi.files.delete(images[i].imgStr);
@@ -248,7 +294,7 @@ class SettingProvider with ChangeNotifier {
     notifBackup();
 
     _initData();
-    downloadfromGdrive();
+    // downloadfromGdrive();
     notifyListeners();
   }
 
@@ -258,20 +304,41 @@ class SettingProvider with ChangeNotifier {
     final googleSignIn =
         signIn.GoogleSignIn.standard(scopes: [drive.DriveApi.driveScope]);
     final signIn.GoogleSignInAccount account = await googleSignIn.signIn();
-    print("User account $account");
+    //print("User account $account");
 
     final authHeaders = await account.authHeaders;
     final authenticateClient = GoogleAuthClient(authHeaders);
     final driveApi = drive.DriveApi(authenticateClient);
+    final test = await driveApi.files.list(q: "name = 'techsupport.db'");
+    //print(test.toJson().toString());
+    final getList = await driveApi.files
+        .list(q: "mimeType = 'application/vnd.google-apps.folder'");
+    // print(getList.toJson().toString());
+    String folderId;
+    if (getList.files.toList().where((e) => e.name == "techsupport").isEmpty) {
+      final folder = await driveApi.files.create(
+        drive.File()
+          ..name = 'techsupport'
+          ..mimeType =
+              'application/vnd.google-apps.folder', // this defines its folder
+      );
 
+      print(folder.toJson().toString());
+      folderId = folder.id;
+    } else {
+      folderId = setting.first.sysDBId.split("|")[0];
+    }
     var dir = await ExtStorage.getExternalStorageDirectory();
     final filename = "techsupport.db";
     var driveFile = new drive.File();
+    driveFile.parents = [folderId];
     driveFile.name = filename;
+
     final localFile = io.File("$dir/techsupport/techsupport.db");
 
     try {
-      await driveApi.files.delete(setting.first.sysDBId);
+      if (setting.first.sysDBId.split("|").length == 2)
+        await driveApi.files.delete(setting.first.sysDBId.split("|")[1]);
     } on Exception catch (e) {
       print(e.toString());
     }
@@ -286,13 +353,14 @@ class SettingProvider with ChangeNotifier {
           setting.first.sysBackupSch.hour,
           setting.first.sysBackupSch.minute),
       account.email,
-      result.id,
+      folderId + "|" + result.id,
       DateTime.now(),
     );
 
     if (images.length > 0) {
       for (int i = 0; 0 < images.length; i++) {
         var driveImg = new drive.File();
+        driveImg.parents = [folderId];
         driveImg.name = io.File(images[i].imgImage).path.split('/').last;
         try {
           await driveApi.files.delete(images[i].imgStr);
@@ -384,4 +452,11 @@ class SettingProvider with ChangeNotifier {
     notificationManager.showNotification(
         999, "TechSupport", "Backup ke google");
   }
+}
+
+class ListDrive {
+  String fileId;
+  String fileName;
+
+  ListDrive();
 }

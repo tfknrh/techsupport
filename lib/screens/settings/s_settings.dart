@@ -190,9 +190,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           brightness: Theme.of(context).brightness,
           backgroundColor: MColors.backgroundColor(context),
           elevation: 0,
+          leading: Icon(AntDesign.setting, color: MColors.buttonColor()),
           title: Text(
             "Setting",
-            style: CText.primarycustomText(2.5, context, "CircularStdBold"),
+            style: CText.primarycustomText(2.5, context, "CircularStdBook"),
           ),
         ),
         body: RefreshIndicator(
@@ -235,11 +236,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             onBack: () => print("Back button pressed"),
                           ),
                         );
-                      }
-                      // else if (_setting.tipe == 2) {
-                      //   value.uploadtoGdrive();
-                      //   }
-                      else if (_setting.title == "Schedule") {
+                      } else if (_setting.title == "Akun") {
+                        value.logoutFromGoogle();
+                        DataBaseMain.db.updateSettingcol("sysGmail", "");
+                        ;
+                      } else if (_setting.title == "Schedule") {
                         showCustomTimePicker(
                           initialTime: TimeOfDay.now(),
                           context: context,

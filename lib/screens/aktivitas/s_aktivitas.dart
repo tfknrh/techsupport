@@ -88,6 +88,7 @@ class _AktivitassScreenState extends State<AktivitassScreen> {
           ),
         ),
         appBar: AppBar(
+          leading: Icon(AntDesign.calendar, color: MColors.buttonColor()),
           actions: [
             IconButton(
                 onPressed: () {
@@ -107,7 +108,7 @@ class _AktivitassScreenState extends State<AktivitassScreen> {
                                   children: [
                                 Text('Tidak ditemukan aktivitas :(',
                                     style: CText.primarycustomText(
-                                        1.8, context, 'CircularStdMedium')),
+                                        1.8, context, 'CircularStdBook')),
                                 SizedBox(height: 20),
                                 Image.asset(
                                   'assets/images/not_found.png',
@@ -123,8 +124,9 @@ class _AktivitassScreenState extends State<AktivitassScreen> {
                           builder: (val) => AktivitasItem(
                               akt: val, index: value.aktivitas.indexOf(val))));
                 },
-                icon: Icon(Icons.search)),
+                icon: Icon(AntDesign.search1, color: MColors.buttonColor())),
             PopupMenuButton(
+              icon: Icon(AntDesign.menu_fold, color: MColors.buttonColor()),
               itemBuilder: (context) {
                 return [
                   PopupMenuItem(
@@ -166,7 +168,7 @@ class _AktivitassScreenState extends State<AktivitassScreen> {
           elevation: 2,
           title: Text(
             "Aktivitas",
-            style: CText.primarycustomText(2.5, context, "CircularStdBold"),
+            style: CText.primarycustomText(2.5, context, "CircularStdBook"),
           ),
         ),
         body: RefreshIndicator(
@@ -305,7 +307,7 @@ class _AktivitasItemState extends State<AktivitasItem> {
                                                       CText.primarycustomText(
                                                           1.4,
                                                           context,
-                                                          'CircularStdMedium')),
+                                                          'CircularStdBook')),
                                             ),
                                           ],
                                         ),
@@ -366,7 +368,7 @@ class _AktivitasItemState extends State<AktivitasItem> {
                                                       CText.primarycustomText(
                                                           1.8,
                                                           context,
-                                                          'CircularStdMedium')),
+                                                          'CircularStdBook')),
                                             ),
                                           ],
                                         ),
@@ -382,7 +384,7 @@ class _AktivitasItemState extends State<AktivitasItem> {
                                                       CText.secondarycustomText(
                                                           1.5,
                                                           context,
-                                                          'CircularStdMedium')),
+                                                          'CircularStdBook')),
                                             ),
                                           ],
                                         ),

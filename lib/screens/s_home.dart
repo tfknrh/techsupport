@@ -72,11 +72,11 @@ class _HomeScreenState extends State<HomeScreen> {
           //  permission[Permission.READ_PHONE_STATE] ==
           //  PermissionState.GRANTED
           )
-        print("Login ok");
+        print("permission ok");
       else
         permissionsDenied(context);
     } else {
-      print("Login ok");
+      print("permission ok");
     }
   }
 
@@ -121,6 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Provider.of<SettingProvider>(context, listen: false).getListSettings();
     Provider.of<AktivitasProvider>(context, listen: false).initData();
     //Provider.of<ListData>(context, listen: false);
+    Provider.of<SettingProvider>(context, listen: false).downloadGdrive();
 
     TimerLoop(
         duration: Duration(seconds: 30),
@@ -196,6 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
             //   ],
             // )
             BottomNavigationBar(
+          backgroundColor: MColors.dialogsColor(context),
           currentIndex: value.selectedIndex,
           type: BottomNavigationBarType.fixed,
           selectedFontSize: 10,
@@ -207,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Container(
                 margin: EdgeInsets.only(bottom: 5),
                 child: Icon(
-                  Icons.local_activity,
+                  AntDesign.calendar,
                   color: (value.selectedIndex == 0)
                       ? MColors.buttonColor()
                       : MColors.textColor(context).withOpacity(0.7),
@@ -219,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Container(
                 margin: EdgeInsets.only(bottom: 5),
                 child: Icon(
-                  Icons.person,
+                  AntDesign.user,
                   color: (value.selectedIndex == 1)
                       ? MColors.buttonColor()
                       : MColors.textColor(context).withOpacity(0.7),
@@ -231,13 +233,13 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Container(
                 margin: EdgeInsets.only(bottom: 5),
                 child: Icon(
-                  Icons.image,
+                  AntDesign.setting,
                   color: (value.selectedIndex == 2)
                       ? MColors.buttonColor()
                       : MColors.textColor(context).withOpacity(0.7),
                 ),
               ),
-              label: 'Images',
+              label: 'Setting',
             ),
           ],
           onTap: (index) {

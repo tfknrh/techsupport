@@ -169,7 +169,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
           automaticallyImplyLeading: false,
           leading: IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: Icon(Icons.close),
+            icon: Icon(AntDesign.back, color: MColors.buttonColor()),
           ),
           actions: [
             if (widget.isEdit)
@@ -185,7 +185,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
                         myScaContext, context, Icons.error, "Error", x.message);
                   }
                 },
-                icon: Icon(Icons.delete),
+                icon: Icon(AntDesign.delete, color: MColors.buttonColor()),
               ),
             IconButton(
                 onPressed: () async {
@@ -270,11 +270,11 @@ class _AddAktivitasState extends State<AddAktivitas> {
                     }
                   }
                 },
-                icon: Icon(Icons.save)),
+                icon: Icon(AntDesign.save, color: MColors.buttonColor())),
           ],
           title: Text(
             "${widget.isEdit == true ? "Ubah" : "Tambah"} Aktivitas",
-            style: CText.primarycustomText(2.5, context, "CircularStdBold"),
+            style: CText.primarycustomText(2.5, context, "CircularStdBook"),
           ),
         ),
         body: Builder(builder: (scaContezt) {
@@ -318,12 +318,11 @@ class _AddAktivitasState extends State<AddAktivitas> {
                                   ),
                                 ),
                               ),
-                              SizedBox(
-                                width: _size.width * .03,
-                              ),
+                              //  SizedBox(width: 10),
                               if (e != null)
                                 IconButton(
-                                  icon: Icon(Icons.close),
+                                  icon: Icon(AntDesign.close,
+                                      color: MColors.buttonColor()),
                                   onPressed: () {
                                     e = null;
                                     setState(() {});
@@ -396,49 +395,62 @@ class _AddAktivitasState extends State<AddAktivitas> {
                                     .category
                                     .length,
                               )),
-                      SizedBox(
-                        height: 10,
-                      ),
+                      // SizedBox(
+                      //   height: 10,
+                      // ),
                       Row(children: [
                         Text(
-                          "Tambahkan Form",
+                          "${widget.isEdit == true ? "Ubah" : "Tambah"} Formulir :",
                           style: CText.primarycustomText(
-                              1.6, context, "CircularStdMedium"),
+                              1.8, context, "CircularStdBook"),
                         ),
                         IconButton(
                             onPressed: () async {
-                              // final formcek = await DataBaseMain.db
-                              //     .getFormulirByCategoryID(_categoryId);
-                              // if (formcek.isNotEmpty) {
                               if (e != null) {
-                                final result = await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            AddFormulirsScreen(
-                                                formValue: aktivitas.formValue,
-                                                isEdit: widget.isEdit,
-                                                aktivitasId:
-                                                    aktivitas.aktivitasId,
-                                                categoryId: _categoryId)));
+                                final formcek =
+                                    await DataBaseMain.getFormulirByCategoryID(
+                                        e.categoryId);
+                                if (formcek.isEmpty) {
+                                  SnackBars.showErrorSnackBar(
+                                      myScaContext,
+                                      context,
+                                      Icons.error,
+                                      "Error",
+                                      "Tidak ditemukan formulir ${e.categoryName}");
+                                } else {
+                                  final result = await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              AddFormulirsScreen(
+                                                  formValue:
+                                                      aktivitas.formValue,
+                                                  isEdit: widget.isEdit,
+                                                  aktivitasId:
+                                                      aktivitas.aktivitasId,
+                                                  categoryId: _categoryId)));
 
-                                setState(() {
-                                  if (result != null) {
-                                    _formValue = result.join("|");
-                                  }
-                                });
+                                  setState(() {
+                                    if (result != null) {
+                                      _formValue = result.join("|");
+                                    }
+                                  });
+                                }
                               } else {
                                 SnackBars.showErrorSnackBar(
                                     myScaContext,
                                     context,
                                     Icons.error,
                                     "Error",
-                                    "Form tidak ditemukan");
+                                    "Tidak ada kategori yang dipilih");
                               }
                             },
-                            icon: Icon(Icons.attachment))
+                            icon: Icon(AntDesign.form,
+                                color: MColors.buttonColor()))
                       ]),
-
+                      SizedBox(
+                        height: 10,
+                      ),
                       Row(children: [
                         Expanded(
                           child: GestureDetector(
@@ -450,7 +462,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
                               child: IgnorePointer(
                                 ignoring: true,
                                 child: CTextField(
-                                    prefixicon: Icons.people,
+                                    prefixicon: AntDesign.user,
                                     label: "Customer",
                                     labelText: "Pilih Customer",
                                     radius: 5,
@@ -508,7 +520,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
                               child: IgnorePointer(
                                 ignoring: true,
                                 child: CTextField(
-                                    prefixicon: Icons.calendar_today,
+                                    prefixicon: AntDesign.calendar,
                                     label: "Tanggal",
                                     labelText: "Tanggal",
                                     radius: 5,
@@ -559,7 +571,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
                                 child: IgnorePointer(
                                   ignoring: true,
                                   child: CTextField(
-                                      prefixicon: Icons.alarm,
+                                      prefixicon: AntDesign.clockcircleo,
                                       label: "Mulai",
                                       labelText: "Mulai",
                                       radius: 5,
@@ -607,7 +619,7 @@ class _AddAktivitasState extends State<AddAktivitas> {
                                       child: IgnorePointer(
                                         ignoring: true,
                                         child: CTextField(
-                                            prefixicon: Icons.alarm,
+                                            prefixicon: AntDesign.clockcircleo,
                                             label: "Selesai",
                                             labelText: "Selesai",
                                             controller: _timeFinish,
@@ -634,13 +646,13 @@ class _AddAktivitasState extends State<AddAktivitas> {
                           validator: (e) =>
                               e.isEmpty ? 'Tidak boleh kosong' : null,
                           padding: EdgeInsets.symmetric(
-                              vertical: 5, horizontal: _size.width * .02)),
+                              vertical: 15, horizontal: _size.width * .02)),
                       SizedBox(
                         height: 20,
                       ),
                       CTextField(
                           inputType: TextInputType.multiline,
-                          maxLines: 5,
+                          //   maxLines: 5,
                           label: "Tambahkan Deskripsi",
                           labelText: "Deskripsi",
                           controller: _description,
@@ -668,7 +680,9 @@ class _AddAktivitasState extends State<AddAktivitas> {
                                           mainAxisSize: MainAxisSize.min,
                                           children: <Widget>[
                                             ListTile(
-                                              leading: new Icon(Icons.photo),
+                                              leading: new Icon(
+                                                  AntDesign.picture,
+                                                  color: MColors.buttonColor()),
                                               title: new Text('Galeri'),
                                               onTap: () {
                                                 pickFromGallery();
@@ -676,8 +690,9 @@ class _AddAktivitasState extends State<AddAktivitas> {
                                               },
                                             ),
                                             ListTile(
-                                              leading:
-                                                  new Icon(Icons.music_note),
+                                              leading: new Icon(
+                                                  AntDesign.camerao,
+                                                  color: MColors.buttonColor()),
                                               title: new Text('Camera'),
                                               onTap: () {
                                                 pickFromCamera();
@@ -685,7 +700,9 @@ class _AddAktivitasState extends State<AddAktivitas> {
                                               },
                                             ),
                                             ListTile(
-                                              leading: new Icon(Icons.photo),
+                                              leading: new Icon(
+                                                  AntDesign.sharealt,
+                                                  color: MColors.buttonColor()),
                                               title: new Text('Shared'),
                                               onTap: () {
                                                 loadShared();
@@ -696,7 +713,8 @@ class _AddAktivitasState extends State<AddAktivitas> {
                                         );
                                       });
                                 },
-                                icon: Icon(Icons.add_a_photo))
+                                icon: Icon(AntDesign.picture,
+                                    color: MColors.buttonColor()))
                           ])),
                       getGridView(),
                       pickGridView(),

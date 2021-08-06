@@ -85,7 +85,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
           automaticallyImplyLeading: false,
           leading: IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: Icon(Icons.close),
+            icon: Icon(AntDesign.back),
           ),
           actions: [
             if (widget.isEdit)
@@ -100,7 +100,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                           Icons.error, "Category", x.message);
                     }
                   },
-                  icon: Icon(Icons.delete),
+                  icon: Icon(AntDesign.delete),
                 ),
             IconButton(
               onPressed: () async {
@@ -117,7 +117,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                   }
                 }
               },
-              icon: Icon(Icons.check),
+              icon: Icon(AntDesign.save),
             ),
           ],
           title: Text(

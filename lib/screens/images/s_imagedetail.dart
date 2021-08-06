@@ -34,7 +34,7 @@ class _ImageDetailState extends State<ImageDetail> {
         elevation: 2,
         title: Text(
           "Images",
-          style: CText.primarycustomText(2.5, context, "CircularStdBold"),
+          style: CText.primarycustomText(2.5, context, "CircularStdBook"),
         ),
       ),
       body: SafeArea(
@@ -70,16 +70,26 @@ class _ImageDetailState extends State<ImageDetail> {
             // PinchZoom(
             //     image: Utility.imageFromBase64String(image),
             //     zoomedBackgroundColor: Colors.white)),
-            Align(
-                alignment: Alignment.topCenter,
-                child: Container(
-                    color: MColors.backgroundColor(context),
-                    padding: const EdgeInsets.all(20),
-                    child: Row(children: [
-                      Text(widget.images.imgName,
-                          style: CText.primarycustomText(
-                              1.8, context, 'CircularStdMedium'))
-                    ]))),
+            Positioned(
+              top: 10.0,
+              left: 10.0,
+              right: 10.0,
+              child: Card(
+                color: MColors.cardColor(context),
+                elevation: 8.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(widget.images.imgName),
+                    )
+                  ],
+                ),
+              ),
+            ),
             Align(
               alignment: Alignment.bottomCenter,
               child: Container(
@@ -91,30 +101,31 @@ class _ImageDetailState extends State<ImageDetail> {
                     //   style: TextStyle(color: Colors.white, fontSize: 30),
                     // ),
                     Row(children: [
-                  IconButton(
-                      onPressed: () {
-                        mode = ExtendedImageMode.editor;
-                        editorKey.currentState.rotate(right: false);
-                      },
-                      icon: Icon(Icons.rotate_left)),
-                  IconButton(
-                      onPressed: () {
-                        mode = ExtendedImageMode.editor;
-                        editorKey.currentState.rotate(right: true);
-                      },
-                      icon: Icon(Icons.rotate_right)),
-                  IconButton(
-                      onPressed: () {
-                        mode = ExtendedImageMode.editor;
-                        editorKey.currentState.reset();
-                        mode = ExtendedImageMode.gesture;
-                      },
-                      icon: Icon(Icons.restore)),
+                  // IconButton(
+                  //     onPressed: () {
+                  //       mode = ExtendedImageMode.editor;
+                  //       editorKey.currentState.rotate(right: false);
+                  //     },
+                  //     icon: Icon(Icons.rotate_left)),
+                  // IconButton(
+                  //     onPressed: () {
+                  //       mode = ExtendedImageMode.editor;
+                  //       editorKey.currentState.rotate(right: true);
+                  //     },
+                  //     icon: Icon(Icons.rotate_right)),
+                  // IconButton(
+                  //     onPressed: () {
+                  //       mode = ExtendedImageMode.editor;
+                  //       editorKey.currentState.reset();
+                  //       mode = ExtendedImageMode.gesture;
+                  //     },
+                  //     icon: Icon(Icons.restore)),
                   IconButton(
                       onPressed: () {
                         _onShare(context);
                       },
-                      icon: Icon(Icons.share)),
+                      icon: Icon(AntDesign.sharealt,
+                          color: MColors.buttonColor())),
                   IconButton(
                     onPressed: () async {
                       final x = await Provider.of<ImagesProvider>(context,
@@ -127,7 +138,7 @@ class _ImageDetailState extends State<ImageDetail> {
                             Icons.error, "Images", x.message);
                       }
                     },
-                    icon: Icon(Icons.delete),
+                    icon: Icon(AntDesign.delete, color: MColors.buttonColor()),
                   )
                 ]),
               ),

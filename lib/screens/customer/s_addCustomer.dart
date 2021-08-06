@@ -138,7 +138,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           automaticallyImplyLeading: false,
           leading: IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: Icon(Icons.close),
+            icon: Icon(AntDesign.back, color: MColors.buttonColor()),
           ),
           actions: [
             if (widget.isEdit)
@@ -154,7 +154,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                         Icons.error, "Customer", x.message);
                   }
                 },
-                icon: Icon(Icons.delete),
+                icon: Icon(AntDesign.delete, color: MColors.buttonColor()),
               ),
             IconButton(
               onPressed: () async {
@@ -186,12 +186,12 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                   }
                 }
               },
-              icon: Icon(Icons.check),
+              icon: Icon(AntDesign.save, color: MColors.buttonColor()),
             ),
           ],
           title: Text(
             "${widget.isEdit ? "Ubah" : "Tambah"} Customer",
-            style: CText.primarycustomText(2.5, context, "CircularStdBold"),
+            style: CText.primarycustomText(2.5, context, "CircularStdBook"),
           ),
         ),
         body: Builder(builder: (scaContezt) {

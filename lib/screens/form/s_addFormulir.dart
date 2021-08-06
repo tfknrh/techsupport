@@ -99,13 +99,13 @@ class _GroupListScreenState extends State<AddFormulirsScreen> {
                   .category
                   .singleWhere((es) => es.categoryId == widget.categoryId)
                   .categoryName,
-          style: CText.primarycustomText(2.5, context, "CircularStdBold"),
+          style: CText.primarycustomText(2.5, context, "CircularStdBook"),
         ),
         actions: [
-          IconButton(
-            onPressed: () async {},
-            icon: Icon(Icons.delete),
-          ),
+          // IconButton(
+          //   onPressed: () async {},
+          //   icon: Icon(Icons.delete),
+          // ),
           IconButton(
             onPressed: () async {
               // for (int i = 0; i < _controllers.length; i++) {
@@ -124,7 +124,7 @@ class _GroupListScreenState extends State<AddFormulirsScreen> {
               Provider.of<AktivitasProvider>(context, listen: false).initData();
               //_controllers.clear();
             },
-            icon: Icon(Icons.save),
+            icon: Icon(AntDesign.checkcircleo, color: MColors.buttonColor()),
           ),
         ],
       ),
@@ -139,7 +139,7 @@ class _GroupListScreenState extends State<AddFormulirsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 0),
             child: Text(listdata.keys.toList()[section],
                 style:
-                    CText.primarycustomText(1.8, context, 'CircularStdBold')),
+                    CText.primarycustomText(1.8, context, 'CircularStdMedium')),
           );
         },
         separatorBuilder: (context, index) =>
@@ -166,6 +166,10 @@ class _GroupListScreenState extends State<AddFormulirsScreen> {
                     style: CText.primarycustomText(
                         1.7, context, 'CircularStdBook'))),
             Checkbox(
+                checkColor: MColors.buttonColor(),
+                activeColor: MColors.buttonColor(),
+                fillColor:
+                    MaterialStateProperty.all(MColors.backgroundColor(context)),
                 value: listdata.values
                     .toList()[index.section][index.index]
                     .isCheck,

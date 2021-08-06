@@ -77,8 +77,9 @@ class _CustomersScreenState extends State<CustomersScreen> {
           elevation: 0,
           title: Text(
             "Customer",
-            style: CText.primarycustomText(2.5, context, "CircularStdBold"),
+            style: CText.primarycustomText(2.5, context, "CircularStdBook"),
           ),
+          leading: Icon(AntDesign.user, color: MColors.buttonColor()),
           actions: [
             IconButton(
                 onPressed: () {
@@ -98,7 +99,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                                   children: [
                                 Text('Tidak ditemukan customer :(',
                                     style: CText.primarycustomText(
-                                        1.8, context, 'CircularStdMedium')),
+                                        1.8, context, 'CircularStdBook')),
                                 SizedBox(height: 20),
                                 Image.asset(
                                   'assets/images/not_found.png',
@@ -109,7 +110,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
                               customer: val,
                               index: value.customer.indexOf(val))));
                 },
-                icon: Icon(Icons.search)),
+                icon: Icon(AntDesign.search1, color: MColors.buttonColor())),
           ],
         ),
         body: RefreshIndicator(
@@ -236,7 +237,7 @@ class _CustomerItemState extends State<CustomerItem> {
                                         child: Text(
                                             widget.customer.customerName,
                                             style: CText.primarycustomText(1.8,
-                                                context, 'CircularStdMedium')),
+                                                context, 'CircularStdBook')),
                                       ),
                                     ],
                                   ),
@@ -250,7 +251,7 @@ class _CustomerItemState extends State<CustomerItem> {
                                             style: CText.secondarycustomText(
                                                 1.5,
                                                 context,
-                                                'CircularStdMedium')),
+                                                'CircularStdBook')),
                                       ),
                                     ],
                                   ),
@@ -264,7 +265,7 @@ class _CustomerItemState extends State<CustomerItem> {
                                             style: CText.secondarycustomText(
                                                 1.5,
                                                 context,
-                                                'CircularStdMedium')),
+                                                'CircularStdBook')),
                                       ),
                                     ],
                                   ),

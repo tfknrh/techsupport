@@ -83,16 +83,18 @@ class _LogPageState extends State<LogPage> {
                   border: InputBorder.none,
                   filled: true,
                   hintStyle: TextStyle(color: MColors.textColor(context)),
-                  fillColor: Colors.grey[500],
+                  fillColor: MColors.textFieldBackgroundColor(context),
                   focusedErrorBorder: InputBorder.none,
                   disabledBorder: InputBorder.none,
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                    borderSide: BorderSide(color: Colors.grey[500], width: 3),
+                    borderSide: BorderSide(
+                        color: MColors.backgroundColor(context), width: 3),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                    borderSide: BorderSide(color: Colors.grey[500], width: 3),
+                    borderSide: BorderSide(
+                        color: MColors.backgroundColor(context), width: 3),
                   ),
                   errorBorder: InputBorder.none,
                 ),

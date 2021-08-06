@@ -91,18 +91,21 @@ class SearchPage<T> extends SearchDelegate<T> {
   ThemeData appBarTheme(BuildContext context) {
     return barTheme ??
         Theme.of(context).copyWith(
-          brightness: Brightness.light,
-          backgroundColor: Color(0xffF9F9F9),
-          buttonColor: Color(0xffAE8D6A),
-          primaryColorLight: Color.fromRGBO(225, 228, 236, 100), //BoxColor
-          accentColor: Color.fromRGBO(114, 114, 114, 100), //SecondPrimaryText
-          splashColor: Color.fromRGBO(69, 79, 99, 1),
-          selectedRowColor: Color.fromRGBO(201, 201, 202, 1),
-          primaryColor: Color(0xffF9F9F9), //Color.fromRGBO(254, 169, 15, 1),
-          indicatorColor: Color(0xffFE6080),
+          //    brightness: Brightness.light,
+          backgroundColor:
+              MColors.backgroundColor(context), //Color(0xffF9F9F9),
+          buttonColor: MColors.buttonColor(), //Color(0xffAE8D6A),
+          //   primaryColorLight: Color.fromRGBO(225, 228, 236, 100), //BoxColor
+          //  accentColor: Color.fromRGBO(114, 114, 114, 100), //SecondPrimaryText
+          //  splashColor: Color.fromRGBO(69, 79, 99, 1),
+          // selectedRowColor: Color.fromRGBO(201, 201, 202, 1),
+          primaryColor: MColors.backgroundColor(
+              context), //Color(0xffF9F9F9), //Color.fromRGBO(254, 169, 15, 1),
+          //    indicatorColor: Color(0xffFE6080),
           textTheme: Theme.of(context).textTheme.copyWith(
                 headline6: TextStyle(
-                  color: Theme.of(context).primaryTextTheme.headline6.color,
+                  color: MColors.textColor(
+                      context), //Theme.of(context).primaryTextTheme.headline6.color,
                   fontSize: 20,
                 ),
               ),
@@ -119,18 +122,20 @@ class SearchPage<T> extends SearchDelegate<T> {
             filled: true,
             hintStyle: TextStyle(color: MColors.textColor(context)),
 
-            fillColor: Colors.grey[200],
+            fillColor: MColors.textFieldBorderColor(context),
 
             focusedErrorBorder: InputBorder.none,
             disabledBorder: InputBorder.none,
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(20.0)),
-              borderSide: BorderSide(color: Color(0xffF9F9F9), width: 3),
+              borderSide:
+                  BorderSide(color: MColors.backgroundColor(context), width: 3),
             ),
 
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(20.0)),
-              borderSide: BorderSide(color: Color(0xffF9F9F9), width: 3),
+              borderSide:
+                  BorderSide(color: MColors.backgroundColor(context), width: 3),
             ),
 
             errorBorder: InputBorder.none,
