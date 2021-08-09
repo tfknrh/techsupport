@@ -43,10 +43,10 @@ dependencies:
   flutter_native_timezone: ^1.0.4
   permissions_plugin: ^1.1.4
   flutter_local_notifications: ^5.0.0
-  logcat: ^1.0.2
+ # logcat: ^1.0.2
   ext_storage:
  # dropdown_search: ^0.6.3
-  #shared_preferences: ^2.0.6
+  shared_preferences: ^2.0.6
   google_sign_in: ^5.0.2
   googleapis: ^2.0.0
   #multi_image_picker: ^4.8.0
@@ -67,8 +67,8 @@ dependencies:
   #flutter_polyline_points: ^0.2.6
   color: ^2.1.1
   images_picker: ^1.2.4
-  group_list_view: ^1.1.1
-  cupertino_listview: ^1.0.5
+  #group_list_view: ^1.1.1
+
 
 flutter_icons:
   android: "launcher_icon" 

@@ -8,6 +8,7 @@ import 'package:techsupport/widgets.dart';
 import 'package:techsupport/utils.dart';
 import 'package:techsupport/screens.dart';
 import 'package:techsupport/models.dart';
+import 'package:techsupport/test.dart';
 
 class AktivitassScreen extends StatefulWidget {
   AktivitassScreen({Key key}) : super(key: key);
@@ -141,10 +142,10 @@ class _AktivitassScreenState extends State<AktivitassScreen> {
                     child: Text("Log"),
                     value: 3,
                   ),
-                  // PopupMenuItem(
-                  //   child: Text("Formulir"),
-                  //   value: 4,
-                  // )
+                  PopupMenuItem(
+                    child: Text("test"),
+                    value: 4,
+                  )
                 ];
               },
               onSelected: (value) {
@@ -159,7 +160,10 @@ class _AktivitassScreenState extends State<AktivitassScreen> {
                 } else if (value == 3) {
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => LogPage()));
-                } else if (value == 4) {}
+                } else if (value == 4) {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => TestPage()));
+                }
               },
             )
           ],

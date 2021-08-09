@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:group_list_view/group_list_view.dart';
 
 import 'package:provider/provider.dart';
 import 'package:techsupport/controllers.dart';
@@ -168,8 +167,9 @@ class _GroupListScreenState extends State<AddFormulirsScreen> {
             Checkbox(
                 checkColor: MColors.buttonColor(),
                 activeColor: MColors.buttonColor(),
-                fillColor:
-                    MaterialStateProperty.all(MColors.backgroundColor(context)),
+                focusColor: MColors.buttonColor(),
+                // fillColor:
+                //     MaterialStateProperty.all(MColors.backgroundColor(context)),
                 value: listdata.values
                     .toList()[index.section][index.index]
                     .isCheck,

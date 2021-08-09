@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:logcat/logcat.dart';
+//import 'package:logcat/logcat.dart';
 import 'package:techsupport/widgets.dart';
 import 'package:techsupport/utils.dart';
 import 'package:intl/intl.dart';

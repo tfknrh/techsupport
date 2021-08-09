@@ -59,6 +59,7 @@ class AfterSplash extends StatelessWidget {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    //   RunBackground.runService();
     return MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => CategoryProvider()),

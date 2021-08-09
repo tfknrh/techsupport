@@ -2,7 +2,7 @@ import 'package:flashy_tab_bar/flashy_tab_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:provider/provider.dart';
-import 'package:techsupport/api/a_db.dart';
+import 'package:techsupport/api.dart';
 import 'package:techsupport/controllers.dart';
 import 'package:techsupport/widgets.dart';
 import 'package:techsupport/utils.dart';
@@ -11,7 +11,7 @@ import 'package:techsupport/models.dart';
 import 'package:permissions_plugin/permissions_plugin.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
-import 'package:move_to_background/move_to_background.dart';
+//import 'package:move_to_background/move_to_background.dart';
 
 import 'package:theme_mode_handler/theme_mode_handler.dart';
 import 'package:http/http.dart' as http;
@@ -114,12 +114,63 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {});
   }
 
+  void backupData() {
+    // TimerLoop(
+    //     duration: Duration(seconds: 30),
+    //     onTick: () {
+    if (TimeValidator.getDatenTimeSch(
+            Provider.of<SettingProvider>(context, listen: false)
+                .setting
+                .first
+                .sysBackupSch) ==
+        TimeValidator.getDatenTimeSch(DateTime(
+            DateTime.now().year,
+            DateTime.now().month,
+            DateTime.now().day,
+            DateTime.now().hour,
+            DateTime.now().minute))) {
+      Provider.of<SettingProvider>(context, listen: false).uploadtoGdriveSch();
+    }
+    // });
+  }
+
+  static const platform = const MethodChannel('com.dtctfk.techsupport/channel');
+  void platFormSet() async {
+    try {
+      platform.setMethodCallHandler(
+        (call) async {
+          final args = call.arguments;
+
+          print('on Dart ${call.method}!');
+
+          switch (call.method) {
+            case 'callback':
+              return backupData();
+
+            default:
+              throw UnimplementedError("Unknow: " + call.method);
+          }
+        },
+      );
+      // final Map result = await platform.invokeMethod('backupData');
+      // print(result.toString());
+    } on PlatformException catch (e) {
+      print(e.toString());
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsFlutterBinding.ensureInitialized();
     checkPermissions(context);
-    downloadGdrive();
+    try {
+      downloadGdrive();
+    } on Exception catch (e) {
+      var dir = ExtStorage.getExternalStorageDirectory();
+      File("$dir/techsupport/db").createSync(recursive: true);
+      print(e.toString());
+    }
     getSetting();
     Provider.of<CustomerProvider>(context, listen: false).getListCustomers();
     Provider.of<CategoryProvider>(context, listen: false).getListCategorys();
@@ -128,6 +179,11 @@ class _HomeScreenState extends State<HomeScreen> {
     Provider.of<SettingProvider>(context, listen: false).getListSettings();
     Provider.of<AktivitasProvider>(context, listen: false).initData();
     //Provider.of<ListData>(context, listen: false);
+    // TimerLoop(
+    //     duration: Duration(seconds: 5),
+    //     onTick: () {
+    //       platFormSet();
+    //     });
 
     TimerLoop(
         duration: Duration(seconds: 30),
@@ -157,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
   Future<void> downloadGdrive() async {
     var dir = await ExtStorage.getExternalStorageDirectory();
-    if (!File("$dir/techsupport/gdrive").existsSync()) {
+    if (!File("$dir/techsupport/db").existsSync()) {
       final googleSignIn =
           signIn.GoogleSignIn.standard(scopes: [drive.DriveApi.driveScope]);
       final signIn.GoogleSignInAccount account = await googleSignIn.signIn();
@@ -219,7 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
 
-      File("$dir/techsupport/gdrive").createSync(recursive: true);
+      File("$dir/techsupport/db").createSync(recursive: true);
     }
     // final directory = await getExternalStorageDirectory();
   }
@@ -229,6 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final _responsive = Responsive(context);
     return WillPopScope(onWillPop: () async {
       MoveToBackground.moveTaskToBack();
+
       return false;
     }, child: Consumer<AktivitasProvider>(builder: (context, value, _) {
       return Scaffold(
@@ -323,5 +380,57 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     }));
+  }
+}
+
+class AmazonFileUpload {
+  static const platform = const MethodChannel('com.dtctfk.techsupport/channel');
+  static StreamController<String> _controller = StreamController.broadcast();
+
+  static Stream get streamData => _controller.stream;
+  static BuildContext mycontext;
+  void backupData() {
+    // TimerLoop(
+    //     duration: Duration(seconds: 30),
+    //     onTick: () {
+    if (TimeValidator.getDatenTimeSch(
+            Provider.of<SettingProvider>(mycontext, listen: false)
+                .setting
+                .first
+                .sysBackupSch) ==
+        TimeValidator.getDatenTimeSch(DateTime(
+            DateTime.now().year,
+            DateTime.now().month,
+            DateTime.now().day,
+            DateTime.now().hour,
+            DateTime.now().minute))) {
+      Provider.of<SettingProvider>(mycontext, listen: false)
+          .uploadtoGdriveSch();
+    }
+    // });
+  }
+
+  Future<Response> uploadFile() async {
+    try {
+      platform.setMethodCallHandler(
+        (call) async {
+          final args = call.arguments;
+
+          print('on Dart ${call.method}!');
+
+          switch (call.method) {
+            case 'callback':
+              return backupData();
+
+            default:
+              throw UnimplementedError("Unknow: " + call.method);
+          }
+        },
+      );
+      //   final Map result = await platform.invokeMethod('s3_upload');
+      return Response(identifier: "success", message: "success");
+    } on PlatformException catch (e) {
+      return Response(identifier: "success", message: e.message);
+    }
   }
 }

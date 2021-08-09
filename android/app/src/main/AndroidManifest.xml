@@ -9,6 +9,7 @@
 	<uses-permission android:name="android.permission.RECORD_AUDIO" />
 	<uses-permission android:name="android.permission.VIBRATE" />
 	<uses-permission android:name="android.permission.SET_ALARM" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
  	<uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
 	<uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
@@ -16,6 +17,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
    <application
+  
    android:name="io.flutter.app.FlutterApplication"
         android:label="techsupport"
         android:icon="@mipmap/ic_launcher">
@@ -78,7 +80,14 @@
         </receiver>
         <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
 
-<!-- Add your Google Maps API Key here -->
+         <service
+      android:name=".MyService"
+      android:enabled="true"
+      android:exported="true" />
+
+       
+
+       <!-- Add your Google Maps API Key here -->
 <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
